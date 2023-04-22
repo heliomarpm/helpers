@@ -19,7 +19,9 @@
     "helper",
     "utility",
     "is",
-    "utils"
+    "utils",
+    "memory",
+    "cache"
   ],
   "scripts": {
     "build": "tsc",
