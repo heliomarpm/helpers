@@ -1,6 +1,6 @@
-import { Is, To, Utils } from '../src'
+import { Is, MemoryStore, To, Utils } from '../src'
 
-interface IPerson{
+interface IPerson {
   name: string;
   age: number;
 }
@@ -46,7 +46,33 @@ test('test `true` to boolean', () => {
   expect(b).toBeTruthy()
 })
 
+test('test set memory boolean', () => {
+  MemoryStore.set("b", true);
+})
+test('test set memory object', () => {
+  MemoryStore.set("o", { value: true });
+})
 
-// test('test is developer mode', () => {
-//   expect(is.dev).toBeTruthy()
-// })
+
+test('test get memory boolean', () => {
+  const b = MemoryStore.get<boolean>("b")
+  expect(b).toBeTruthy()
+})
+
+test('test get memory object', () => {
+  const b = MemoryStore.get("o")
+  expect(b).toEqual({ value: true });
+})
+
+test('test remove memory boolean', () => {
+  MemoryStore.remove("b");
+  const b = MemoryStore.get("b");
+  expect(b).toBeUndefined();
+})
+
+
+test('test clear memory', () => {
+  MemoryStore.clear();
+  const n = MemoryStore.size();
+  expect(n).toBe(0);
+})

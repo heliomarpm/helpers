@@ -11,7 +11,7 @@ export class MemoryStore {
      * @param value The value to set.
      * 
      */
-    public static set(key: string, value: unknown): void {
+    public static set<T>(key: string, value: T): void {
         MemoryStore.store[key] = value;
     }
 
@@ -21,8 +21,8 @@ export class MemoryStore {
      * @param key The key to get.
      * @returns The value for the given key, or undefined if the key is not found.
      */
-    public static get(key: string): unknown {
-        return MemoryStore.store[key];
+    public static get<T>(key: string): T {
+        return MemoryStore.store[key] as T;
     }
 
     /**
@@ -47,5 +47,14 @@ export class MemoryStore {
      */
     public static getAll(): Record<string, unknown> {
         return MemoryStore.store;
+    }
+
+    /**
+    * Returns the number of key-value pairs currently stored in the MemoryStore.
+    *
+    * @returns The number of key-value pairs in the MemoryStore.
+    */
+    public static size(): number {
+        return Object.keys(MemoryStore.store).length;
     }
 }
