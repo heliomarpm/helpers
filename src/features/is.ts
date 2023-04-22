@@ -17,19 +17,19 @@ const Is = {
      * 
      * @returns boolean
      */
-    get windows(): boolean { return process.platform === eOS.Windows },
+    get windowsOS(): boolean { return process.platform === eOS.Windows },
     /**
      * Verifies that it's running on the Linux OS.
      * 
      * @returns boolean
      */
-    get linux(): boolean { return process.platform === eOS.Linux },
+    get linuxOS(): boolean { return process.platform === eOS.Linux },
     /**
      * Verifies that it's running on the Mac OS.
      * 
      * @returns boolean
      */
-    get macOs(): boolean { return process.platform === eOS.MacOS },
+    get macOS(): boolean { return process.platform === eOS.MacOS },
     /**
      * Check if the processor architecture is ia32.
      * 
