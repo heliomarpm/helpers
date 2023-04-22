@@ -11,7 +11,7 @@ enum eArchitecture {
     Arm64 = "arm64",
 }
 
-const Is = {
+const is = {
     /**
      * Verifies that it's running on the Windows OS.
      * 
@@ -85,4 +85,4 @@ const Is = {
     },
 }
 
-export { Is }
+export default is;

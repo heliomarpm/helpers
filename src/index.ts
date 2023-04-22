@@ -1,6 +1,6 @@
-import { Is } from './features/is';
-import { Utils } from './features/utils';
-import { To } from './features/to';
-import { MemoryStore } from './features/memory';
+import is from './features/is';
+import utils from './features/utils';
+import to from './features/to';
+import memory from './features/memory';
 
-export { Is, To, Utils, MemoryStore  }
+export { is, to, utils, memory  }

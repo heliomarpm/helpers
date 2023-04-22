@@ -1,4 +1,4 @@
-const Utils = {
+const utils = {
     /** 
      * This function takes a string parameter property that represents the property by which the array of objects will be sorted.
      * The function returns another function that will be used to sort the array of objects.
@@ -96,4 +96,4 @@ const Utils = {
     
 }
 
-export { Utils }
+export default utils;

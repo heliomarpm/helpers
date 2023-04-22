@@ -1,4 +1,4 @@
-import { Is, MemoryStore, To, Utils } from '../src'
+import { is, memory, to, utils } from '../src'
 
 interface IPerson {
   name: string;
@@ -11,68 +11,68 @@ const people: IPerson[] = [
 ];
 
 test('test dynamicSort ascending', () => {
-  const n = Utils.sortBy(people, "age");
+  const n = utils.sortBy(people, "age");
   expect(n[0].age).toBe(19)
 })
 
 test('test dynamicSort descending', () => {
-  const n = Utils.sortBy(people, "age", "desc");
+  const n = utils.sortBy(people, "age", "desc");
   expect(n[0].age).toBe(35)
 })
 
 test('test is numeric', () => {
-  const b = Is.numeric("15.4")
+  const b = is.numeric("15.4")
   expect(b).toBeTruthy()
 })
 
 test('test is not numeric', () => {
-  const b = !Is.numeric("15px")
+  const b = !is.numeric("15px")
   expect(b).toBeTruthy()
 })
 
 test('test number 0 to boolean', () => {
-  const b = !To.boolean("0")
+  const b = !to.boolean("0")
   expect(b).toBeTruthy()
 })
 
 
 test('test number to boolean', () => {
-  const b = To.boolean("55")
+  const b = to.boolean("55")
   expect(b).toBeTruthy()
 })
 
 test('test `true` to boolean', () => {
-  const b = To.boolean("true")
+  const b = to.boolean("true")
   expect(b).toBeTruthy()
 })
 
 test('test set memory boolean', () => {
-  MemoryStore.set("b", true);
+  memory.set("b", true);
 })
 test('test set memory object', () => {
-  MemoryStore.set("o", { value: true });
+  memory.set("o", { value: true });
 })
 
 
 test('test get memory boolean', () => {
-  const b = MemoryStore.get<boolean>("b")
+  const b = memory.get<boolean>("b")
   expect(b).toBeTruthy()
 })
 
 test('test get memory object', () => {
-  const b = MemoryStore.get("o")
+  const b = memory.get("o")
   expect(b).toEqual({ value: true });
 })
 
 test('test remove memory boolean', () => {
-  MemoryStore.remove("b");
-  const b = MemoryStore.get("b");
+  memory.remove("b");
+  const b = memory.get("b");
   expect(b).toBeUndefined();
 })
 
 
 test('test clear memory', () => {
-  MemoryStore.clear();
-  const n = MemoryStore.size();
+  memory.clear();
+  const n = memory.size();
   expect(n).toBe(0);
 })

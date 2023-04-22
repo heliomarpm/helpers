@@ -1,6 +1,6 @@
-import { Is } from "./is";
+import is from "./is";
 
-const To = {
+const to = {
     /**
      * Converts a JSON object to a Record<string, T> type.
      * 
@@ -32,8 +32,8 @@ const To = {
      * @returns `boolean` The boolean representation of the input value.
      */
     boolean(value: number | string): boolean {
-        return Is.numeric(value) ? !/^0$/i.test(value as string) : /^true$/i.test(value as string);
+        return is.numeric(value) ? !/^0$/i.test(value as string) : /^true$/i.test(value as string);
     }
 }
 
-export { To }
+export default to;
