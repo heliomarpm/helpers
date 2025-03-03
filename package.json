@@ -1,6 +1,6 @@
 {
   "name": "@heliomarpm/helpers",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A library with many useful features",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,13 +15,13 @@
     "url": "git+https://github.com/heliomarpm/helpers.git"
   },
   "keywords": [
-		"helpers",
+    "helpers",
     "helper",
-		"to",
+    "to",
     "is",
     "utils",
-		"format",
-		"helpers-br"
+    "format",
+    "helpers-br"
   ],
   "scripts": {
     "prebuild": "rimraf dist",

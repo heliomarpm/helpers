@@ -9,8 +9,7 @@
   [![CodeFactor][url-codefactor-badge]][url-codefactor] 
   ![CodeQL][url-codeql]<!-- ![Publish][url-publish] --> [![NPM version][url-npm-badge]][url-npm]
   [![Downloads][url-downloads-badge]][url-downloads]
-
-  ![typescript](https://img.shields.io/github/package-json/dev-dependency-version/heliomarpm/helpers/typescript)
+  
   <!-- ![lodash](https://img.shields.io/github/package-json/dependency-version/heliomarpm/helpers/lodash)   -->
 </h1>
 
