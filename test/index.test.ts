@@ -1,78 +1,72 @@
-import { is, memory, to, utils } from '../src'
+// import { describe, it, expect } from "@jest/globals";
+
+import { Is, To, Utils } from '../src';
 
 interface IPerson {
-  name: string;
-  age: number;
+	name: string;
+	age: number;
 }
 const people: IPerson[] = [
-  { name: 'John', age: 23 },
-  { name: 'Jane', age: 19 },
-  { name: 'Bob', age: 35 },
+	{ name: 'John', age: 23 },
+	{ name: 'Jane', age: 19 },
+	{ name: 'Bob', age: 35 }
 ];
 
-test('test dynamicSort ascending', () => {
-  const n = utils.sortBy(people, "age");
-  expect(n[0].age).toBe(19)
-})
+describe('test', () => {
+	it('test dynamicSort ascending', () => {
+		const n = Utils.orderBy(people, 'age');
+		expect(n[0].age).toBe(19);
+	});
 
-test('test dynamicSort descending', () => {
-  const n = utils.sortBy(people, "age", "desc");
-  expect(n[0].age).toBe(35)
-})
+	it('test dynamicSort descending', () => {
+		const n = Utils.orderBy(people, 'age', 'desc');
+		expect(n[0].age).toBe(35);
+	});
 
-test('test is numeric', () => {
-  const b = is.numeric("15.4")
-  expect(b).toBeTruthy()
-})
+	it('test is numeric', () => {
+		const b = Is.numeric('15.4');
+		expect(b).toBeTruthy();
+	});
 
-test('test is not numeric', () => {
-  const b = !is.numeric("15px")
-  expect(b).toBeTruthy()
-})
+	it('test is not numeric', () => {
+		const b = !Is.numeric('15px');
+		expect(b).toBeTruthy();
+	});
 
-test('test number 0 to boolean', () => {
-  const b = !to.boolean("0")
-  expect(b).toBeTruthy()
-})
+	it('test number 0 to boolean', () => {
+		const b = !To.boolean('0');
+		expect(b).toBeTruthy();
+	});
 
+	it('test number to boolean', () => {
+		const b = To.boolean('55');
+		expect(b).toBeTruthy();
+	});
 
-test('test number to boolean', () => {
-  const b = to.boolean("55")
-  expect(b).toBeTruthy()
-})
+	it('test `true` to boolean', () => {
+		const b = To.boolean('true');
+		expect(b).toBeTruthy();
+	});
 
-test('test `true` to boolean', () => {
-  const b = to.boolean("true")
-  expect(b).toBeTruthy()
-})
+	it('test dateExplode', () => {
+		const date = new Date();
+		const dateExploded = To.dateParts(date);
+		expect(dateExploded.year).toBe(date.getFullYear());
+		expect(dateExploded.month).toBe(date.getMonth() + 1);
+		expect(dateExploded.day).toBe(date.getDate());
+		expect(dateExploded.hour).toBe(date.getHours());
+		expect(dateExploded.minute).toBe(date.getMinutes());
+		expect(dateExploded.second).toBe(date.getSeconds());
+	});
 
-test('test set memory boolean', () => {
-  memory.set("b", true);
-})
-test('test set memory object', () => {
-  memory.set("o", { value: true });
-})
-
-
-test('test get memory boolean', () => {
-  const b = memory.get<boolean>("b")
-  expect(b).toBeTruthy()
-})
-
-test('test get memory object', () => {
-  const b = memory.get("o")
-  expect(b).toEqual({ value: true });
-})
-
-test('test remove memory boolean', () => {
-  memory.remove("b");
-  const b = memory.get("b");
-  expect(b).toBeUndefined();
-})
-
-
-test('test clear memory', () => {
-  memory.clear();
-  const n = memory.size();
-  expect(n).toBe(0);
-})
+	it('test dateExplode with string', () => {
+		const date = new Date();
+		const dateExploded = To.dateParts(date.toString());
+		expect(dateExploded.year).toBe(date.getFullYear());
+		expect(dateExploded.month).toBe(date.getMonth() + 1);
+		expect(dateExploded.day).toBe(date.getDate());
+		expect(dateExploded.hour).toBe(date.getHours());
+		expect(dateExploded.minute).toBe(date.getMinutes());
+		expect(dateExploded.second).toBe(date.getSeconds());
+	});
+});
