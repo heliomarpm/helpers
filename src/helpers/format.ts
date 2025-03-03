@@ -225,7 +225,7 @@ export const Format = {
 		const result = value.toLocaleString(options.locale, { style: 'currency', currency: options.currency });
 		return result.replace(/\u00A0/g, ' '); // Substitui o espaço não quebrável (\u00A0) por um espaço comum
 	},
-	
+
 	/**
 	 * Formats a number according to the given locale.
 	 * @param value The number to format.
