@@ -2,7 +2,7 @@
   "compilerOptions": {
     "strict": true,
     "useDefineForClassFields": true,
-    "forceConsistentCasingInFileNames": true, 
+    "forceConsistentCasingInFileNames": true,
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "./dist",
@@ -10,12 +10,11 @@
     "declaration": true,
     "sourceMap": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+		"paths": {
+			"@/*": [ "./src/*" ]
+		}
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "**/*.test.ts", "**/*.spec.ts"
-  ]
+  "include": [ "src/**/*" ],
+  "exclude": [ "**/*.test.ts", "**/*.spec.ts" ]
 }
