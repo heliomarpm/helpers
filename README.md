@@ -1,7 +1,7 @@
 
 <div id="top" align="center" style="text-align:center;">
 <h1>
-  <img src="./logo.png" alt="Helpers Library" width="128" />
+  <img src="https://raw.githubusercontent.com/heliomarpm/helpers/refs/heads/master/logo.png" alt="Helpers Library" width="128" />
   <br>Helpers Library
   <a href="https://navto.me/heliomarpm" target="_blank"><img src="https://navto.me/assets/navigatetome-brand.png" width="32"/></a>
 
