@@ -3,136 +3,140 @@ export const Format = {
 	 * Formatações em português brasileiro.
 	 */
 	ptBr: {
-		cnpj: (value: string): string => {
-			return Format.onlyNumbers(value).replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+		cnpj: (value: string, fallback = 'CNPJ está incorreto!'): string => {
+			const number = Format.onlyNumbers(value);
+
+			if (number.length !== 14) {
+				return fallback;
+			}
+			return number.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
 		},
-		cpf: (value: string): string => {
-			return Format.onlyNumbers(value).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+		cpf: (value: string, fallback = 'CPF está incorreto!'): string => {
+			const number = Format.onlyNumbers(value);
+
+			if (number.length !== 11) {
+				return fallback;
+			}
+			return number.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 		},
-		rg: (value: string): string => {
-			return Format.onlyNumbers(value).replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+		cep: (value: string, fallback = 'CEP está incorreto!'): string => {
+			const number = Format.onlyNumbers(value);
+
+			if (number.length !== 8) {
+				return fallback;
+			}
+
+			return number.replace(/(\d{5})(\d{3})/, '$1-$2');
 		},
-		cep: (value: string): string => {
-			return Format.onlyNumbers(value).replace(/(\d{5})(\d{3})/, '$1-$2');
-		},
-		telefone: (value: string): string => {
-			return Format.onlyNumbers(value).replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+		/**
+		 * Formata um número de telefone com DDD.
+		 * Se o valor informado tiver entre 8 e 11 dígitos, ele
+		 * será formatado com DDD.
+		 * Caso o valor tenha 8 ou 9 dígitos, ele usará o DDD
+		 * informado como parâmetro.
+		 * @param {string} value O valor a ser formatado.
+		 * @param {string} [defaultAreaCode=''] DDD padrão a ser usado.
+		 * @param {boolean} [suppressError=false] Se verdadeiro, retorna o valor sem formatação em vez de lançar um erro.
+		 * @returns {string} O valor formatado.
+		 * @throws {Error} Se o valor informado tiver menos de 8 ou mais de 11 dígitos.
+		 */
+		telefone: (value: string, defaultAreaCode: string = '', fallback = 'Telefone está incorreto!'): string => {
+			let number = Format.onlyNumbers(value);
+			const areaCode = Format.onlyNumbers(defaultAreaCode);
+
+			number = number.length < 10 ? `${areaCode}${number}` : number;
+
+			if (number.length < 8 || number.length > 11) {
+				return fallback;
+			}
+
+			if (number.length === 8 || number.length === 9) {
+				return number.replace(/(\d{4,5})(\d{4})/, '$1-$2');
+			}
+
+			return number.replace(/(\d{2})(\d{4,5})(\d{4})/, '$1 $2-$3');
 		},
 
 		/**
 		 * Converte um valor em uma string escrita por extenso.
 		 *
-		 * Exemplos:
-		 *  - 0: zero
-		 *  - 1: um
-		 *  - 10: dez
-		 *  - 100: cem
-		 *  - 101: cento e um
-		 *  - 1000: mil
-		 *  - 1001: mil e um
-		 *  - 1_000_000: um milhão
-		 *  - 1_000_001: um milhão e um
-		 *  - 1_000_000_000: um bilhão
-		 *  - 1_000_000_001: um bilhão e um
-		 *
 		 * @param value O valor a ser convertido.
-		 *
 		 * @returns Uma string com o valor escrito por extenso.
+		 *
+		 * @example
+		 * ```js
+		 * 	Format.valorPorExtenso(1000); // Output: "mil"
+		 * 	Format.valorPorExtenso(1000000); // Output: "um milhão"
+		 * 	Format.valorPorExtenso(1000000000); // Output: "um bilhão"
+		 * 	Format.valorPorExtenso(1000000001); // Output: "um bilhão e um"
+		 *  Format.valorPorExtenso(2_000_000_000_000_000); // Output: "dois quatrilhões"
+		 * ```
 		 */
 		valorPorExtenso: (value: number): string => {
-			const units: string[] = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
-			const tens: string[] = ['', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
-			const tensMore: string[] = ['onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
-			const hundreds: string[] = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
-			const thousands: string[] = ['', 'mil', 'milhão', 'bilhão', 'trilhão', 'quatrilhão'];
+			if (value < 0 || value >= 1000 ** 6) {
+				throw new Error('O valor deve estar entre 0 e 999.999.999.999.999.999');
+			}
 
-			// Função para converter centenas, dezenas e unidades
-			const convertHundreds = (value: number): string => {
-				if (value === 0) return '';
+			const units = ['zero', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+			const tens = ['', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+			const tensMore = ['onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+			const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+			const scales = ['', 'mil', 'milhão', 'bilhão', 'trilhão', 'quadrilhão'];
 
-				const hundred = Math.floor(value / 100);
-				const ten = Math.floor((value % 100) / 10);
-				const unit = value % 10;
-				let extenso = '';
+			// Converte centenas, dezenas e unidades
+			const convertHundreds = (num: number): string => {
+				if (num === 0) return '';
+				if (num === 100) return 'cem';
+
+				const hundred = Math.floor(num / 100);
+				const ten = Math.floor((num % 100) / 10);
+				const unit = num % 10;
+				let result = '';
 
 				if (hundred > 0) {
-					// extenso +=  hundreds[hundred] + ' ';
-					extenso += value === 100 ? 'cem ' : hundreds[hundred] + ' ';
-					if (ten > 0 || unit > 0) extenso += 'e ';
+					result += hundreds[hundred] + (ten > 0 || unit > 0 ? ' e ' : '');
 				}
 
 				if (ten === 1 && unit > 0) {
-					extenso += tensMore[unit - 1] + ' ';
+					result += tensMore[unit - 1];
 				} else {
 					if (ten > 0) {
-						extenso += tens[ten] + ' ';
-						if (unit > 0) extenso += 'e ';
+						result += tens[ten] + (unit > 0 ? ' e ' : '');
 					}
-
 					if (unit > 0) {
-						extenso += units[unit] + ' ';
+						result += units[unit];
 					}
 				}
 
-				return extenso.trim();
+				return result;
 			};
 
-			// Função principal para converter o número completo
 			if (value === 0) return units[0];
-			if (value === 100) return 'cem';
 
-			let extenso = '';
-			const vQuadrillions = Math.floor(value / 1_000_000_000_000_000);
-			const vTrillions = Math.floor((value % 1_000_000_000_000_000) / 1_000_000_000_000);
-			const vBillions = Math.floor((value % 1_000_000_000_000) / 1_000_000_000);
-			const vMillions = Math.floor((value % 1_000_000_000) / 1_000_000);
-			const vThousands = Math.floor((value % 1_000_000) / 1000);
-			const vRemainder = value % 1000;
+			let result = '';
+			const parts: number[] = [];
 
-			// Quadrilhoes
-			if (vQuadrillions > 0) {
-				extenso += convertHundreds(vQuadrillions) + ' ';
-				extenso += vQuadrillions > 1 ? thousands[5].replace('ão', 'ões') : thousands[5];
-				extenso += ' ';
-			}
-			// Trilhoes
-			if (vTrillions > 0) {
-				extenso += convertHundreds(vTrillions) + ' ';
-				extenso += vTrillions > 1 ? thousands[4].replace('ão', 'ões') : thousands[4];
-				extenso += ' ';
+			for (let i = 0; i < scales.length; i++) {
+				parts[i] = Math.floor(value / 1000 ** i) % 1000;
 			}
 
-			// Bilhões
-			if (vBillions > 0) {
-				extenso += convertHundreds(vBillions) + ' ';
-				extenso += vBillions > 1 ? thousands[3].replace('ão', 'ões') : thousands[3];
-				extenso += ' ';
-			}
+			for (let i = scales.length - 1; i >= 0; i--) {
+				if (parts[i] > 0) {
+					if (result) result += parts[i] < 101 ? ' e ' : ' ';
 
-			// Milhões
-			if (vMillions > 0) {
-				extenso += convertHundreds(vMillions) + ' ';
-				extenso += vMillions > 1 ? thousands[2].replace('ão', 'ões') : thousands[2];
-				extenso += ' ';
-			}
+					if (i === 1 && parts[i] === 1) {
+						result += 'mil';
+					} else {
+						result += convertHundreds(parts[i]) + (i > 0 ? ` ${scales[i]}` : '');
+					}
 
-			// Milhares
-			if (vThousands > 0) {
-				extenso += vThousands === 1 ? 'mil ' : convertHundreds(vThousands) + ' ' + thousands[1] + ' ';
-			}
-
-			// Resto (centenas, dezenas e unidades)
-			if (vRemainder > 0) {
-				if (vQuadrillions > 0 || vTrillions > 0 || vBillions > 0 || vMillions > 0 || vThousands > 0) {
-					extenso += vRemainder < 101 ? ' e ' : ' ';
+					if (parts[i] > 1 && (i === 2 || i === 3 || i === 4 || i === 5)) {
+						result = result.replace(/ão$/, 'ões');
+					}
 				}
-				extenso += convertHundreds(vRemainder);
 			}
 
-			return extenso
-				.trim()
-				.replace(/\s+/g, ' ')
-				.replace(/(\ão|\ões) cem/g, '$1 e cem');
+			return result.trim().replace(/\s+/g, ' ');
 		}
 	},
 
@@ -159,15 +163,17 @@ export const Format = {
 	 *
 	 * @param {string|Date} date - The date to format.
 	 * @param {string} format - The desired format for the output string.
-	 * @param {string} locale - The locale to use. Defaults to 'pt-BR'.
+	 * @param {string} locale - The locale to use.
 	 * @returns {string} The date formatted as a string.
 	 *
 	 * @example
 	 * ```js
 	 * Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // Output: 'Sunday, 02 March 2025'
 	 * ```
+	 *
+	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	date: (date: Date | string, format: string, locale: string = 'pt-BR'): string => {
+	date: (date: Date | string, format: string, locale: Intl.LocalesArgument = 'default'): string => {
 		try {
 			if (typeof date === 'string') {
 				date = date.trim().replace(/-/g, '/').replace(/T/g, ' ');
@@ -220,6 +226,8 @@ export const Format = {
 	 * Format.currency(123456.78); // 'R$ 123.456,78'Format.currency(1234.56);
 	 * // Output: R$ 1.234,56
 	 * ```
+	 *
+	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
 	currency: (value: number, options: { locale: Intl.LocalesArgument; currency: string } = { locale: 'pt-BR', currency: 'BRL' }): string => {
 		const result = value.toLocaleString(options.locale, { style: 'currency', currency: options.currency });
@@ -229,7 +237,7 @@ export const Format = {
 	/**
 	 * Formats a number according to the given locale.
 	 * @param value The number to format.
-	 * @param locale The locale to use. Defaults to 'pt-BR'.
+	 * @param locale The locale to use.
 	 * @returns The formatted string.
 	 *
 	 * @example
@@ -237,11 +245,77 @@ export const Format = {
 	 * Format.number(123456.78); // '123.456,78'Format.number(1234.56);
 	 * // Output: 1.234,56
 	 * ```
+	 *
+	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	number: (value: number, locale: Intl.LocalesArgument = 'pt-BR'): string => {
+	number: (value: number, locale: Intl.LocalesArgument = 'default'): string => {
 		return value.toLocaleString(locale, { minimumFractionDigits: 2 });
 	},
 
+	/**
+	 * Abbreviates a number by adding a suffix based on its magnitude.
+	 *
+	 * This function takes a number and returns a string with the number abbreviated
+	 * using metric suffixes (e.g., K for thousand, M for million).
+	 *
+	 * @param value - The number to abbreviate.
+	 * @param options - Options for abbreviation, including:
+	 *   - `fractionDigits`: Number of decimal places to include in the abbreviated value.
+	 *   - `removeEndZero`: Whether to remove trailing zeros after the decimal point.
+	 * @returns A string representing the abbreviated number with a suffix.
+	 *
+	 * @example
+	 * ```typescript
+	 * abbreviateNumber(1500); // '1.50K'
+	 * abbreviateNumber(2000000); // '2.00M'
+	 * abbreviateNumber(123_456_789); // '123.46M'
+	 * abbreviateNumber(1e33); // '1.00D'
+	 * ```
+	 */
+	abbreviateNumber: (value: number, { fractionDigits = 2, removeEndZero = true } = {}): string => {
+		const abbreviations = [
+			{ threshold: 1e33, suffix: 'D' }, // 1 decillion
+			{ threshold: 1e30, suffix: 'N' }, // 1 nonillion
+			{ threshold: 1e27, suffix: 'O' }, // 1 octillion
+			{ threshold: 1e24, suffix: 'Se' }, // 1 septillion
+			{ threshold: 1e21, suffix: 'S' }, // 1 sextillion
+			{ threshold: 1e18, suffix: 'Qu' }, // 1 quintillion
+			{ threshold: 1e15, suffix: 'Q' }, // 1 quadrillion
+			{ threshold: 1e12, suffix: 'T' }, // 1 trillion
+			{ threshold: 1e9, suffix: 'B' }, // 1 billion
+			{ threshold: 1e6, suffix: 'M' }, // 1 million
+			{ threshold: 1e3, suffix: 'K' } // 1 thousand
+		];
+
+		const abbreviation = abbreviations.find(({ threshold }) => value >= threshold);
+
+		if (abbreviation) {
+			let abbreviatedValue = (value / abbreviation.threshold).toFixed(fractionDigits);
+
+			// Optionally remove trailing zeros
+			if (removeEndZero) {
+				abbreviatedValue = abbreviatedValue.replace(/\.?0*$/, '');
+			}
+
+			return `${abbreviatedValue}${abbreviation.suffix}`;
+		}
+
+		// Return the original number as a string if no abbreviation is applicable
+		return value.toString();
+	},
+
+	/**
+	 * Removes all non-numeric characters from a string.
+	 *
+	 * @param {string} value The string to remove non-numeric characters from.
+	 * @returns {string} The resulting string with only numeric characters.
+	 *
+	 * @example
+	 * ```js
+	 * onlyNumbers('123abc'); // '123'
+	 * onlyNumbers('abc'); // ''
+	 * ```
+	 */
 	onlyNumbers: (value: string): string => {
 		return value.replace(/\D/g, '');
 	},
@@ -250,18 +324,47 @@ export const Format = {
 	 * Pads a number with leading zeros to match the number of digits in a given maximum value.
 	 *
 	 * @param {number} value The number to be padded with leading zeros.
-	 * @param {number} maxValue The maximum value for which the number of digits will be used to determine the padding length
+	 * @param {number} refValue The reference value for determining the maximum length for adding leading zeros.
 	 *
 	 *  @returns {string} the input number padded with leading zeros to match the number of digits in the maximum value.
 	 *
 	 * @example
 	 * ```js
-	 * Format.padZerosByMax(2, 10); // '02'
-	 * Format.padZerosByMax(12, 110); // '012'
+	 * Format.padZerosByRef(2, 90); // '02'
+	 * Format.padZerosByRef(12, 110); // '012'
 	 * ```
 	 */
-	padZerosByMax(value: number, maxValue: number): string {
-		const numDigits = Math.floor(Math.log10(maxValue) + 1);
+	padZerosByRef(value: number, refValue: number): string {
+		const numDigits = Math.floor(Math.log10(refValue) + 1);
 		return value.toString().padStart(numDigits, '0');
+	},
+
+	/**
+	 * Converts a full name string to title case, properly capitalizing words
+	 * while maintaining lowercase for specified conjunctions.
+	 *
+	 * @param {string} name - The full name string to format.
+	 * @returns {string} The formatted name in title case.
+	 *
+	 * @example
+	 * ```ts
+	 * titleCase('john doe de souza'); // 'John Doe de Souza'
+	 * titleCase('maria da silva'); // 'Maria da Silva'
+	 * ```
+	 */
+	titleCase(name: string): string {
+		if (!name.trim()) return '';
+
+		const conjunctions = new Set(['do', 'da', 'dos', 'das', 'de', 'e']); // Common conjunctions to remain lowercase
+
+		return name
+			.trim()
+			.toLowerCase()
+			.split(/\s+/) // Split the name by whitespace
+			.map((word, index) =>
+				// Capitalize the first letter of the word if it's the first word or not a conjunction
+				index === 0 || !conjunctions.has(word) ? word.charAt(0).toUpperCase() + word.slice(1) : word
+			)
+			.join(' '); // Join the words back into a string with spaces
 	}
 };
