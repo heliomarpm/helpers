@@ -340,7 +340,7 @@ export const Format = {
 	},
 
 	/**
-	 * Converts a full name string to title case, properly capitalizing words
+	 * Capitalizes the first letter of the full name
 	 * while maintaining lowercase for specified conjunctions.
 	 *
 	 * @param {string} name - The full name string to format.

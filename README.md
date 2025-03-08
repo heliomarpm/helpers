@@ -1,4 +1,3 @@
-
 <div id="top" align="center" style="text-align:center;">
 <h1>
   <img src="https://raw.githubusercontent.com/heliomarpm/helpers/refs/heads/master/logo.png" alt="Helpers Library" width="128" />
@@ -44,7 +43,7 @@
 
 ## 🎯 About
 
-`@heliomarpm\helpers` is a comprehensive collection of TypeScript utility functions for formatting, type checking, conversion, and general utilities. This library provides a set of helper functions to make common programming tasks easier and more maintainable.
+`@heliomarpm/helpers` is a comprehensive collection of TypeScript utility functions for formatting, type checking, conversion, and general utilities. This library provides a set of helper functions to make common programming tasks easier and more maintainable.
 
 
 ## 🚀 Features
@@ -70,13 +69,7 @@ src/
 └── index.ts         # Main entry point
 ```
 
-## Main files:
 
-- `format.ts` - String formatting, date formatting, number formatting
-- `is.ts` - Type checking and validation functions
-- `to.ts` - Type conversion and transformation utilities
-- `utils.ts` - Common utility functions
-- `index.ts` - Main export file
 
 ## 📦 Installation
 
@@ -97,11 +90,12 @@ import { Is, To, Format, Utils } from '@heliomarpm/helpers';
 
 // Type checking
 Is.CPF('111.222.333-00'); // false
-Is.linuxOS; // true
+Is.CNPJ('11.222.333/0001-00'); // false
 
 // Conversion
 To.boolean('1'); // true
 To.boolean('false'); // false
+To.boolean('invalid'); // false
 
 // Formatting
 Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // "Sunday, 02 March 2025"
@@ -127,52 +121,134 @@ Utils.setNestedValue(target, 'animals[1]', 'cat');
 
 ```
 
-### Main functionalities
+## Main functionalities
 
-#### Type Checking (is.ts)
-- `Is.windowsOS` - Verifies that it's running on the Windows OS.
-- `Is.linuxOS` - Verifies that it's running on the Linux OS.
-- `Is.macOS` - Verifies that it's running on the Mac OS.
-- `Is.arch_x64` - Check if the processor architecture is x64.
-- `Is.arch_x86` - Check if the processor architecture is ia32.
-- `Is.arch_Arm` - Check if the processor architecture is arm.	
-- `Is.arch_Arm64` - Check if the processor architecture is arm64.
-- `Is.cpf()` - Validate a CPF (Brazilian National Register of Individuals).
-- `Is.cnpj()` - Validate a CNPJ (Brazilian National Corporate Registration Number).
-- `Is.equals()` - Compares two values recursively.
-- `Is.numeric()` - Check if a value is numeric.
-- `Is.date()` - Check if a value is a date.
-- `Is.object()` - Check if a value is an object.
-- `Is.nullOrEmpty()` - Check if a value is null or an empty object or array.
+### Usage
 
-#### Formatting (format.ts)
-- `Format.date()` - Formats a Date object into a string according to the specified format.
-- `Format.number()` - Format numbers
-- `Format.currency()` - Format currency values
-- `Format.onlyNumbers()` - Remove non-numeric characters from a string.
-- `Format.padZerosByMax()` - Pad a number with zeros to a specified maximum length.
-- `Format.ptBr.` - Brazilian Portuguese formatting helpers
+```typescript
+import { Format, Is, To, Utils } from '@heliomarpm/helpers';
+```
 
-#### Conversion (to.ts)
-- `To.dictionary()` - Converts a JSON object to a Record<string, T> type.
-- `To.boolean()` - Convert to boolean
-- `To.dateParts()` - Extracts parts of a date such as year, month, day, etc.
-- `To.number()` - Convert to number, fallback to NaN
+### Format Helpers
 
-#### Utilities (utils.ts)
-- `Utils.gerarCPF()` - Generate a random CPF (Brazilian National Register of Individuals).
-- `Utils.gerarCNPJ()` - Generate a random CNPJ (Brazilian National Corporate Registration Number).
-- `Utils.sortByProps()` - Returns a comparison function to be used with the `sort` method for sorting an array of objects.	
-- `Utils.orderBy()` - Sorts an array of objects by the specified key in ascending or descending order.
-- `Utils.getNestedValue()` - Retrieves a value from a nested object using a dot-separated path.
-- `Utils.setNestedValue()` - Sets a value in a nested object using a dot-separated path.
-- `Utils.ifNull()` - Returns a default value if the input value is null or undefined.
-- `Utils.ifNullOrEmpty()` - Returns a default value if the input value is null, undefined, or an empty string.
-- `Utils.generateGuid()` - Generates a globally unique identifier (GUID).
-- `Utils.generateKey()` - Generates a new 256-bit AES-GCM key.
-- `Utils.encrypt()` - Encrypts a string using AES-GCM algorithm.
-- `Utils.decrypt()` - Decrypts an encrypted string using AES-GCM algorithm.
-___
+#### Brazilian Formats (ptBr)
+
+```typescript
+Format.ptBr.cnpj('12345678901234'); // Formatar CNPJ '12.345.678/9012-34'
+Format.ptBr.cnpj('1234567890123400', 'CNPJ não pode ser formatado'); // 'CNPJ não pode ser formatado'
+
+Format.ptBr.cpf('12345678901'); // '123.456.789-01'
+Format.ptBr.cpf('1234567890100', 'CPF não pode ser formatado'); // 'CPF não pode ser formatado'
+
+Format.ptBr.cep('12345678'); // '12345-678'
+Format.ptBr.cep('1234567800', 'CEP não pode ser formatado'); // 'CEP não pode ser formatado'
+
+Format.ptBr.telefone('11999999999'); // '11 99999-9999'
+Format.ptBr.telefone('1199999999900', 'Telefone não pode ser formatado'); // 'Telefone não pode ser formatado'
+Format.ptBr.valorPorExtenso(1234); // 'mil duzentos e trinta e quatro'
+```
+
+#### Date Formatting
+
+```typescript
+Format.date(new Date(), 'dd/mm/yyyy HH:MM:ss'); // '31/12/2023 23:59:59'
+Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // "Sunday, 02 
+```
+
+	Supported formats:
+	- 'a': 'am' or 'pm' (lowercase)
+	- 'A': 'AM' or 'PM' (uppercase)
+	- 'hh': hours in 12h format (01-12)
+	- 'h': hours in 12h format (1-12)
+	- 'HH': hours in 24h format (00-23)
+	- 'H': hours in 24h format (0-23)
+	- 'MM': minutes (00-59)
+	- 'ss': seconds (00-59)
+	- 'SSS': milliseconds (000-999)
+	- 'yyyy': full year
+	- 'yy': year (two digits)
+	- 'mmmm': month name
+	- 'mmm': abbreviated month
+	- 'mm': month (01-12)
+	- 'dddd': weekday name
+	- 'ddd': abbreviated weekday
+	- 'dd': day (01-31)
+
+
+#### Number Formatting
+
+```typescript
+// Format currency
+Format.currency(1234.56, { locale: 'en', currency: 'USD' }); // '$1,234.56'
+
+// Formating number (1.234,56)
+Format.number(1234.56); // '1.234,56'
+
+// Abreviate number (1.23K, 1.23M, etc.)
+Format.abbreviateNumber(1234567); // '1.23M'
+
+// Remove non-numeric characters from a string.
+Format.onlyNumbers('abc123'); // '123'
+
+// Pads a number with leading zeros to match the number of digits in a given maximum value
+Format.padZerosByRef(5, 100); // '005'
+
+// Capitalizes the first letter of a string
+Format.titleCase('john doe'); // 'John Doe'
+Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
+```
+
+### Is Helpers (Validation)
+
+```typescript
+Is.cpf('123.456.789-01'); // Validates CPF
+Is.cnpj('12.345.678/9012-34'); // Validates CNPJ
+Is.numeric('123'); // true
+Is.equals(obj1, obj2); // Deep comparison
+Is.date('2023-12-31'); // Validates date
+Is.nullOrEmpty(value); // Checks for null/empty
+Is.object({}); // Validates object type
+Is.email('user@example.com'); // Validates email
+
+// OS and Architecture checks
+Is.windowsOS
+Is.linuxOS
+Is.macOS
+Is.arch_x86
+Is.arch_x64
+Is.arch_Arm
+Is.arch_Arm64
+```
+
+### To Helpers (Conversion)
+
+```typescript
+To.dictionary(jsonObject); // Converts to Record<string, T>
+To.boolean('true'); // Converts to boolean
+To.dateParts(new Date()); // Extracts date components
+To.number('123'); // Converts to number
+```
+
+### Utils Helpers
+
+```typescript
+Utils.gerarCPF(); // Generates valid CPF
+Utils.gerarCNPJ(); // Generates valid CNPJ
+Utils.sortByProps(['name', '-age']); // Sort function for arrays
+Utils.orderBy(array, 'key', 'asc'); // Sort array by key
+Utils.getNestedValue(obj, 'user.name'); // Get nested object value
+Utils.setNestedValue(obj, 'user.name', value); // Set nested object value
+Utils.ifNull(value, defaultValue); // Null coalescing
+Utils.ifNullOrEmpty(value, defaultValue); // Empty check with default
+Utils.generateGuid(); // Generate GUID (e.g. '00000000-0000-0000-0000-000000000000') 
+Utils.months({locale: 'pt-BR', month: 'long'}); // Get month names array (e.g. ['Janeiro', 'Fevereiro', ...])
+Utils.weekdays({locale: 'pt-BR', weekday: 'long'}); // Get weekday names array (e.g. ['Domingo', 'Segunda-feira', ...])
+
+// Crypto utilities
+Utils.crypto.generateKey(); // Generate encryption key
+Utils.crypto.encrypt(text, key); // Encrypt text
+Utils.crypto.decrypt(encryptedText, key); // Decrypt text
+```
 
 ## Dependencies
 
@@ -243,4 +319,126 @@ If you appreciate that, please consider donating to the Developer.
 [url-codefactor]: https://www.codefactor.io/repository/github/heliomarpm/helpers
 [url-codefactor-badge]: https://www.codefactor.io/repository/github/heliomarpm/helpers/badge
 [url-codeql]: https://github.com/heliomarpm/helpers/actions/workflows/codeql.yml/badge.svg 
-[url-publish]: https://github.com/heliomarpm/helpers/actions/workflows/publish.yml/badge.svg 
+[url-publish]: https://github.com/heliomarpm/helpers/actions/workflows/publish.yml/badge.svg
+
+# Helper Functions Documentation
+
+A collection of TypeScript helper functions for common operations.
+
+## Installation
+
+```bash
+npm install @heliomarpm/helpers
+```
+
+## Usage
+
+```typescript
+import { Format, Is, To, Utils } from '@heliomarpm/helpers';
+```
+
+## Format Helpers
+
+### Brazilian Formats (ptBr)
+
+```typescript
+Format.ptBr.cnpj('12345678901234'); // '12.345.678/9012-34'
+Format.ptBr.cpf('12345678901'); // '123.456.789-01'
+Format.ptBr.cep('12345678'); // '12345-678'
+Format.ptBr.telefone('11999999999'); // '11 99999-9999'
+Format.ptBr.valorPorExtenso(1234); // 'mil duzentos e trinta e quatro'
+```
+
+### Date Formatting
+
+```typescript
+Format.date(new Date(), 'dd/mm/yyyy HH:MM:ss'); // '31/12/2023 23:59:59'
+Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // "Sunday, 02 
+```
+
+	Supported formats:
+	- 'a': 'am' or 'pm' (lowercase)
+	- 'A': 'AM' or 'PM' (uppercase)
+	- 'hh': hours in 12h format (01-12)
+	- 'h': hours in 12h format (1-12)
+	- 'HH': hours in 24h format (00-23)
+	- 'H': hours in 24h format (0-23)
+	- 'MM': minutes (00-59)
+	- 'ss': seconds (00-59)
+	- 'SSS': milliseconds (000-999)
+	- 'yyyy': full year
+	- 'yy': year (two digits)
+	- 'mmmm': month name
+	- 'mmm': abbreviated month
+	- 'mm': month (01-12)
+	- 'dddd': weekday name
+	- 'ddd': abbreviated weekday
+	- 'dd': day (01-31)
+
+
+### Number Formatting
+
+```typescript
+Format.currency(1234.56); // 'R$ 1.234,56'
+Format.number(1234.56); // '1.234,56'
+Format.abbreviateNumber(1234567); // '1.23M'
+Format.onlyNumbers('abc123'); // '123'
+Format.padZerosByRef(5, 100); // '005'
+Format.titleCase('john doe'); // 'John Doe'
+```
+
+## Is Helpers (Validation)
+
+```typescript
+Is.cpf('123.456.789-01'); // Validates CPF
+Is.cnpj('12.345.678/9012-34'); // Validates CNPJ
+Is.numeric('123'); // true
+Is.equals(obj1, obj2); // Deep comparison
+Is.date('2023-12-31'); // Validates date
+Is.nullOrEmpty(value); // Checks for null/empty
+Is.object({}); // Validates object type
+Is.email('user@example.com'); // Validates email
+
+// OS and Architecture checks
+Is.windowsOS
+Is.linuxOS
+Is.macOS
+Is.arch_x86
+Is.arch_x64
+Is.arch_Arm
+Is.arch_Arm64
+```
+
+## To Helpers (Conversion)
+
+```typescript
+To.dictionary(jsonObject); // Converts to Record<string, T>
+To.boolean('true'); // Converts to boolean
+To.dateParts(new Date()); // Extracts date components
+To.number('123'); // Converts to number
+```
+
+## Utils Helpers
+
+```typescript
+Utils.gerarCPF(); // Generates valid CPF
+Utils.gerarCNPJ(); // Generates valid CNPJ
+Utils.sortByProps(['name', '-age']); // Sort function for arrays
+Utils.orderBy(array, 'key', 'asc'); // Sort array by key
+Utils.getNestedValue(obj, 'user.name'); // Get nested object value
+Utils.setNestedValue(obj, 'user.name', value); // Set nested object value
+Utils.ifNull(value, defaultValue); // Null coalescing
+Utils.ifNullOrEmpty(value, defaultValue); // Empty check with default
+Utils.generateGuid(); // Generate GUID
+Utils.months(); // Get month names array
+Utils.weekdays(); // Get weekday names array
+
+// Crypto utilities
+Utils.crypto.generateKey(); // Generate encryption key
+Utils.crypto.encrypt(text, key); // Encrypt text
+Utils.crypto.decrypt(encryptedText, key); // Decrypt text
+```
+
+## License
+
+MIT © [Heliomar P. Marques](mailto:heliomarpm@proton.me)
