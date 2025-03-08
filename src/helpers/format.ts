@@ -81,7 +81,7 @@ export const Format = {
 			const tens = ['', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
 			const tensMore = ['onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
 			const hundreds = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
-			const scales = ['', 'mil', 'milhão', 'bilhão', 'trilhão', 'quadrilhão'];
+			const scales = ['', 'mil', 'milhão', 'bilhão', 'trilhão', 'quatrilhão'];
 
 			// Converte centenas, dezenas e unidades
 			const convertHundreds = (num: number): string => {

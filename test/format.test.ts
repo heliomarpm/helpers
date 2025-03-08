@@ -128,7 +128,7 @@ describe('Format Class', () => {
 		expect(Format.ptBr.valorPorExtenso(1_234_567)).toBe('um milhão duzentos e trinta e quatro mil quinhentos e sessenta e sete');
 		expect(Format.ptBr.valorPorExtenso(1_000_001)).toBe('um milhão e um');
 		expect(Format.ptBr.valorPorExtenso(1_234_567_890_123_456)).toBe(
-			'um quadrilhão duzentos e trinta e quatro trilhões quinhentos e sessenta e sete bilhões oitocentos e noventa milhões cento e vinte e três mil quatrocentos e cinquenta e seis'
+			'um quatrilhão duzentos e trinta e quatro trilhões quinhentos e sessenta e sete bilhões oitocentos e noventa milhões cento e vinte e três mil quatrocentos e cinquenta e seis'
 		);
 	});
 
