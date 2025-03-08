@@ -114,9 +114,9 @@ Utils.setNestedValue(target, 'animals[1]', 'cat');
 
 // output will be target:
 { 
- 	user: { name: { first: 'Jane', last: 'Doe' } }, 
-	children: [{ name: 'John' }], 
-	animals: ['dog', 'cat'] 
+  user: { name: { first: 'Jane', last: 'Doe' } }, 
+  children: [{ name: 'John' }], 
+  animals: ['dog', 'cat'] 
 }
 
 ```
@@ -155,24 +155,30 @@ Format.date(new Date(), 'dd/mm/yyyy HH:MM:ss'); // '31/12/2023 23:59:59'
 Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // "Sunday, 02 
 ```
 
-	Supported formats:
-	- 'a': 'am' or 'pm' (lowercase)
-	- 'A': 'AM' or 'PM' (uppercase)
-	- 'hh': hours in 12h format (01-12)
-	- 'h': hours in 12h format (1-12)
-	- 'HH': hours in 24h format (00-23)
-	- 'H': hours in 24h format (0-23)
-	- 'MM': minutes (00-59)
-	- 'ss': seconds (00-59)
-	- 'SSS': milliseconds (000-999)
-	- 'yyyy': full year
-	- 'yy': year (two digits)
-	- 'mmmm': month name
-	- 'mmm': abbreviated month
-	- 'mm': month (01-12)
-	- 'dddd': weekday name
-	- 'ddd': abbreviated weekday
-	- 'dd': day (01-31)
+###### Supported formats are:
+
+```js
+/**
+ * @param {string} format - The desired format for the output string.
+ * - 'a': 'am' or 'pm' in lowercase
+ * - 'A': 'AM' or 'PM' in uppercase
+ * - 'hh': two-digit hours in 12h format (01-12)
+ * - 'h': hours in 12h format (1-12)
+ * - 'HH': two-digit hours in 24h format (00-23)
+ * - 'H': hours in 24h format (0-23)
+ * - 'MM': two-digit minutes (00-59)
+ * - 'ss': two-digit seconds (00-59)
+ * - 'SSS': three-digit milliseconds (000-999)
+ * - 'yyyy': four-digit year (2024)
+ * - 'yy': two-digit year (24)
+ * - 'mmmm': full month name (January, February, ...)
+ * - 'mmm': full month name abbreviated month (Jan, Feb, ...)
+ * - 'mm': two-digit month (01-12)
+ * - 'dddd': full weekday name (Sun, Mon, ...)
+ * - 'ddd': abbreviated weekday name (Sun, Mon, ...)
+ * - 'dd': two-digit day (01-31)
+ */
+  ```
 
 
 #### Number Formatting
@@ -252,7 +258,7 @@ Utils.crypto.decrypt(encryptedText, key); // Decrypt text
 
 ## Dependencies
 
-	This library has no dependencies
+  This library has no dependencies
 
 
 ## 🤝 Contributing
