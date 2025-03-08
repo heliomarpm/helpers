@@ -24,7 +24,14 @@
     "is",
     "utils",
     "format",
-    "helpers-br"
+    "helpers-br",
+		"br",
+		"brasil",
+		"brazilian",
+		"brazil",
+		"pt-br",
+		"ptbr",
+		"validations"
   ],
   "scripts": {
     "prebuild": "rimraf dist",

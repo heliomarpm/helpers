@@ -307,3 +307,15 @@ If you appreciate that, please consider donating to the Developer.
 ## 📝 License
 
 [MIT © Heliomar P. Marques](LICENSE) <a href="#top">🔝</a>
+
+----
+[url-npm]: https://www.npmjs.com/package/@heliomarpm/helpers
+[url-npm-badge]: https://img.shields.io/npm/v/@heliomarpm/helpers.svg
+[url-downloads]: http://badge.fury.io/js/@heliomarpm/helpers.svg
+[url-downloads-badge]: https://img.shields.io/npm/dm/@heliomarpm/helpers.svg  
+[url-deepscan]: https://deepscan.io/dashboard#view=project&tid=19612&pid=28935&bid=933374
+[url-deepscan-badge]: https://deepscan.io/api/teams/19612/projects/28935/branches/933374/badge/grade.svg
+[url-codefactor]: https://www.codefactor.io/repository/github/heliomarpm/helpers
+[url-codefactor-badge]: https://www.codefactor.io/repository/github/heliomarpm/helpers/badge
+[url-codeql]: https://github.com/heliomarpm/helpers/actions/workflows/codeql.yml/badge.svg 
+[url-publish]: https://github.com/heliomarpm/helpers/actions/workflows/publish.yml/badge.svg
