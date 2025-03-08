@@ -17,7 +17,7 @@ describe('Format Class', () => {
 	});
 
 	test('should format currency without symbol correctly', () => {
-		expect(Format.number(number)).toBe('1.234.567,89');
+		expect(Format.number(number, 'pt-BR')).toBe('1.234.567,89');
 	});
 
 	test('should format phoneBR correctly', () => {
@@ -151,8 +151,8 @@ describe('Format Class', () => {
 			const date = new Date('2025-03-03 17:33:44.135');
 
 			expect(Format.date(date, 'yy yyyy')).toBe('25 2025');
-			expect(Format.date(date, 'mm mmm. mmmm').toLocaleLowerCase()).toBe('03 mar. março');
-			expect(Format.date(date, 'dd ddd. dddd').toLocaleLowerCase()).toBe('03 seg. segunda-feira');
+			expect(Format.date(date, 'mm mmm. mmmm', 'pt-BR').toLocaleLowerCase()).toBe('03 mar. março');
+			expect(Format.date(date, 'dd ddd. dddd', 'pt-BR').toLocaleLowerCase()).toBe('03 seg. segunda-feira');
 			expect(Format.date(date, 'hh HH')).toBe('05 17');
 			expect(Format.date(date, 'MM')).toBe('33');
 			expect(Format.date(date, 'ss')).toBe('44');
@@ -160,7 +160,7 @@ describe('Format Class', () => {
 			expect(Format.date(date, 'a A')).toBe('pm PM');
 			expect(Format.date('2025/03/03 07:33', 'a A')).toBe('am AM');
 			expect(Format.date(date, 'HH:MM:ss.SSS')).toBe('17:33:44.135');
-			expect(Format.titleCase(Format.date(date, 'dddd, dd mmmm yyyy'))).toBe('Segunda-feira, 03 Março 2025');
+			expect(Format.titleCase(Format.date(date, 'dddd, dd mmmm yyyy', 'pt-BR'))).toBe('Segunda-feira, 03 Março 2025');
 		});
 
 		it('should format date with default format', () => {
