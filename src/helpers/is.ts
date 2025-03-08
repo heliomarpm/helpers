@@ -211,5 +211,17 @@ export const Is = {
 	 */
 	object(value: any): boolean {
 		return value !== null && typeof value === 'object' && !Array.isArray(value);
+	},
+
+	/**
+	 * Verifies if the given value is a valid email address.
+	 * @param value The value to be verified.
+	 * @returns {boolean} `true` if the value is a valid email address, `false` otherwise.
+	 *
+	 * @example
+	 * Is.email('heliomarpm@proton.me'); //output: true
+	 */
+	email(value: string): boolean {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 	}
 };

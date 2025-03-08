@@ -368,4 +368,25 @@ describe('Is', () => {
 			expect(Is.object(true)).toBe(false);
 		});
 	});
+
+	describe('Is.email', () => {
+		it('should return true for valid email addresses', () => {
+			expect(Is.email('heliomarpm@proton.me')).toBe(true);
+			expect(Is.email('test@example.com')).toBe(true);
+			expect(Is.email('hello.world@example.co.uk')).toBe(true);
+		});
+
+		it('should return false for invalid email addresses', () => {
+			expect(Is.email('invalid_email')).toBe(false);
+			expect(Is.email('test@example')).toBe(false);
+			expect(Is.email('@example.com')).toBe(false);
+			expect(Is.email('test@.com')).toBe(false);
+		});
+
+		it('should return false for email addresses with special characters', () => {
+			expect(Is.email('test@example!com')).toBe(false);
+			expect(Is.email('test@example#com')).toBe(false);
+			expect(Is.email('test@example$com')).toBe(false);
+		});
+	});
 });
