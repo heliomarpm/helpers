@@ -1,7 +1,6 @@
 .*
 docs
 src
-dist
 test
 tests
 coverage
