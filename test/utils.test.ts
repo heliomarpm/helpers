@@ -61,7 +61,7 @@ describe('Utils', () => {
 				{ name: 'Bob', age: 25 },
 				{ name: 'Alice', age: 20 }
 			];
-			const sorted = [...data].sort(Utils.sortByProps(['name', 'age']));
+			const sorted = data.sort(Utils.sortByProps(['name', 'age']));
 			expect(sorted[0].name).toBe('Alice');
 			expect(sorted[0].age).toBe(20);
 			expect(sorted[1].name).toBe('Alice');
@@ -244,32 +244,37 @@ describe('Utils', () => {
 	});
 
 	describe('generateGuid Function', () => {
-		test('should generate a valid GUID', () => {
+		it('should generate a valid GUID', () => {
 			const guid = Utils.generateGuid();
-			const guidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-			expect(guid).toMatch(guidRegex);
+			expect(guid).toMatch(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
 		});
 
-		test('should generate unique GUIDs', () => {
+		it('should generate unique GUIDs', () => {
 			const guid1 = Utils.generateGuid();
 			const guid2 = Utils.generateGuid();
 
 			expect(guid1).not.toBe(guid2);
 		});
 
-		test('should generate a string of correct length', () => {
+		it('should generate a string of correct length', () => {
 			const guid = Utils.generateGuid();
 
 			expect(guid.length).toBe(36);
 		});
+
+		// it('throws an error when crypto is not available', () => {
+		// 	const originalCrypto = global.crypto;
+		// 	global.crypto = undefined;
+		// 	expect(() => Utils.generateGuid()).toThrowError('Crypto API not available in this environment.');
+		// 	global.crypto = originalCrypto;
+		// });
 	});
 
 	describe('Crypto Helper', () => {
 		let key: CryptoKey;
 
 		beforeAll(async () => {
-			key = await Utils.generateKey();
+			key = await Utils.crypto.generateKey();
 		});
 
 		test('should generate a valid key', async () => {
@@ -280,28 +285,144 @@ describe('Utils', () => {
 
 		test('should encrypt and decrypt text', async () => {
 			const originalText = 'secret message correct';
-			const encryptedText = await Utils.encrypt(originalText, key);
+			const encryptedText = await Utils.crypto.encrypt(originalText, key);
 
 			expect(encryptedText).toBeDefined();
 			expect(typeof encryptedText).toBe('string');
 			expect(encryptedText.length).toBeGreaterThan(0);
 
-			const decryptedText = await Utils.decrypt(encryptedText, key);
+			const decryptedText = await Utils.crypto.decrypt(encryptedText, key);
 			expect(decryptedText).toBe(originalText);
 		});
 
 		test('should fail to decrypt text with another key', async () => {
 			const originalText = 'secret message';
-			const encryptedText = await Utils.encrypt(originalText, key);
+			const encryptedText = await Utils.crypto.encrypt(originalText, key);
 
-			const anotherKey = await Utils.generateKey();
+			const anotherKey = await Utils.crypto.generateKey();
 
-			await expect(Utils.decrypt(encryptedText, anotherKey)).rejects.toThrow();
+			await expect(Utils.crypto.decrypt(encryptedText, anotherKey)).rejects.toThrow();
 		});
 
 		test('should fail to decrypt invalid text', async () => {
 			const invalidText = 'invalid text';
-			await expect(Utils.decrypt(invalidText, key)).rejects.toThrow();
+			await expect(Utils.crypto.decrypt(invalidText, key)).rejects.toThrow();
+		});
+	});
+
+	describe('months function', () => {
+		it('should return month names in default locale', () => {
+			const result = Utils.months();
+			expect(result.length).toBe(12);
+		});
+
+		it('should return month names in specific locale (pt-BR)', () => {
+			const result = Utils.months({ locale: 'pt-BR' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('Janeiro');
+			expect(result[11]).toBe('Dezembro');
+		});
+
+		it('should return month names in specific locale (en-US)', () => {
+			const result = Utils.months({ locale: 'en-US' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('January');
+			expect(result[11]).toBe('December');
+		});
+
+		it('should return month names in specific locale (fr-FR)', () => {
+			const result = Utils.months({ locale: 'fr-FR' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('Janvier');
+			expect(result[11]).toBe('Décembre');
+		});
+
+		it('should throw an error with invalid locale', () => {
+			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrowError();
+		});
+
+		it('should return month names in default locale', () => {
+			const result = Utils.months({ month: 'short' });
+			expect(result.length).toBe(12);
+		});
+
+		it('should return month names in specific locale (pt-BR)', () => {
+			const result = Utils.months({ month: 'short', locale: 'pt-BR' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('Jan.');
+			expect(result[11]).toBe('Dez.');
+		});
+
+		it('should return month names in specific locale (en-US)', () => {
+			const result = Utils.months({ month: 'short', locale: 'en-US' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('Jan');
+			expect(result[11]).toBe('Dec');
+		});
+
+		it('should return month names in non-English locale (fr-FR)', () => {
+			const result = Utils.months({ month: 'short', locale: 'fr-FR' });
+			expect(result.length).toBe(12);
+			expect(result[0]).toBe('Janv.');
+			expect(result[11]).toBe('Déc.');
+		});
+
+		it('should throw an error with invalid locale', () => {
+			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrowError();
+		});
+	});
+
+	describe('weekdays function', () => {
+		it('should return weekday names in default locale', () => {
+			const result = Utils.weekdays();
+			expect(result).toHaveLength(7);
+		});
+
+		it('should return weekday names in specific locale (pt-BR)', () => {
+			const result = Utils.weekdays({ locale: 'pt-BR' });
+			expect(result).toHaveLength(7);
+			expect(result).toEqual(expect.arrayContaining(['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']));
+		});
+
+		it('should return weekday names in specific locale (en-US)', () => {
+			const result = Utils.weekdays({ locale: 'en-US' });
+			expect(result).toHaveLength(7);
+			expect(result).toEqual(expect.arrayContaining(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']));
+		});
+
+		it('should return weekday names in specific locale (fr-FR)', () => {
+			const result = Utils.weekdays({ locale: 'fr-FR' });
+			expect(result).toHaveLength(7);
+			expect(result).toEqual(expect.arrayContaining(['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']));
+		});
+
+		it('should throw an error with invalid locale', () => {
+			expect(() => Utils.weekdays({ locale: ' invalid-locale' })).toThrowError();
+		});
+
+		it('returns expected weekday names for default locale', () => {
+			const result = Utils.weekdays({ weekday: 'short' });
+			expect(result).toHaveLength(7);
+		});
+
+		it('returns expected weekday short names in specific locale (pt-BR)', () => {
+			const result = Utils.weekdays({ weekday: 'short', locale: 'pt-BR' });
+			expect(result).toEqual(['Dom.', 'Seg.', 'Ter.', 'Qua.', 'Qui.', 'Sex.', 'Sáb.']);
+		});
+
+		it('returns expected weekday short names in specific locale (en-US)', () => {
+			const result = Utils.weekdays({ weekday: 'short', locale: 'en-US' });
+			expect(result).toEqual(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']);
+		});
+
+		it('returns expected weekday short names in specific locale (fr-FR)', () => {
+			const result = Utils.weekdays({ weekday: 'short', locale: 'fr-FR' });
+			expect(result).toEqual(['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.']);
+		});
+
+		it('returns expected weekday narrow names in specific locale (pt-BR)', () => {
+			const result = Utils.weekdays({ weekday: 'narrow', locale: 'pt-BR' });
+			expect(result).toEqual(['D', 'S', 'T', 'Q', 'Q', 'S', 'S']);
 		});
 	});
 });

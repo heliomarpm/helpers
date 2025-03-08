@@ -256,7 +256,10 @@ export const Utils = {
 	 * console.log(guid); // "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 	 */
 	generateGuid(): string {
-		// Generate 16 random bytes
+		if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
+			throw new Error('Crypto API not available in this environment.');
+		}
+
 		const randomBytes = new Uint8Array(16);
 		crypto.getRandomValues(randomBytes);
 
@@ -271,50 +274,105 @@ export const Utils = {
 			.join('');
 	},
 
+	crypto: {
+		/**
+		 * Generates a new 256-bit AES-GCM key.
+		 *
+		 * @returns A Promise that resolves to a CryptoKey that can be used for encryption and decryption.
+		 *
+		 * @example
+		 * const key = await generateKey();
+		 */
+		async generateKey(): Promise<CryptoKey> {
+			return crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+		},
+
+		/**
+		 * Encrypts a string using AES-GCM algorithm and returns the result as a Base64 string.
+		 * @param text The plaintext string to encrypt.
+		 * @param key The CryptoKey used for encryption.
+		 * @returns A Promise that resolves to the encrypted Base64 string.
+		 */
+		async encrypt(text: string, key: CryptoKey): Promise<string> {
+			const iv: Uint8Array = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector (IV)
+			const encodedText: Uint8Array = new TextEncoder().encode(text);
+			const encryptedData: ArrayBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encodedText);
+
+			// Concatenate IV + encrypted data and convert to Base64
+			const combined: Uint8Array = new Uint8Array(iv.length + encryptedData.byteLength);
+			combined.set(iv, 0);
+			combined.set(new Uint8Array(encryptedData), iv.length);
+
+			return Buffer.from(combined).toString('base64');
+		},
+
+		/**
+		 * Decodes a Base64 string and decrypts the contents using the AES-GCM algorithm.
+		 * @param encryptedText The Base64 string to decrypt.
+		 * @param key The CryptoKey used for decryption.
+		 * @returns The decrypted string.
+		 */
+		async decrypt(encryptedText: string, key: CryptoKey): Promise<string> {
+			const rawData = Buffer.from(encryptedText, 'base64') as Uint8Array; // Decodifica Base64 para Uint8Array
+			const iv = rawData.slice(0, 12) as Uint8Array; // Extrai o IV
+			const encryptedData = rawData.slice(12) as Uint8Array; // Extrai os dados criptografados
+
+			const decryptedData = (await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encryptedData)) as Uint8Array;
+
+			return new TextDecoder().decode(decryptedData);
+		}
+	},
+
 	/**
-	 * Generates a new 256-bit AES-GCM key.
+	 * Returns an array of month names for a given locale.
 	 *
-	 * @returns A Promise that resolves to a CryptoKey that can be used for encryption and decryption.
+	 * @param options - An object with options for formatting the month names.
+	 * @param options.locale - The locale string to use for formatting the month names.
+	 * @param options.month - The type of month name to return. Can be 'long', 'short', or 'numeric'.
+	 * @returns An array of month names (e.g., "January", "February", ...) for the specified locale.
 	 *
 	 * @example
-	 * const key = await generateKey();
+	 * const months = monthNames('en-US'); // ["January", "February", ..., "December"]
+	 *
+	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	async generateKey(): Promise<CryptoKey> {
-		return crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+	months({ locale = 'default', month = 'long' }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions['month'] } = {}): Array<string> {
+		// return Array.from({ length: 12 }, (_, i) => new Date(2000, i).toLocaleString(locale, { month }));
+
+		return Array.from({ length: 12 }, (_, i) => {
+			const monthName = new Date(2000, i).toLocaleString(locale, { month });
+
+			// Garantir primeira letra maiúscula
+			return monthName.charAt(0).toUpperCase() + monthName.slice(1);
+		});
 	},
 
 	/**
-	 * Encrypts a string using AES-GCM algorithm and returns the result as a Base64 string.
-	 * @param text The plaintext string to encrypt.
-	 * @param key The CryptoKey used for encryption.
-	 * @returns A Promise that resolves to the encrypted Base64 string.
+	 * Returns an array of full weekday names for a given locale.
+	 *
+	 * @param {Object} [options]
+	 * @param {string} [options.locale='default'] - The locale string to use for formatting the weekday names.
+	 * @param {string} [options.weekday='long'] - The type of weekday name to return. Can be 'narrow', 'short', or 'long'.
+	 * @returns {string[]} An array of full weekday names (e.g., "Sunday", "Monday", ...) for the specified locale.
+	 *
+	 * @example
+	 * const days = dayNames({ locale: 'en-US', weekday: 'short' });
+	 * // Output: ["Sun", "Mon", ..., "Sat"]
+	 *
+	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	async encrypt(text: string, key: CryptoKey): Promise<string> {
-		const iv: Uint8Array = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector (IV)
-		const encodedText: Uint8Array = new TextEncoder().encode(text);
-		const encryptedData: ArrayBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encodedText);
+	weekdays({ locale = 'default', weekday = 'long' }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions['weekday'] } = {}): Array<string> {
+		const firstSunday = new Date(2000, 0, 1);
+		firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
 
-		// Concatenate IV + encrypted data and convert to Base64
-		const combined: Uint8Array = new Uint8Array(iv.length + encryptedData.byteLength);
-		combined.set(iv, 0);
-		combined.set(new Uint8Array(encryptedData), iv.length);
+		// return Array.from({ length: 7 }, (_, i) =>
+		// 	new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + i).toLocaleString(locale, { weekday })
+		// );
+		return Array.from({ length: 7 }, (_, i) => {
+			const dayName = new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + i).toLocaleString(locale, { weekday });
 
-		return Buffer.from(combined).toString('base64');
-	},
-
-	/**
-	 * Decodes a Base64 string and decrypts the contents using the AES-GCM algorithm.
-	 * @param encryptedText The Base64 string to decrypt.
-	 * @param key The CryptoKey used for decryption.
-	 * @returns The decrypted string.
-	 */
-	async decrypt(encryptedText: string, key: CryptoKey): Promise<string> {
-		const rawData = Buffer.from(encryptedText, 'base64') as Uint8Array; // Decodifica Base64 para Uint8Array
-		const iv = rawData.slice(0, 12) as Uint8Array; // Extrai o IV
-		const encryptedData = rawData.slice(12) as Uint8Array; // Extrai os dados criptografados
-
-		const decryptedData = (await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encryptedData)) as Uint8Array;
-
-		return new TextDecoder().decode(decryptedData);
+			// Garantir a primeira letra maiúscula
+			return dayName.charAt(0).toUpperCase() + dayName.slice(1);
+		});
 	}
 };
