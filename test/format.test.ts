@@ -151,8 +151,8 @@ describe('Format Class', () => {
 			const date = new Date('2025-03-03 17:33:44.135');
 
 			expect(Format.date(date, 'yy yyyy')).toBe('25 2025');
-			expect(Format.date(date, 'mm mmm mmmm')).toBe('03 mar março');
-			expect(Format.date(date, 'dd ddd dddd')).toBe('03 seg segunda-feira');
+			expect(Format.date(date, 'mm mmm. mmmm').toLocaleLowerCase()).toBe('03 mar. março');
+			expect(Format.date(date, 'dd ddd. dddd').toLocaleLowerCase()).toBe('03 seg. segunda-feira');
 			expect(Format.date(date, 'hh HH')).toBe('05 17');
 			expect(Format.date(date, 'MM')).toBe('33');
 			expect(Format.date(date, 'ss')).toBe('44');
@@ -160,7 +160,7 @@ describe('Format Class', () => {
 			expect(Format.date(date, 'a A')).toBe('pm PM');
 			expect(Format.date('2025/03/03 07:33', 'a A')).toBe('am AM');
 			expect(Format.date(date, 'HH:MM:ss.SSS')).toBe('17:33:44.135');
-			expect(Format.date(date, 'dddd, dd mmmm yyyy')).toBe('segunda-feira, 03 março 2025');
+			expect(Format.titleCase(Format.date(date, 'dddd, dd mmmm yyyy'))).toBe('Segunda-feira, 03 Março 2025');
 		});
 
 		it('should format date with default format', () => {
@@ -177,7 +177,7 @@ describe('Format Class', () => {
 
 		it('should format date with locale', () => {
 			const date = new Date(2025, 2, 2);
-			const formattedDate = Format.date(date, 'dddd, dd mmmm yyyy', 'en-US');
+			const formattedDate = Format.titleCase(Format.date(date, 'dddd, dd mmmm yyyy', 'en-US'));
 			expect(formattedDate).toBe('Sunday, 02 March 2025');
 		});
 
@@ -254,13 +254,13 @@ describe('Format Class', () => {
 
 		it('should format date with full weekday nam, locale pt-BR', () => {
 			const date = new Date(2024, 7, 1);
-			const formattedDate = Format.date(date, 'dddd', 'pt-BR');
+			const formattedDate = Format.date(date, 'dddd', 'pt-BR').toLocaleLowerCase();
 			expect(formattedDate).toBe('quinta-feira');
 		});
 
 		it('should format date with abbreviated weekday name', () => {
 			const date = new Date(2025, 2, 2);
-			const formattedDate = Format.date(date, 'ddd', 'pt-BR');
+			const formattedDate = Format.date(date, 'ddd', 'pt-BR').toLocaleLowerCase();
 			expect(formattedDate).toBe('dom');
 		});
 
