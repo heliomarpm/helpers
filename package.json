@@ -1,6 +1,6 @@
 {
   "name": "@heliomarpm/helpers",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "A library with many useful features",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,9 +14,9 @@
     "type": "git",
     "url": "git+https://github.com/heliomarpm/helpers.git"
   },
-	"files": [
+  "files": [
     "dist/**/*"
-  ], 
+  ],
   "keywords": [
     "helpers",
     "helper",
