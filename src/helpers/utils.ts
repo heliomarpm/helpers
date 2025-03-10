@@ -1,3 +1,5 @@
+import { Is } from './is';
+
 export const Utils = {
 	/**
 	 * Generates a random valid CPF (Brazilian National Register of Individuals)
@@ -223,27 +225,27 @@ export const Utils = {
 	/**
 	 * Returns the first argument if it is not null or undefined, otherwise returns the second argument.
 	 * @param value The value to check.
-	 * @param defaultValue The value to return if `value` is null or undefined.
+	 * @param fallback The value to return if `value` is null or undefined.
 	 * @returns The first argument if it is not null or undefined, otherwise the second argument.
 	 * @example
 	 * const foo = null;
 	 * const bar = ifNull(foo, "baz"); // "baz"
 	 */
-	ifNull<T>(value: T | null | undefined, defaultValue: T): T {
-		return value ?? defaultValue;
+	ifNull<T>(value: T, fallback: T): T {
+		return value ?? fallback;
 	},
 
 	/**
 	 * Returns the first argument if it is not null, undefined, or an empty string; otherwise, returns the second argument.
 	 * @param value The value to check.
-	 * @param defaultValue The value to return if `value` is null, undefined, or an empty string.
+	 * @param fallback The value to return if `value` is null, undefined, or an empty string.
 	 * @returns The first argument if it is not null, undefined, or an empty string, otherwise the second argument.
 	 * @example
 	 * const foo = '';
 	 * const bar = ifNullOrEmpty(foo, "baz"); // "baz"
 	 */
-	ifNullOrEmpty<T>(value: T | null | undefined, defaultValue: T): T {
-		return value == null || (typeof value === 'string' && !value.trim()) ? defaultValue : value;
+	ifNullOrEmpty<T>(value: T, fallback: T): T {
+		return !Is.nullOrEmpty(value) ? value : fallback;
 	},
 
 	/**

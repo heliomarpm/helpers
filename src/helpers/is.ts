@@ -192,13 +192,13 @@ export const Is = {
 	 */
 	nullOrEmpty(value: any): boolean {
 		return (
-			value === null ||
-			value === undefined ||
+			!value ||
 			(typeof value === 'string' && value.trim() === '') ||
 			(Array.isArray(value) && value.length === 0) ||
-			(typeof value === 'object' && value !== null && Object.keys(value).length === 0)
+			(typeof value === 'object' && Object.keys(value).length === 0)
 		);
 	},
+
 
 	/**
 	 * Verifies if the given value is a valid object.
@@ -206,11 +206,16 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid object, `false` otherwise.
 	 *
 	 * @example
+	 *
+	 * Is.object({ a: 1 }); //output: true
 	 * Is.object({}); //output: true
 	 * Is.object([]); //output: false
+	 * Is.object([{a:1}]); //output: false
+	 * Is.object(null); //output: false
+	 * Is.object(undefined); //output: false
 	 */
 	object(value: any): boolean {
-		return value !== null && typeof value === 'object' && !Array.isArray(value);
+		return !!value && typeof value === 'object' && !Array.isArray(value);
 	},
 
 	/**
