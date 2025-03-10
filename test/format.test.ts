@@ -1,3 +1,4 @@
+import { describe, test, expect, it } from 'vitest';
 import { Format } from '../src';
 
 describe('Format Class', () => {
@@ -6,7 +7,6 @@ describe('Format Class', () => {
 	const cep = '12345678';
 	const cnpj = '12345678000195';
 	const cpf = '12345678909';
-	const rg = '123456789';
 
 	test('should format currency correctly', () => {
 		expect(Format.currency(number)).toBe('R$ 1.234.567,89');

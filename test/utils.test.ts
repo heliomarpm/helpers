@@ -175,7 +175,7 @@ describe('Utils', () => {
 			expect(() => Utils.setNestedValue(target, '', 'value')).toThrow('Path is required.');
 		});
 		it('throws an error with a null target object', () => {
-			let target = null;
+			const target = null;
 			expect(() => Utils.setNestedValue(target!, 'user.name.first', 'Jane')).toThrow('Target object is required.');
 		});
 		it('throws an error with an undefined target object', () => {
