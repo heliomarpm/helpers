@@ -1,4 +1,5 @@
 import { Utils } from '../src';
+import { beforeAll, describe, expect, it, test, vi } from 'vitest';
 
 describe('Utils', () => {
 	describe('gerarCPF', () => {
@@ -185,61 +186,49 @@ describe('Utils', () => {
 
 	describe('ifNull function', () => {
 		it('returns default value when input is null', () => {
-			const result = Utils.ifNull(null, 'default');
-			expect(result).toBe('default');
+			expect(Utils.ifNull(null, 'default')).toBe('default');
+			expect(Utils.ifNull(null, null)).toBeNull();
+			expect(Utils.ifNull(null, undefined)).toBeUndefined();
 		});
 
 		it('returns default value when input is undefined', () => {
-			const result = Utils.ifNull(undefined, 'default');
-			expect(result).toBe('default');
+			expect(Utils.ifNull(undefined, 'default')).toBe('default');
+			expect(Utils.ifNull(undefined, null)).toBeNull();
 		});
 
 		it('returns original value when input is not null or undefined', () => {
-			const result = Utils.ifNull('hello', 'default');
-			expect(result).toBe('hello');
+			expect(Utils.ifNull('hello', 'default')).toBe('hello');
 		});
 
 		it('works with different data types', () => {
-			const result1 = Utils.ifNull(123, 456);
-			expect(result1).toBe(123);
-
-			const result2 = Utils.ifNull(true, false);
-			expect(result2).toBe(true);
-
-			const result3 = Utils.ifNull('hello', 'world');
-			expect(result3).toBe('hello');
+			expect(Utils.ifNull(123, null)).toBe(123);
+			expect(Utils.ifNull(true, false)).toBe(true);
 		});
 	});
 
 	describe('ifNullOrEmpty', () => {
 		it('returns default value when input is null', () => {
-			const result = Utils.ifNullOrEmpty(null, 'default');
-			expect(result).toBe('default');
+			expect(Utils.ifNullOrEmpty(null, 'default')).toBe('default');
 		});
 
 		it('returns default value when input is undefined', () => {
-			const result = Utils.ifNullOrEmpty(undefined, 'default');
-			expect(result).toBe('default');
+			expect(Utils.ifNullOrEmpty(undefined, null)).toBeNull();
 		});
 
 		it('returns undefined when default value is undefined', () => {
-			const result = Utils.ifNullOrEmpty(null, undefined);
-			expect(result).toBeUndefined();
+			expect(Utils.ifNullOrEmpty(null, undefined)).toBeUndefined();
 		});
 
 		it('returns default value when input is an empty string', () => {
-			const result = Utils.ifNullOrEmpty('', 'default');
-			expect(result).toBe('default');
+			expect(Utils.ifNullOrEmpty('', 'default')).toBe('default');
 		});
 
 		it('returns original value when input is a non-empty string', () => {
-			const result = Utils.ifNullOrEmpty('hello', 'default');
-			expect(result).toBe('hello');
+			expect(Utils.ifNullOrEmpty('hello', 'default')).toBe('hello');
 		});
 
 		it('returns original value when input is a non-string value', () => {
-			const result = Utils.ifNullOrEmpty(123, 0);
-			expect(result).toBe(123);
+			expect(Utils.ifNullOrEmpty(123, 0)).toBe(123);
 		});
 	});
 
@@ -262,11 +251,13 @@ describe('Utils', () => {
 			expect(guid.length).toBe(36);
 		});
 
-	  it('should throw an error when the Crypto API is not available', () => {
+		it('should throw an error when the Crypto API is not available', () => {
 			const originalCrypto = global.crypto;
-			(global.crypto as any) = undefined;
+			vi.stubGlobal('crypto', undefined);
+
 			expect(() => Utils.generateGuid()).toThrow('Crypto API not available in this environment.');
-			global.crypto = originalCrypto;
+
+			vi.stubGlobal('crypto', originalCrypto);
 		});
 	});
 

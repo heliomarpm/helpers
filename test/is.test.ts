@@ -1,3 +1,4 @@
+import { describe, beforeAll, it, expect, beforeEach, afterEach } from 'vitest';
 import { Is, Utils } from '../src';
 
 describe('Is', () => {
@@ -341,11 +342,19 @@ describe('Is', () => {
 
 	describe('Is.object', () => {
 		it('should return true for a valid object', () => {
+			expect(Is.object({name: 'John', age: 30})).toBe(true);
+		});
+
+		it('should return true for a empty object', () => {
 			expect(Is.object({})).toBe(true);
 		});
 
 		it('should return false for an array', () => {
 			expect(Is.object([])).toBe(false);
+		});
+
+		it('should return false for an array of object', () => {
+			expect(Is.object([{name: 'John', age: 30}])).toBe(false);
 		});
 
 		it('should return false for null', () => {

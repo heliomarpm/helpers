@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { Is, To, Utils } from '../src';
 
 interface IPerson {
