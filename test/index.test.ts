@@ -1,5 +1,3 @@
-// import { describe, it, expect } from "@jest/globals";
-
 import { Is, To, Utils } from '../src';
 
 interface IPerson {

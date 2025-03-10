@@ -171,15 +171,15 @@ describe('Utils', () => {
 
 		it('throws an error with an empty path', () => {
 			const target = {};
-			expect(() => Utils.setNestedValue(target, '', 'value')).toThrowError('Path is required.');
+			expect(() => Utils.setNestedValue(target, '', 'value')).toThrow('Path is required.');
 		});
 		it('throws an error with a null target object', () => {
 			let target = null;
-			expect(() => Utils.setNestedValue(target!, 'user.name.first', 'Jane')).toThrowError('Target object is required.');
+			expect(() => Utils.setNestedValue(target!, 'user.name.first', 'Jane')).toThrow('Target object is required.');
 		});
 		it('throws an error with an undefined target object', () => {
 			const target = undefined;
-			expect(() => Utils.setNestedValue(target!, 'user.name.first', 'Jane')).toThrowError('Target object is required.');
+			expect(() => Utils.setNestedValue(target!, 'user.name.first', 'Jane')).toThrow('Target object is required.');
 		});
 	});
 
@@ -262,12 +262,12 @@ describe('Utils', () => {
 			expect(guid.length).toBe(36);
 		});
 
-		// it('throws an error when crypto is not available', () => {
-		// 	const originalCrypto = global.crypto;
-		// 	global.crypto = undefined;
-		// 	expect(() => Utils.generateGuid()).toThrowError('Crypto API not available in this environment.');
-		// 	global.crypto = originalCrypto;
-		// });
+	  it('should throw an error when the Crypto API is not available', () => {
+			const originalCrypto = global.crypto;
+			(global.crypto as any) = undefined;
+			expect(() => Utils.generateGuid()).toThrow('Crypto API not available in this environment.');
+			global.crypto = originalCrypto;
+		});
 	});
 
 	describe('Crypto Helper', () => {
@@ -338,7 +338,7 @@ describe('Utils', () => {
 		});
 
 		it('should throw an error with invalid locale', () => {
-			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrowError();
+			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrow();
 		});
 
 		it('should return month names in default locale', () => {
@@ -368,7 +368,7 @@ describe('Utils', () => {
 		});
 
 		it('should throw an error with invalid locale', () => {
-			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrowError();
+			expect(() => Utils.months({ locale: ' invalid-locale ' })).toThrow();
 		});
 	});
 
@@ -397,7 +397,7 @@ describe('Utils', () => {
 		});
 
 		it('should throw an error with invalid locale', () => {
-			expect(() => Utils.weekdays({ locale: ' invalid-locale' })).toThrowError();
+			expect(() => Utils.weekdays({ locale: ' invalid-locale' })).toThrow();
 		});
 
 		it('returns expected weekday names for default locale', () => {
