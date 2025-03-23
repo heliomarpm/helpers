@@ -238,16 +238,27 @@ export const Utils = {
 	},
 
 	/**
-	 * Returns the first argument if it is not null, undefined, or an empty string; otherwise, returns the second argument.
-	 * @param value The value to check.
-	 * @param fallback The value to return if `value` is null, undefined, or an empty string.
-	 * @returns The first argument if it is not null, undefined, or an empty string, otherwise the second argument.
+	 * Returns the first non-null, non-undefined, and non-empty value from the given arguments.
+	 *
+	 * @param values - A list of values to check.
+	 * @returns The first valid value or `undefined` if all values are null, undefined, or empty.
+	 *
 	 * @example
-	 * const foo = '';
-	 * const bar = ifNullOrEmpty(foo, "baz"); // "baz"
+	 * ```typescript
+	 * console.log(ifNullOrEmpty(null, undefined, "", "Hello", "World")); // "Hello"
+	 * console.log(ifNullOrEmpty(null, "", [], {}, undefined)); // undefined
+	 * console.log(ifNullOrEmpty(undefined, 0, false, "Valid")); // 0
+	 * console.log(ifNullOrEmpty(null, [], {})); // undefined
+	 * ```
 	 */
-	ifNullOrEmpty<T>(value: T, fallback: T): T {
-		return !Is.nullOrEmpty(value) ? value : fallback;
+	ifNullOrEmpty<T>(...values: (T | null | undefined)[]): T | undefined {
+		return values.find((value): value is T => {
+			if (value === null || value === undefined) return false;
+			if (typeof value === 'string' && value.trim() === '') return false;
+			if (Array.isArray(value) && value.length === 0) return false;
+			if (typeof value === 'object' && Object.keys(value).length === 0) return false;
+			return true;
+		});
 	},
 
 	/**

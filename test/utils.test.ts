@@ -121,11 +121,13 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined with null object', () => {
-			expect(Utils.getNestedValue(null, 'user.name.first')).toBeUndefined();
+			const data = null;
+			expect(Utils.getNestedValue(data, 'user.name.first')).toBeUndefined();
 		});
 
 		it('should return undefined with undefined object', () => {
-			expect(Utils.getNestedValue(undefined, 'user.name.first')).toBeUndefined();
+			const data = undefined;
+			expect(Utils.getNestedValue(data, 'user.name.first')).toBeUndefined();
 		});
 	});
 
@@ -207,28 +209,40 @@ describe('Utils', () => {
 	});
 
 	describe('ifNullOrEmpty', () => {
-		it('returns default value when input is null', () => {
-			expect(Utils.ifNullOrEmpty(null, 'default')).toBe('default');
-		});
-
-		it('returns default value when input is undefined', () => {
-			expect(Utils.ifNullOrEmpty(undefined, null)).toBeNull();
-		});
-
-		it('returns undefined when default value is undefined', () => {
+		it('returns undefined for null and undefined values', () => {
 			expect(Utils.ifNullOrEmpty(null, undefined)).toBeUndefined();
 		});
 
-		it('returns default value when input is an empty string', () => {
-			expect(Utils.ifNullOrEmpty('', 'default')).toBe('default');
+		it('returns undefined for empty string', () => {
+			expect(Utils.ifNullOrEmpty('')).toBeUndefined();
 		});
 
-		it('returns original value when input is a non-empty string', () => {
-			expect(Utils.ifNullOrEmpty('hello', 'default')).toBe('hello');
+		it('returns undefined for empty array', () => {
+			expect(Utils.ifNullOrEmpty([])).toBeUndefined();
 		});
 
-		it('returns original value when input is a non-string value', () => {
-			expect(Utils.ifNullOrEmpty(123, 0)).toBe(123);
+		it('returns undefined for empty object', () => {
+			expect(Utils.ifNullOrEmpty({})).toBeUndefined();
+		});
+
+		it('returns non-empty string', () => {
+			expect(Utils.ifNullOrEmpty('hello')).toBe('hello');
+		});
+
+		it('returns non-empty array', () => {
+			expect(Utils.ifNullOrEmpty([1, 2, 3])).toEqual([1, 2, 3]);
+		});
+
+		it('returns non-empty object', () => {
+			expect(Utils.ifNullOrEmpty({ a: 1 })).toEqual({ a: 1 });
+		});
+
+		it('returns first valid value among multiple values', () => {
+			expect(Utils.ifNullOrEmpty(null, undefined, 'hello', 'world')).toBe('hello');
+		});
+
+		it('returns undefined when no valid values are provided', () => {
+			expect(Utils.ifNullOrEmpty(null, undefined, '', [], {})).toBeUndefined();
 		});
 	});
 
