@@ -199,9 +199,14 @@ Format.onlyNumbers('abc123'); // '123'
 // Pads a number with leading zeros to match the number of digits in a given maximum value
 Format.padZerosByRef(5, 100); // '005'
 
+#### String Formatting
+
 // Capitalizes the first letter of a string
 Format.titleCase('john doe'); // 'John Doe'
 Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
+
+// Mask a part of a string with a single character
+Format.maskIt('1234567890', 3, 6, '*'); // '123****890'
 ```
 
 ### Is Helpers (Validation)
@@ -245,7 +250,7 @@ Utils.orderBy(array, 'key', 'asc'); // Sort array by key
 Utils.getNestedValue(obj, 'user.name'); // Get nested object value
 Utils.setNestedValue(obj, 'user.name', value); // Set nested object value
 Utils.ifNull(value, defaultValue); // Null coalescing
-Utils.ifNullOrEmpty(value, defaultValue); // Empty check with default
+Utils.ifNullOrEmpty(value, value2, defaultValue); // Returns the first non-null, non-undefined, and non-empty value from the given arguments.
 Utils.generateGuid(); // Generate GUID (e.g. '00000000-0000-0000-0000-000000000000') 
 Utils.months({locale: 'pt-BR', month: 'long'}); // Get month names array (e.g. ['Janeiro', 'Fevereiro', ...])
 Utils.weekdays({locale: 'pt-BR', weekday: 'long'}); // Get weekday names array (e.g. ['Domingo', 'Segunda-feira', ...])
