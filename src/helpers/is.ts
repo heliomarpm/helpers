@@ -128,7 +128,7 @@ export const Is = {
 	 * @param value The value to be verified.
 	 * @returns {boolean} `true` if the value is a valid number, `false` otherwise.
 	 */
-	numeric(value: any): boolean {
+	numeric<T>(value: T): boolean {
 		return (typeof value === 'number' && !isNaN(value)) || (typeof value === 'string' && value.trim() !== '' && !isNaN(Number(value)));
 	},
 
@@ -144,22 +144,25 @@ export const Is = {
 	 * const obj2 = { b: { c: 2 }, a: 1 };
 	 * console.log(Is.equals(obj1, obj2)); // true
 	 */
-	equals(a: any, b: any, ignoreOrder = false): boolean {
-		if (a === b) return true;
-		if (a === null || b === null) return false;
-
+	equals<T, U>(a: T, b: U, ignoreOrder = false): boolean {
 		if (typeof a !== typeof b) return false;
+		if ((a as unknown) === (b as unknown)) return true;
+		if (a === null || b === null) return false;
+		if (a === undefined || b === undefined) return false;
 
-		if (Array.isArray(a)) {
+		if (Array.isArray(a) && Array.isArray(b)) {
 			if (ignoreOrder) {
-				return a.length === b.length && a.every(val => b.some((otherVal: any) => Is.equals(val, otherVal)));
+				return a.length === b.length && a.every(val => b.some(otherVal => Is.equals(val, otherVal)));
 			}
 			return a.length === b.length && a.every((val, index) => Is.equals(val, b[index]));
 		}
 
-		if (typeof a === 'object') {
+		if (typeof a === 'object' && typeof b === 'object') {
 			const keys = Object.keys(a);
-			return keys.length === Object.keys(b).length && keys.every(key => Is.equals(a[key], b[key]));
+			return (
+				keys.length === Object.keys(b).length &&
+				keys.every((key: string) => Is.equals((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]))
+			);
 		}
 
 		return false;
@@ -170,7 +173,7 @@ export const Is = {
 	 * @param value The value to be verified.
 	 * @returns {boolean} `true` if the value is a valid date, `false` otherwise.
 	 */
-	date(value: any): boolean {
+	date(value: unknown): boolean {
 		if (typeof value === 'string') {
 			value = new Date(value);
 		}
@@ -190,7 +193,7 @@ export const Is = {
 	 * Is.nullOrEmpty([]); //output: true
 	 * Is.nullOrEmpty({}); //output: true
 	 */
-	nullOrEmpty(value: any): boolean {
+	nullOrEmpty(value: unknown): boolean {
 		return (
 			!value ||
 			(typeof value === 'string' && value.trim() === '') ||
@@ -198,7 +201,6 @@ export const Is = {
 			(typeof value === 'object' && Object.keys(value).length === 0)
 		);
 	},
-
 
 	/**
 	 * Verifies if the given value is a valid object.
@@ -214,7 +216,7 @@ export const Is = {
 	 * Is.object(null); //output: false
 	 * Is.object(undefined); //output: false
 	 */
-	object(value: any): boolean {
+	object(value: unknown): boolean {
 		return !!value && typeof value === 'object' && !Array.isArray(value);
 	},
 

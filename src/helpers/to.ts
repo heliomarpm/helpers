@@ -64,7 +64,7 @@ export const To = {
 	 * @param value - The value to be converted to a number.
 	 * @returns `number` The numeric representation of the input value.
 	 */
-	number(value: any): number {
+	number(value: unknown): number {
 		return Is.numeric(value) ? Number(value) : NaN;
 	}
 };
