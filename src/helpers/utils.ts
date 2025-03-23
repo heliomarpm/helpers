@@ -1,5 +1,3 @@
-import { Is } from './is';
-
 export const Utils = {
 	/**
 	 * Generates a random valid CPF (Brazilian National Register of Individuals)
@@ -62,14 +60,18 @@ export const Utils = {
 	},
 
 	/**
-	 * Returns a comparison function to be used with the `sort` method for sorting
-	 * an array of objects based on specified properties.
+	 * Returns a function that sorts an array of objects by the given properties.
 	 *
-	 * The properties parameter can be a single property name or an array of names.
-	 * If the property name is prefixed with a "-", the sorting will be in descending order.
+	 * If a property name starts with a '-', the sort order is reversed.
+	 *
+	 * The function returned is a compare function, compliant with the API of
+	 * `Array.prototype.sort()`.
+	 *
+	 * When sorting, all values are converted to strings. If a value is an object,
+	 * it is converted to a string using `JSON.stringify()`.
 	 *
 	 * @param {string | string[]} properties - Properties to sort by.
-	 * @returns {function} A comparator function for use with sorting methods like Array.prototype.sort.
+	 * @returns {function} a compare function
 	 *
 	 * @example
 	 * const validations = [
@@ -81,14 +83,14 @@ export const Utils = {
 	 * const sortedValidations = validations.sort(sortByProps(['level', 'type', '-message']));
 	 * console.log(sortedValidations); // [{ level: "ERROR", type: "TypeE", message: "Something went wrong." }, ...]
 	 */
-	sortByProps(properties: string | string[]): (a: any, b: any) => number {
+	sortByProps(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
 		const propertyList = Array.isArray(properties) ? properties : [properties];
 
-		const stringifyValue = (value: any): string => {
+		const stringifyValue = (value: unknown): string => {
 			return String(typeof value === 'object' ? JSON.stringify(value || '') : value || '');
 		};
 
-		return (objA: any, objB: any) => {
+		return (objA, objB) => {
 			for (const property of propertyList) {
 				let sortOrder = 1;
 				let propName = property;
@@ -140,10 +142,10 @@ export const Utils = {
 	},
 
 	/**
-	 * Gets a nested value from an object given a path.
+	 * Retrieves a nested value from an object using a dot-separated path.
 	 *
-	 * @param obj The object to get the nested value from.
-	 * @param path The path to the nested value. Uses dot notation.
+	 * @param obj The target object from which to retrieve the nested value.
+	 * @param path A dot-separated string indicating the path to the nested value.
 	 * @returns The nested value or `undefined` if the path is invalid.
 	 *
 	 * @example
@@ -157,10 +159,10 @@ export const Utils = {
 	 * };
 	 * const firstName = getNestedValue(data, "user.name.first"); // "John"
 	 */
-	getNestedValue(obj: any, path: string): any {
+	getNestedValue<T>(obj: Record<string, unknown>, path: string): T | undefined {
 		try {
-			return path.split('.').reduce((acc, key) => acc[key], obj);
-		} catch (error) {
+			return path.split('.').reduce((acc, key) => acc[key] as Record<string, unknown>, obj) as T;
+		} catch {
 			return undefined;
 		}
 	},
@@ -191,7 +193,7 @@ export const Utils = {
 	 * };
 	 * setNestedValue<User>(data, "user.name.first", "Jane"); // Sets data.user.name.first to "Jane"
 	 */
-	setNestedValue<T extends Record<string, any>>(target: T, path: string, value: any): void {
+	setNestedValue<T extends Record<string, unknown>>(target: T, path: string, value: unknown): void {
 		if (!target) {
 			throw new Error('Target object is required.');
 		}
@@ -203,7 +205,7 @@ export const Utils = {
 		// Divide a string da chave, lidando com arrays corretamente
 		const keys = path.match(/[^.[\]]+/g) as string[];
 
-		keys.reduce((acc: Record<string, any>, key: string, index: number) => {
+		keys.reduce((acc: Record<string, unknown>, key: string, index: number) => {
 			const isLastKey = index === keys.length - 1;
 			const nextKey = keys[index + 1];
 			const isNextKeyArrayIndex = nextKey !== undefined && /^\d+$/.test(nextKey);
@@ -217,8 +219,8 @@ export const Utils = {
 				if (!(parsedKey in acc)) {
 					acc[parsedKey] = isNextKeyArrayIndex ? [] : {};
 				}
-				return acc[parsedKey];
 			}
+			return acc[parsedKey] as Record<string, unknown>;
 		}, target);
 	},
 
@@ -339,12 +341,8 @@ export const Utils = {
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
 	months({ locale = 'default', month = 'long' }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions['month'] } = {}): Array<string> {
-		// return Array.from({ length: 12 }, (_, i) => new Date(2000, i).toLocaleString(locale, { month }));
-
 		return Array.from({ length: 12 }, (_, i) => {
 			const monthName = new Date(2000, i).toLocaleString(locale, { month });
-
-			// Garantir primeira letra maiúscula
 			return monthName.charAt(0).toUpperCase() + monthName.slice(1);
 		});
 	},
@@ -367,13 +365,8 @@ export const Utils = {
 		const firstSunday = new Date(2000, 0, 1);
 		firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
 
-		// return Array.from({ length: 7 }, (_, i) =>
-		// 	new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + i).toLocaleString(locale, { weekday })
-		// );
 		return Array.from({ length: 7 }, (_, i) => {
 			const dayName = new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + i).toLocaleString(locale, { weekday });
-
-			// Garantir a primeira letra maiúscula
 			return dayName.charAt(0).toUpperCase() + dayName.slice(1);
 		});
 	}
