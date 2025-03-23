@@ -344,4 +344,32 @@ describe('Format Class', () => {
 			expect(Format.titleCase('john   smith')).toBe('John Smith');
 		});
 	});
+
+	describe('maskIt function', () => {
+		it('should mask a part of a string with a single character', () => {
+			expect(Format.maskIt('1234567890', 3, 6, '*')).toBe('123****890');
+			expect(Format.maskIt('1234567890', 0, 3, '*')).toBe('****567890');
+			expect(Format.maskIt('1234-5678-9101-1121', 5, 13, '*')).toBe('1234-*********-1121');
+		});
+
+		it('should throw an error for invalid startIndex or finalIndex', () => {
+			expect(() => Format.maskIt('1234567890', -1, 6, '*')).toThrowError('Invalid startIndex or finalIndex');
+			expect(() => Format.maskIt('1234567890', 3, 10, '*')).toThrowError('Invalid startIndex or finalIndex');
+			expect(() => Format.maskIt('1234567890', 6, 3, '*')).toThrowError('Invalid startIndex or finalIndex');
+		});
+
+		it('should throw an error for invalid maskChar (not a single character)', () => {
+			expect(() => Format.maskIt('1234567890', 3, 6, '**')).toThrowError('maskChar must be a single character');
+			expect(() => Format.maskIt('1234567890', 3, 6, 'abc')).toThrowError('maskChar must be a single character');
+		});
+
+		it('should handle edge cases (startIndex = 0, finalIndex = value.length - 1)', () => {
+			expect(Format.maskIt('1234567890', 0, 9, '*')).toBe('**********');
+		});
+
+		it('should mask with different characters', () => {
+			expect(Format.maskIt('1234567890', 3, 6, '#')).toBe('123####890');
+			expect(Format.maskIt('1234567890', 0, 3, 'x')).toBe('xxxx567890');
+		});
+	});
 });

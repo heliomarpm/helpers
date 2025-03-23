@@ -366,5 +366,37 @@ export const Format = {
 				index === 0 || !conjunctions.has(word) ? word.charAt(0).toUpperCase() + word.slice(1) : word
 			)
 			.join(' '); // Join the words back into a string with spaces
+	},
+
+	/**
+	 * Masks a part of a string with a given character.
+	 *
+	 * @param {string} value - The string to mask.
+	 * @param {number} startIndex - The starting index of the part of the string to mask.
+	 * @param {number} finalIndex - The final index of the part of the string to mask.
+	 * @param {string} maskChar - The character to use for masking.
+	 *
+	 * @throws {Error} If startIndex is negative, finalIndex is greater than or equal to the length of the string, or startIndex is greater than finalIndex.
+	 * @throws {Error} If maskChar is not a single character.
+	 *
+	 * @returns {string} The string with the part between startIndex and finalIndex (inclusive) masked with maskChar.
+	 *
+	 * @example
+	 * ```js
+	 * maskIt('1234567890', 3, 6, '*'); // '123****890'
+	 * maskIt('1234567890', 0, 3, '*'); // '****567890'
+	 * ```
+	 */
+	maskIt(value: string, startIndex: number, finalIndex: number, maskChar: string): string {
+		if (startIndex < 0 || finalIndex >= value.length || startIndex > finalIndex) {
+			throw new Error('Invalid startIndex or finalIndex');
+		}
+
+		if (maskChar.length !== 1) {
+			throw new Error('maskChar must be a single character');
+		}
+
+		const maskedPart = maskChar.repeat(finalIndex - startIndex + 1);
+		return value.slice(0, startIndex) + maskedPart + value.slice(finalIndex + 1);
 	}
 };
