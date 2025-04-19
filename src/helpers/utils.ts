@@ -229,6 +229,7 @@ export const Utils = {
 	 * @param value The value to check.
 	 * @param fallback The value to return if `value` is null or undefined.
 	 * @returns The first argument if it is not null or undefined, otherwise the second argument.
+	 *
 	 * @example
 	 * const foo = null;
 	 * const bar = ifNull(foo, "baz"); // "baz"
@@ -244,21 +245,19 @@ export const Utils = {
 	 * @returns The first valid value or `undefined` if all values are null, undefined, or empty.
 	 *
 	 * @example
-	 * ```typescript
-	 * console.log(ifNullOrEmpty(null, undefined, "", "Hello", "World")); // "Hello"
-	 * console.log(ifNullOrEmpty(null, "", [], {}, undefined)); // undefined
-	 * console.log(ifNullOrEmpty(undefined, 0, false, "Valid")); // 0
-	 * console.log(ifNullOrEmpty(null, [], {})); // undefined
-	 * ```
+	 * const result = ifNullOrEmpty(null, '', undefined, 'Hello', 'World'); // "Hello"
+	 * const result2 = ifNullOrEmpty(null, '', 0); // 0
+	 * const result3 = ifNullOrEmpty([], {}); // undefined
 	 */
 	ifNullOrEmpty<T>(...values: (T | null | undefined)[]): T | undefined {
-		return values.find((value): value is T => {
-			if (value === null || value === undefined) return false;
-			if (typeof value === 'string' && value.trim() === '') return false;
-			if (Array.isArray(value) && value.length === 0) return false;
-			if (typeof value === 'object' && Object.keys(value).length === 0) return false;
-			return true;
-		});
+		return values.find(
+			(value): value is T =>
+				value !== null &&
+				value !== undefined &&
+				(typeof value !== 'string' || value.trim() !== '') &&
+				(!Array.isArray(value) || value.length !== 0) &&
+				(typeof value !== 'object' || Object.keys(value).length !== 0)
+		);
 	},
 
 	/**
