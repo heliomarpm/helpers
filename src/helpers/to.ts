@@ -32,7 +32,8 @@ export const To = {
 	 * @returns `boolean` The boolean representation of the input value.
 	 */
 	boolean(value: number | string): boolean {
-		return Is.numeric(value) ? !/^0$/i.test(value as string) : /^true$/i.test(value as string);
+		const str = String(value).trim().toLowerCase();
+		return Is.numeric(value) ? str !== '0' : str === 'true';
 	},
 
 	/**
@@ -43,6 +44,10 @@ export const To = {
 	 */
 	dateParts(date: Date | string): DatePartsType {
 		const parsedDate = typeof date === 'string' ? new Date(date) : date;
+
+		if (isNaN(parsedDate.getTime())) {
+			throw new Error('Invalid date');
+		}
 
 		return {
 			year: parsedDate.getFullYear(), // Extract year
