@@ -1,11 +1,11 @@
-type RetryOptions = {
+type MemoizedFn<T extends (...args: any[]) => any> = T & {
+	clear: () => void;
+};
+
+export type RetryOptions = {
 	retries?: number;
 	delay?: number;
 	onRetry?: (error: Error, attempt: number) => void;
-};
-
-type MemoizedFn<T extends (...args: any[]) => any> = T & {
-	clear: () => void;
 };
 
 export const Utils = {
