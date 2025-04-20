@@ -62,6 +62,7 @@
 ```
 src/
 ├── helpers/
+│   ├── cryptor.ts   # Cryptography utilities
 │   ├── format.ts    # Formatting utilities
 │   ├── is.ts        # Type checking functions
 │   ├── to.ts        # Type conversion helpers
@@ -128,6 +129,55 @@ Utils.setNestedValue(target, 'animals[1]', 'cat');
 ```typescript
 import { Format, Is, To, Utils } from '@heliomarpm/helpers';
 ```
+
+### Cryptor Helpers
+
+```typescript
+Cryptor.hash('myPassword'); // Promise<string>
+Cryptor.compareHash('myPassword', 'hashedPassword'); // Promise<boolean>
+Cryptor.generateSalt(16); // Promise<string>
+Cryptor.generateKeyPair(); // Promise<{ publicKey: string, privateKey: string }>
+Cryptor.sign('myPassword', privateKey); // Promise<string>
+Cryptor.verify('myPassword', signature, publicKey); // Promise<boolean>
+``` 
+
+- Example:
+  
+```typescript
+// Assume this is your Cryptor class already imported
+
+async function main() {
+  // User registration
+  const password = "myStrongPassword123!";
+  const hashedPassword = await Cryptor.hash(password);
+  console.log("Password hash:", hashedPassword);
+
+  // Password comparison (login)
+  const loginPassword = "myStrongPassword123!";
+  const match = await Cryptor.compareHash(loginPassword, hashedPassword);
+  console.log("Correct password?", match); // true
+  
+  // Key pair generation (for digital signature)
+  const { privateKey, publicKey } = await Cryptor.generateKeyPair();
+
+  // Sign a payload (e.g. document or token data)
+  const payload = JSON.stringify({
+    id: 123,
+    name: "Heliomar",
+    timestamp: Date.now()
+  });
+
+  const signature = await Cryptor.sign(payload, privateKey);
+  console.log("Signature:", Buffer.from(signature).toString("base64"));
+
+  // Verify the signature
+  const isValid = await Cryptor.verify(payload, signature, publicKey);
+  console.log("Valid signature?", isValid); // true
+}
+
+main().catch(console.error);
+```
+
 
 ### Format Helpers
 
@@ -207,28 +257,37 @@ Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
 
 // Mask a part of a string with a single character
 Format.maskIt('1234567890', 3, 6, '*'); // '123****890'
+Format.maskItParts('Heliomar P. Marques', '*', 1); // 'H******* P. M******'
 ```
 
 ### Is Helpers (Validation)
 
 ```typescript
 Is.cpf('123.456.789-01'); // Validates CPF
-Is.cnpj('12.345.678/9012-34'); // Validates CNPJ
+Is.cnpj('12.345.678/9012-34'); // Validates CNPJ, can be in '12.345.678/9012-34' or '12345678901234'
+Is.cnpj('12.ABC.345/01DE-35'); //after 2026, the CNPJ will transition to a new format with letters and numbers
 Is.numeric('123'); // true
 Is.equals(obj1, obj2); // Deep comparison
 Is.date('2023-12-31'); // Validates date
 Is.nullOrEmpty(value); // Checks for null/empty
 Is.object({}); // Validates object type
 Is.email('user@example.com'); // Validates email
+Is.odd(123); // Checks if a number is odd
+Is.even(123); // Checks if a number is even
+Is.uuid('12345678-1234-1234-1234-123456789012'); // Validates UUID
+Is.promise(new Promise(() => {})); // Checks if a value is a promise
+Is.function(() => {}); // Checks if a value is a function
+Is.url('https://example.com'); // Validates URL
+Is.json('{"name": "John", "age": 30}'); // Validates JSON
 
 // OS and Architecture checks
-Is.windowsOS
-Is.linuxOS
-Is.macOS
-Is.arch_x86
-Is.arch_x64
-Is.arch_Arm
-Is.arch_Arm64
+Is.plataform.windowsOS
+Is.plataform.linuxOS
+Is.plataform.macOS
+Is.plataform.arch_x86
+Is.plataform.arch_x64
+Is.plataform.arch_Arm
+Is.plataform.arch_Arm64
 ```
 
 ### To Helpers (Conversion)
@@ -254,6 +313,14 @@ Utils.ifNullOrEmpty(value, value2, defaultValue); // Returns the first non-null,
 Utils.generateGuid(); // Generate GUID (e.g. '00000000-0000-0000-0000-000000000000') 
 Utils.months({locale: 'pt-BR', month: 'long'}); // Get month names array (e.g. ['Janeiro', 'Fevereiro', ...])
 Utils.weekdays({locale: 'pt-BR', weekday: 'long'}); // Get weekday names array (e.g. ['Domingo', 'Segunda-feira', ...])
+Utils.sleep(1000); // Sleep for 1 second
+Utils.retry(fn, {retries: 5, delay: 500, onRetry: (error, attempt) => console.log(`Attempt ${attempt} failed with error ${error.message}`)}); // Retry function
+Utils.memoize(fn); // Memoize function
+Utils.debounce(fn, 100); // Debounce function
+Utils.throttle(fn, 100); // Throttle function
+Utils.once(fn); // Once function
+Utils.pipe(fn1, fn2, fn3); // Pipe function
+Utils.compose(fn1, fn2, fn3); // Compose function
 
 // Crypto utilities
 Utils.crypto.generateKey(); // Generate encryption key
