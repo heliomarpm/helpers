@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { To, DatePartsType } from '../src';
+import { To } from '../src';
 
 describe('To', () => {
 	describe('dictionary', () => {
@@ -26,50 +26,65 @@ describe('To', () => {
 		});
 	});
 
-	describe('dateParts', () => {
-		it('deve extrair partes da data de um objeto Date', () => {
-			const date = new Date(2024, 6, 1, 12, 30, 45);
-			const result: DatePartsType = To.dateParts(date);
-
+	describe('dateParts function', () => {
+		it('should extract date parts from a valid date string', () => {
+			const date = '2024-07-01T12:00:00';
+			const result = To.dateParts(date);
 			expect(result).toEqual({
 				year: 2024,
 				month: 7,
 				day: 1,
 				hour: 12,
-				minute: 30,
-				second: 45,
+				minute: 0,
+				second: 0,
+				timestamp: new Date(date).getTime()
+			});
+		});
+
+		it('should extract date parts from a valid Date object', () => {
+			const date = new Date(2024, 6, 1, 12, 0, 0);
+			const result = To.dateParts(date);
+			expect(result).toEqual({
+				year: 2024,
+				month: 7,
+				day: 1,
+				hour: 12,
+				minute: 0,
+				second: 0,
 				timestamp: date.getTime()
 			});
 		});
 
-		it('deve extrair partes da data de uma string', () => {
-			const dateString = '2024-07-01T12:30:45';
-			const date = new Date(dateString);
-			const result: DatePartsType = To.dateParts(dateString);
+		it('should throw an error for an invalid date string', () => {
+			const date = 'invalid-date';
+			expect(() => To.dateParts(date)).toThrow('Invalid date');
+		});
 
+		it('should handle edge case: February 29th', () => {
+			const date = '2024-02-29T12:00:00';
+			const result = To.dateParts(date);
 			expect(result).toEqual({
-				year: date.getFullYear(),
-				month: date.getMonth() + 1,
-				day: date.getDate(),
-				hour: date.getHours(),
-				minute: date.getMinutes(),
-				second: date.getSeconds(),
-				timestamp: date.getTime()
+				year: 2024,
+				month: 2,
+				day: 29,
+				hour: 12,
+				minute: 0,
+				second: 0,
+				timestamp: new Date(date).getTime()
 			});
 		});
 
-		it('deve lidar com datas inválidas', () => {
-			const invalidDate = 'invalid-date';
-			const result: DatePartsType = To.dateParts(invalidDate as unknown as Date); // Coerção de tipo para fins de teste
-
+		it('should handle edge case: December 31st', () => {
+			const date = '2024-12-31T12:00:00';
+			const result = To.dateParts(date);
 			expect(result).toEqual({
-				year: NaN,
-				month: NaN,
-				day: NaN,
-				hour: NaN,
-				minute: NaN,
-				second: NaN,
-				timestamp: NaN
+				year: 2024,
+				month: 12,
+				day: 31,
+				hour: 12,
+				minute: 0,
+				second: 0,
+				timestamp: new Date(date).getTime()
 			});
 		});
 	});

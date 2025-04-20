@@ -346,30 +346,66 @@ describe('Format Class', () => {
 	});
 
 	describe('maskIt function', () => {
-		it('should mask a part of a string with a single character', () => {
-			expect(Format.maskIt('1234567890', 3, 6, '*')).toBe('123****890');
-			expect(Format.maskIt('1234567890', 0, 3, '*')).toBe('****567890');
-			expect(Format.maskIt('1234-5678-9101-1121', 5, 13, '*')).toBe('1234-*********-1121');
+		it('masks a substring with default mask character', () => {
+			expect(Format.maskIt('1234567890', '*', 2, 5)).toBe('12***67890');
 		});
 
-		it('should throw an error for invalid startIndex or finalIndex', () => {
-			expect(() => Format.maskIt('1234567890', -1, 6, '*')).toThrowError('Invalid startIndex or finalIndex');
-			expect(() => Format.maskIt('1234567890', 3, 10, '*')).toThrowError('Invalid startIndex or finalIndex');
-			expect(() => Format.maskIt('1234567890', 6, 3, '*')).toThrowError('Invalid startIndex or finalIndex');
+		it('masks a substring with custom mask character', () => {
+			expect(Format.maskIt('1234567890', '#', 3)).toBe('123#######');
 		});
 
-		it('should throw an error for invalid maskChar (not a single character)', () => {
-			expect(() => Format.maskIt('1234567890', 3, 6, '**')).toThrowError('maskChar must be a single character');
-			expect(() => Format.maskIt('1234567890', 3, 6, 'abc')).toThrowError('maskChar must be a single character');
+		it('masks until the end of the string', () => {
+			expect(Format.maskIt('1234567890', '$', 3)).toBe('123$$$$$$$');
 		});
 
-		it('should handle edge cases (startIndex = 0, finalIndex = value.length - 1)', () => {
-			expect(Format.maskIt('1234567890', 0, 9, '*')).toBe('**********');
+		it('throws an error with invalid start index', () => {
+			expect(() => Format.maskIt('1234567890', '*', -1)).toThrowError('Invalid start or final index');
 		});
 
-		it('should mask with different characters', () => {
-			expect(Format.maskIt('1234567890', 3, 6, '#')).toBe('123####890');
-			expect(Format.maskIt('1234567890', 0, 3, 'x')).toBe('xxxx567890');
+		it('throws an error with invalid final index', () => {
+			expect(() => Format.maskIt('1234567890', '*', 10, 1)).toThrowError('Invalid start or final index');
+		});
+
+		it('throws an error with invalid mask character', () => {
+			expect(() => Format.maskIt('1234567890', '**', 2, 5)).toThrowError('maskChar must be a single character');
+		});
+
+		it('masks an empty string', () => {
+			expect(Format.maskIt('', '*', 0, 0)).toBe('');
+		});
+
+		it('masks a string with no characters to mask', () => {
+			expect(Format.maskIt('1234567890', '*', 10, 10)).toBe('1234567890');
+		});
+	});
+
+	describe('maskItParts function', () => {
+		it('should mask a string with default mask character and visible characters', () => {
+			expect(Format.maskItParts('Heliomar P. Marques', '*', 2)).toBe('He****** P. Ma*****');
+		});
+
+		it('should set visible characters to 1 for negative input', () => {
+			expect(Format.maskItParts('Heliomar P. Marques', '*', 0)).toBe('H******* P. M******');
+		});
+
+		it('should throw an error for invalid mask character', () => {
+			expect(() => Format.maskItParts('Heliomar P. Marques', '**')).toThrowError('maskChar must be a single character');
+		});
+
+		it('should mask a string with custom mask character and visible characters', () => {
+			expect(Format.maskItParts('+55 (11) 91888-0000', '#', 1)).toBe('+5# (1#) 9####-0###');
+		});
+
+		it('should mask a string with custom mask character and visible characters', () => {
+			expect(Format.maskItParts('123.444.555-67', '_', 2)).toBe('12_.44_.55_-67');
+		});
+
+		it('should not mask a short string', () => {
+			expect(Format.maskItParts('abc')).toBe('a**');
+		});
+
+		it('should return an empty string for an empty input', () => {
+			expect(Format.maskItParts('')).toBe('');
 		});
 	});
 });

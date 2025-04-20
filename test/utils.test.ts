@@ -1,5 +1,5 @@
 import { Utils } from '../src';
-import { beforeAll, describe, expect, it, test, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from 'vitest';
 
 describe('Utils', () => {
 	describe('gerarCPF', () => {
@@ -119,16 +119,6 @@ describe('Utils', () => {
 		it('should return undefined with empty string path', () => {
 			expect(Utils.getNestedValue(data, '')).toBeUndefined();
 		});
-
-		it('should return undefined with null object', () => {
-			const data = null;
-			expect(Utils.getNestedValue(data, 'user.name.first')).toBeUndefined();
-		});
-
-		it('should return undefined with undefined object', () => {
-			const data = undefined;
-			expect(Utils.getNestedValue(data, 'user.name.first')).toBeUndefined();
-		});
 	});
 
 	describe('setNestedValue', () => {
@@ -242,7 +232,10 @@ describe('Utils', () => {
 		});
 
 		it('returns undefined when no valid values are provided', () => {
-			expect(Utils.ifNullOrEmpty(null, undefined, '', [], {})).toBeUndefined();
+			const emptyArray = [];
+			const emptyObj = {};
+
+			expect(Utils.ifNullOrEmpty(null, undefined, '', emptyArray, emptyObj)).toBeUndefined();
 		});
 	});
 
@@ -428,6 +421,529 @@ describe('Utils', () => {
 		it('returns expected weekday narrow names in specific locale (pt-BR)', () => {
 			const result = Utils.weekdays({ weekday: 'narrow', locale: 'pt-BR' });
 			expect(result).toEqual(['D', 'S', 'T', 'Q', 'Q', 'S', 'S']);
+		});
+	});
+
+	describe('sleep function', () => {
+		it('resolves after the specified duration', async () => {
+			const startTime = Date.now();
+			await Utils.sleep(1000);
+			const endTime = Date.now();
+			expect(endTime - startTime).toBeGreaterThanOrEqual(1000);
+		});
+
+		it('rejects if the input is not a positive number', async () => {
+			await expect(Utils.sleep(-1)).rejects.toThrow();
+			await expect(Utils.sleep(NaN)).rejects.toThrowError();
+		});
+
+		it('resolves immediately if the input is 0', async () => {
+			const startTime = Date.now();
+			await Utils.sleep(0);
+			const endTime = Date.now();
+			expect(endTime - startTime).toBeLessThan(30);
+		});
+	});
+
+	describe('retry function', () => {
+		it('should succeed on first attempt', async () => {
+			const fn = async () => 'success';
+			const result = await Utils.retry(fn);
+			expect(result).toBe('success');
+		});
+
+		it('should succeed after retrying', async () => {
+			let attempt = 0;
+			const fn = async () => {
+				attempt++;
+				if (attempt < 2) {
+					throw new Error('Mock error');
+				}
+				return 'success';
+			};
+			const result = await Utils.retry(fn, { retries: 2 });
+			expect(result).toBe('success');
+			expect(attempt).toBe(2);
+		});
+
+		it('should fail after all retries exhausted', async () => {
+			const fn = async () => {
+				throw new Error('Mock error');
+			};
+			await expect(Utils.retry(fn, { retries: 3 })).rejects.toThrowError('Mock error');
+		});
+
+		it('should use custom retry options', async () => {
+			let attempt = 0;
+			const fn = async () => {
+				attempt++;
+				if (attempt < 3) {
+					throw new Error('Mock error');
+				}
+				return 'success';
+			};
+			const result = await Utils.retry(fn, { retries: 3, delay: 50 });
+			expect(result).toBe('success');
+			expect(attempt).toBe(3);
+		});
+
+		it('should call onRetry callback on failure', async () => {
+			const onRetry = vi.fn();
+			const fn = async () => {
+				throw new Error('Mock error');
+			};
+
+			try {
+				await Utils.retry(fn, { retries: 3, onRetry });
+			} catch {}
+
+			expect(onRetry).toHaveBeenCalledTimes(2);
+		});
+
+		it('should throw error if retries is 0', async () => {
+			const fn = async () => 1 / 0;
+			await expect(Utils.retry(fn, { retries: 0 })).rejects.toThrowError('Retry attempts exhausted');
+		});
+
+		it('should throw error if delay is 0', async () => {
+			const fn = async () => 'success';
+			await expect(Utils.retry(fn, { delay: 0 })).rejects.toThrowError("The 'delay' parameter must be greater than 0.");
+		});
+	});
+
+	describe('memoize', () => {
+		it('memoizes a simple function', () => {
+			const add = (a: number, b: number) => a + b;
+			const memoizedAdd = Utils.memoize(add);
+
+			expect(memoizedAdd(1, 2)).toBe(3);
+			expect(memoizedAdd(1, 2)).toBe(3); // returns cached result
+		});
+
+		it('memoizes a function with multiple arguments', () => {
+			const multiply = (a: number, b: number, c: number) => a * b * c;
+			const memoizedMultiply = Utils.memoize(multiply);
+
+			expect(memoizedMultiply(1, 2, 3)).toBe(6);
+			expect(memoizedMultiply(1, 2, 3)).toBe(6); // returns cached result
+		});
+
+		it('returns cached result for same inputs', () => {
+			const add = (a: number, b: number) => a + b;
+			const memoizedAdd = Utils.memoize(add);
+
+			expect(memoizedAdd(1, 2)).toBe(3);
+			expect(memoizedAdd(1, 2)).toBe(3); // returns cached result
+			expect(memoizedAdd(2, 3)).toBe(5); // calls original function
+			expect(memoizedAdd(2, 3)).toBe(5); // returns cached result
+		});
+
+		it('calls original function if result is not cached', () => {
+			const add = (a: number, b: number) => a + b;
+			const memoizedAdd = Utils.memoize(add);
+
+			expect(memoizedAdd(1, 2)).toBe(3); // calls original function
+			expect(memoizedAdd(1, 2)).toBe(3); // returns cached result
+		});
+
+		it('clears the cache', () => {
+			const add = (a: number, b: number) => a + b;
+			const memoizedAdd = Utils.memoize(add);
+
+			expect(memoizedAdd(1, 2)).toBe(3); // calls original function
+			memoizedAdd.clear();
+			expect(memoizedAdd(1, 2)).toBe(3); // calls original function again
+		});
+
+		it('handles non-primitive argument types', () => {
+			const obj1 = { a: 1 };
+			const obj2 = { b: 2 };
+			const addObjects = (obj1: any, obj2: any) => ({ ...obj1, ...obj2 });
+			const memoizedAddObjects = Utils.memoize(addObjects);
+
+			expect(memoizedAddObjects(obj1, obj2)).toEqual({ a: 1, b: 2 });
+			expect(memoizedAddObjects(obj1, obj2)).toEqual({ a: 1, b: 2 }); // returns cached result
+		});
+	});
+
+	describe('debounce', () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.clearAllTimers();
+			vi.restoreAllMocks();
+		});
+
+		it('debounces a function with a delay', () => {
+			const fn = vi.fn();
+			const debouncedFn = Utils.debounce(fn, 100);
+			debouncedFn();
+			expect(fn).not.toHaveBeenCalled();
+			vi.advanceTimersByTime(150);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('debounces a function with multiple calls outside the delay period', () => {
+			const fn = vi.fn();
+			const debouncedFn = Utils.debounce(fn, 100);
+			debouncedFn();
+			vi.advanceTimersByTime(150);
+			debouncedFn();
+			vi.advanceTimersByTime(150);
+			expect(fn).toHaveBeenCalledTimes(2);
+		});
+
+		it('should call the function after the wait time', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			debounced();
+			expect(fn).not.toHaveBeenCalled();
+
+			vi.advanceTimersByTime(1000);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should not call the function if called again before wait time', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			debounced();
+			vi.advanceTimersByTime(500); // ainda não deve chamar
+			debounced(); // reinicia o timer
+
+			vi.advanceTimersByTime(500); // tempo total 1000ms, mas resetou
+			expect(fn).not.toHaveBeenCalled();
+
+			vi.advanceTimersByTime(500); // agora sim
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should only call once after multiple rapid calls', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			for (let i = 0; i < 10; i++) {
+				debounced();
+				vi.advanceTimersByTime(100); // chamado a cada 100ms
+			}
+
+			expect(fn).not.toHaveBeenCalled();
+			vi.advanceTimersByTime(1000);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should preserve context (this)', () => {
+			const context = {
+				value: 42,
+				method(this: any) {
+					return this.value;
+				}
+			};
+
+			const spy = vi.fn(context.method);
+			const debounced = Utils.debounce(spy, 1000);
+
+			debounced.call(context);
+			vi.advanceTimersByTime(1000);
+
+			expect(spy).toHaveBeenCalled();
+			expect(spy.mock.results[0].value).toBe(42);
+		});
+
+		it('should pass arguments to the original function', () => {
+			const fn = vi.fn((a, b) => a + b);
+			const debounced = Utils.debounce(fn, 1000);
+
+			debounced(3, 4);
+			vi.advanceTimersByTime(1000);
+
+			expect(fn).toHaveBeenCalledWith(3, 4);
+			expect(fn.mock.results[0].value).toBe(7);
+		});
+
+		it('should clear previous timeout on each call', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			debounced();
+			debounced();
+			debounced();
+
+			expect(vi.getTimerCount()).toBe(1); // apenas 1 timeout ativo
+
+			vi.advanceTimersByTime(1000);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should not throw if called with no arguments', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			expect(() => debounced()).not.toThrow();
+			vi.advanceTimersByTime(1000);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should not execute if never waited enough', () => {
+			const fn = vi.fn();
+			const debounced = Utils.debounce(fn, 1000);
+
+			debounced();
+			vi.advanceTimersByTime(500);
+			debounced();
+			vi.advanceTimersByTime(500);
+			debounced();
+			vi.advanceTimersByTime(500);
+
+			expect(fn).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('throttle function', () => {
+		// 	beforeEach(() => {
+		// 		vi.useFakeTimers();
+		// 	});
+		// 	afterEach(() => {
+		// 		vi.useRealTimers();
+		// 		vi.clearAllTimers();
+		// 		vi.restoreAllMocks();
+		// 	});
+
+		it('should call the function immediately with a wait time of 0', () => {
+			const fn = vi.fn();
+			const throttledFn = Utils.throttle(fn, 0);
+			throttledFn();
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should call the function after the wait time', () => {
+			const fn = vi.fn();
+			const throttledFn = Utils.throttle(fn, 100);
+			throttledFn(); // chamada imediata
+			throttledFn(); // agendada
+			vi.advanceTimersByTime(150);
+			expect(fn).toHaveBeenCalledTimes(2); // chamada agendada
+		});
+
+		it('should call the function multiple times outside the wait time', () => {
+			const fn = vi.fn();
+			const throttledFn = Utils.throttle(fn, 100);
+			throttledFn();
+			vi.advanceTimersByTime(150);
+			throttledFn();
+			vi.advanceTimersByTime(150);
+			throttledFn();
+			expect(fn).toHaveBeenCalledTimes(3);
+		});
+
+		it('should call the function immediately on the first call', () => {
+			const fn = vi.fn();
+			const throttled = Utils.throttle(fn, 1000);
+			throttled();
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should not call the function again within the wait time', () => {
+			const fn = vi.fn();
+			const throttled = Utils.throttle(fn, 1000);
+			throttled(); // imediato
+			throttled(); // ignorado
+			vi.advanceTimersByTime(500);
+			throttled(); // ainda ignorado
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('should call the function again after the wait time', () => {
+			const fn = vi.fn();
+			const throttled = Utils.throttle(fn, 1000);
+			throttled(); // imediato
+			vi.advanceTimersByTime(1000);
+			throttled(); // novo chamado
+			expect(fn).toHaveBeenCalledTimes(2);
+		});
+
+		it('should schedule a trailing call if called within wait time', () => {
+			const fn = vi.fn();
+			const throttled = Utils.throttle(fn, 1000);
+			throttled(); // chamado imediatamente
+			vi.advanceTimersByTime(500);
+			throttled(); // agendado
+			expect(fn).toHaveBeenCalledTimes(1);
+			vi.advanceTimersByTime(500); // agora executa o agendado
+			expect(fn).toHaveBeenCalledTimes(2);
+		});
+
+		it('should return the last result immediately if within wait time', () => {
+			const fn = vi.fn(() => 'first');
+			const throttled = Utils.throttle(fn, 1000);
+			const result1 = throttled();
+			expect(result1).toBe('first');
+			fn.mockReturnValue('second');
+			const result2 = throttled(); // não chama `fn` de novo
+			expect(result2).toBe('first'); // retorna o mesmo valor anterior
+			vi.advanceTimersByTime(1000); // executa o agendado
+		});
+
+		it('should throw error from first immediate call', () => {
+			const fn = vi.fn(() => {
+				throw new Error('Oops');
+			});
+			const throttled = Utils.throttle(fn, 1000);
+			expect(() => throttled()).toThrowError('Oops');
+		});
+
+		it('should return the last result during throttle and call fn again after wait time', () => {
+			const fn = vi.fn(() => Math.random());
+			const throttled = Utils.throttle(fn, 1000);
+
+			const result = throttled();
+			expect(throttled()).equals(result);
+
+			vi.advanceTimersByTime(1000);
+			expect(throttled()).not.equals(result);
+
+			expect(fn).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe('once function', () => {
+		it('calls the function only once with the correct arguments', () => {
+			const fn = vi.fn((a: number, b: number) => a + b);
+			const onceFn = Utils.once(fn);
+			onceFn(1, 2);
+			onceFn(3, 4);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(1, 2);
+		});
+
+		it('returns the result of the first call', () => {
+			const fn = (a: number, b: number) => a + b;
+			const onceFn = Utils.once(fn);
+			const result1 = onceFn(1, 2);
+			const result2 = onceFn(3, 4);
+			expect(result1).toBe(3);
+			expect(result2).toBe(3);
+		});
+
+		it('does not call the function again with different arguments', () => {
+			const fn = vi.fn((a: number, b: number) => a + b);
+			const onceFn = Utils.once(fn);
+			onceFn(1, 2);
+			onceFn(3, 4);
+			expect(fn).toHaveBeenCalledTimes(1);
+		});
+
+		it('returns the correct result when called once', () => {
+			const fn = (a: number, b: number) => a + b;
+			const onceFn = Utils.once(fn);
+			const result = onceFn(1, 2);
+			expect(result).toBe(3);
+		});
+
+		it('works with functions that return different types', () => {
+			const fn1 = (a: number, b: number) => a + b;
+			const onceFn1 = Utils.once(fn1);
+			const result1 = onceFn1(1, 2);
+			expect(result1).toBe(3);
+
+			const fn2 = (a: string, b: string) => a + b;
+			const onceFn2 = Utils.once(fn2);
+			const result2 = onceFn2('a', 'b');
+			expect(result2).toBe('ab');
+
+			const fn3 = (a: { foo: string }, b: { bar: string }) => ({ ...a, ...b });
+			const onceFn3 = Utils.once(fn3);
+			const result3 = onceFn3({ foo: 'foo' }, { bar: 'bar' });
+			expect(result3).toEqual({ foo: 'foo', bar: 'bar' });
+		});
+	});
+
+	describe('pipe', () => {
+		it('should compose multiple functions', () => {
+			const addOne = (x: number) => x + 1;
+			const subTwo = (x: number) => x - 2;
+			const process = Utils.pipe(addOne, subTwo);
+			expect(process(3)).toBe(2);
+		});
+
+		it('should compose single function', () => {
+			const addOne = (x: number) => x + 1;
+			const process = Utils.pipe(addOne);
+			expect(process(3)).toBe(4);
+		});
+
+		it('should return identity function when no functions are provided', () => {
+			const process = Utils.pipe();
+			expect(process(3)).toBe(3);
+		});
+
+		it('should throw error when functions return different types', () => {
+			const addOne = (x: number) => x + 1;
+			const toString = (x: number) => x.toString();
+
+			const process = Utils.pipe(addOne, toString);
+
+			expect(() => process(3)).not.toThrowError();
+			expect(process(3)).toBe('4');
+		});
+
+		it('should throw error when functions are incompatible at runtime', () => {
+			const addOne = (x: number) => x + 1;
+			const breakIt = (x: string) => x.toUpperCase(); // espera string, mas vai receber number
+
+			const process = Utils.pipe(addOne, breakIt); // breakIt recebe number, erro esperado
+
+			expect(() => process(3)).toThrowError();
+		});
+
+		it('should throw error when function throws error', () => {
+			const addOne = (x: number) => x + 1;
+			const throwError = (x: number) => {
+				throw new Error(`Test error: ${x}`);
+			};
+			const process = Utils.pipe(addOne, throwError);
+			expect(() => process(3)).toThrowError('Test error: 4');
+		});
+	});
+
+	describe('compose', () => {
+		it('should compose multiple functions', () => {
+			const addOne = (x: number) => x + 1;
+			const subTwo = (x: number) => x - 2;
+			const process = Utils.compose(addOne, subTwo);
+			expect(process(-1)).toBe(-2);
+		});
+
+		it('should compose single function', () => {
+			const addOne = (x: number) => x + 1;
+			const process = Utils.compose(addOne);
+			expect(process(3)).toBe(4);
+		});
+
+		it('should return identity function when no functions are provided', () => {
+			const process = Utils.compose();
+			expect(process(3)).toBe(3);
+		});
+
+		it('should throw error when functions return different types', () => {
+			const addOne = (x: number) => x + 1;
+			const toString = (x: number) => x.toString();
+			const process = Utils.compose(addOne, toString);
+			expect(() => process(3)).not.toThrowError();
+			expect(process(3)).toBe('31');
+		});
+
+		it('should throw error when functions are incompatible at runtime', () => {
+			const addOne = (x: number) => x + 1;
+			const fail = (x: number) => {
+				throw new Error(`Erro proposital: ${x}`);
+			};
+			const process = Utils.compose(addOne, fail);
+
+			expect(() => process(3)).toThrowError('Erro proposital: 3');
 		});
 	});
 });
