@@ -103,9 +103,13 @@ export const Is = {
 	 *
 	 * @param value - The value to be validated as a CNPJ.
 	 * @returns `true` if the input value is a valid CNPJ, `false` otherwise.
+	 *
+	 * @example
+	 *
+	 * Utils.cnpj("12.ABC.345/01DE-35") // Output: true
 	 */
 	cnpj(value: string): boolean {
-		const isAlfaActive = new Date() >= new Date('2026-07-01');
+		const isAlfaActive = Date.now() >= new Date('2026-07-01').getTime();
 
 		// if (!/^[\d.-]+$/.test(value)) return false;
 		const regexNum = /^\d{14}$|^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
