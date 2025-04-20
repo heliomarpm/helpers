@@ -316,9 +316,7 @@ export const Format = {
 	 * onlyNumbers('abc'); // ''
 	 * ```
 	 */
-	onlyNumbers: (value: string): string => {
-		return value.replace(/\D/g, '');
-	},
+	onlyNumbers: (value: string): string => value.replace(/\D/g, ''),
 
 	/**
 	 * Pads a number with leading zeros to match the number of digits in a given maximum value.
@@ -369,34 +367,72 @@ export const Format = {
 	},
 
 	/**
-	 * Masks a part of a string with a given character.
+	 * Masks a substring of a string with a specified character.
 	 *
-	 * @param {string} value - The string to mask.
-	 * @param {number} startIndex - The starting index of the part of the string to mask.
-	 * @param {number} finalIndex - The final index of the part of the string to mask.
-	 * @param {string} maskChar - The character to use for masking.
-	 *
-	 * @throws {Error} If startIndex is negative, finalIndex is greater than or equal to the length of the string, or startIndex is greater than finalIndex.
-	 * @throws {Error} If maskChar is not a single character.
-	 *
-	 * @returns {string} The string with the part between startIndex and finalIndex (inclusive) masked with maskChar.
+	 * @param {string} value - The original string to mask.
+	 * @param {string} [maskChar='*''] - The character to use for masking.
+	 * @param {number} [startIndex=0] - The starting index of the substring to mask (inclusive).
+	 * @param {number | null} [finalIndex=null] - The ending index of the substring to mask (exclusive). If null, masks until the end of the string.
+	 * @returns {string} The masked string.
 	 *
 	 * @example
 	 * ```js
-	 * maskIt('1234567890', 3, 6, '*'); // '123****890'
-	 * maskIt('1234567890', 0, 3, '*'); // '****567890'
+	 * maskIt('1234567890', '*', 2, 5); // '12*****90'
+	 * maskIt('1234567890', '#', 3); // '123########'
 	 * ```
+	 * @throws {Error} Invalid start or final index.
+	 * @throws {Error} maskChar must be a single character
 	 */
-	maskIt(value: string, startIndex: number, finalIndex: number, maskChar: string): string {
-		if (startIndex < 0 || finalIndex >= value.length || startIndex > finalIndex) {
-			throw new Error('Invalid startIndex or finalIndex');
+	maskIt(value: string, maskChar: string = '*', startIndex: number = 0, finalIndex: number | null = null): string {
+		if (startIndex > value.length) startIndex = value.length - 1;
+
+		if (finalIndex === null || finalIndex > value.length) {
+			finalIndex = value.length;
+		}
+
+		if (startIndex < 0 || startIndex > finalIndex) {
+			throw new Error('Invalid start or final index');
 		}
 
 		if (maskChar.length !== 1) {
 			throw new Error('maskChar must be a single character');
 		}
 
-		const maskedPart = maskChar.repeat(finalIndex - startIndex + 1);
-		return value.slice(0, startIndex) + maskedPart + value.slice(finalIndex + 1);
+		const maskedSubstring = maskChar.repeat(finalIndex - startIndex);
+		return value.slice(0, startIndex) + maskedSubstring + value.slice(finalIndex);
+	},
+
+	/**
+	 * Masks a part of a string with a specified character.
+	 *
+	 * @param {string} text - The original string to mask.
+	 * @param {string} [maskChar='*'] - The character to use for masking.
+	 * @param {number} [visibleChars=1] - The number of visible characters in the masked part.
+	 * @returns {string} The masked string.
+	 *
+	 * @example
+	 * ```js
+	 * maskItParts('Heliomar P. Marques', '*', 1); // 'H******* P. M******'
+	 * maskItParts('+55 (11) 91888-0000', '#', 1); // '+5# (1#) 9####-0###'
+	 * maskItParts('123.444.555-67', '_', 2); // '12_.44_.55_-67'
+	 * ```
+	 * @throws {Error} maskChar must be a single character
+	 */
+	maskItParts(text: string, maskChar: string = '*', visibleChars: number = 1): string {
+		if (maskChar.length !== 1) {
+			throw new Error('maskChar must be a single character');
+		}
+
+		const effectiveVisibleChars = visibleChars <= 0 ? 1 : visibleChars;
+
+		return text.replace(/([a-zA-Z0-9]+)/g, match => {
+			if (match.length <= effectiveVisibleChars) {
+				return match;
+			}
+
+			const visiblePart = match.substring(0, effectiveVisibleChars);
+			const maskedPart = maskChar.repeat(match.length - effectiveVisibleChars);
+			return visiblePart + maskedPart;
+		});
 	}
 };
