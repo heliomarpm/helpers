@@ -1,3 +1,13 @@
+type RetryOptions = {
+	retries?: number;
+	delay?: number;
+	onRetry?: (error: Error, attempt: number) => void;
+};
+
+type MemoizedFn<T extends (...args: any[]) => any> = T & {
+	clear: () => void;
+};
+
 export const Utils = {
 	/**
 	 * Generates a random valid CPF (Brazilian National Register of Individuals)
@@ -159,9 +169,9 @@ export const Utils = {
 	 * };
 	 * const firstName = getNestedValue(data, "user.name.first"); // "John"
 	 */
-	getNestedValue<T>(obj: Record<string, unknown>, path: string): T | undefined {
+	getNestedValue<T>(obj: Record<string, T>, path: string): T | undefined {
 		try {
-			return path.split('.').reduce((acc, key) => acc[key] as Record<string, unknown>, obj) as T;
+			return path.split('.').reduce((acc, key) => acc[key] as Record<string, T>, obj) as T;
 		} catch {
 			return undefined;
 		}
@@ -379,5 +389,237 @@ export const Utils = {
 			const dayName = new Date(firstSunday.getFullYear(), firstSunday.getMonth(), firstSunday.getDate() + i).toLocaleString(locale, { weekday });
 			return dayName.charAt(0).toUpperCase() + dayName.slice(1);
 		});
+	},
+
+	/**
+	 * Pauses execution for a specified duration.
+	 * @param ms - The number of milliseconds to wait.
+	 * @returns A promise that resolves after the specified duration.
+	 *
+	 * @example
+	 * await sleep(1000); // Pauses for 1 second
+	 */
+	async sleep(ms: number): Promise<void> {
+		if (ms < 0 || isNaN(ms)) {
+			throw new Error("The 'ms' parameter must be greater than 0.");
+		}
+
+		return new Promise(resolve => setTimeout(resolve, ms));
+	},
+
+	/**
+	 * Executes a function and retries it if it fails, up to a specified number of attempts.
+	 *
+	 * @param fn - The function to execute and retry.
+	 * @param options - Options for retrying the function.
+	 * @param options.retries - The maximum number of attempts to make before giving up.
+	 * @param options.delay - The duration to wait between attempts.
+	 * @param options.onRetry - A callback that is called when an attempt fails.
+	 * @returns A promise that resolves to the result of the function, or rejects with the last error.
+	 *
+	 * @example
+	 * await retry(() => fetch('https://example.com/api/data'), {
+	 *   retries: 5,
+	 *   delay: 500,
+	 *   onRetry: (error, attempt) => console.log(`Attempt ${attempt} failed with error ${error.message}`)
+	 * });
+	 */
+	async retry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
+		const { retries = 3, delay = 1000, onRetry } = options;
+
+		if (delay < 1 || isNaN(delay)) {
+			throw new Error("The 'delay' parameter must be greater than 0.");
+		}
+
+		for (let attempt = 1; attempt <= retries; attempt++) {
+			try {
+				return await fn();
+			} catch (error) {
+				if (attempt === retries) throw error;
+
+				onRetry?.(error as Error, attempt);
+				await this.sleep(delay);
+			}
+		}
+
+		// If we reach this point, all attempts have failed
+		throw new Error('Retry attempts exhausted');
+	},
+
+	/**
+	 * Creates a memoized version of the given function. Memoization is a technique for
+	 * optimizing performance by storing the results of expensive function calls and
+	 * reusing them when the same inputs occur again.
+	 * @param fn - The function to memoize.
+	 * @returns A memoized version of the function.
+	 *
+	 * @example
+	 * const add = (a: number, b: number) => a + b;
+	 * const memoizedAdd = memoize(add);
+	 *
+	 * memoizedAdd(1, 2); // Calculates the result and stores it in the cache
+	 * memoizedAdd(1, 2); // Returns the cached result
+	 */
+	memoize<T extends (...args: any[]) => any>(fn: T): MemoizedFn<T> {
+		const cache = new Map<string, ReturnType<T>>();
+
+		const memoizedFn = (...args: Parameters<T>): ReturnType<T> => {
+			const key = JSON.stringify(args);
+
+			if (cache.has(key)) {
+				return cache.get(key)!;
+			}
+
+			// Call the original function if the result is not cached
+			const result = fn(...args);
+			cache.set(key, result);
+			return result;
+		};
+
+		memoizedFn.clear = () => cache.clear();
+
+		return memoizedFn as MemoizedFn<T>;
+	},
+
+	/**
+	 * Creates a debounced version of the given function. Debouncing is a technique for
+	 * optimizing performance by delaying the execution of a function until a specified
+	 * delay has passed since the last time it was called.
+	 * @param fn - The function to debounce.
+	 * @param wait - The delay in milliseconds.
+	 * @returns A debounced version of the function.
+	 *
+	 * @example
+	 * const add = (a: number, b: number) => a + b;
+	 * const debouncedAdd = debounce(add, 500);
+	 *
+	 * debouncedAdd(1, 2); // Calls the function immediately
+	 * debouncedAdd(3, 4); // Calls the function after 500ms
+	 *
+	 * const debouncedSearch = debounce(searchFunction, 300);
+	 * input.addEventListener('input', debouncedSearch);
+	 */
+	debounce<T extends (...args: any[]) => any>(fn: T, wait: number): T {
+		let timeoutId: NodeJS.Timeout;
+
+		return function (this: any, ...args: Parameters<T>) {
+			clearTimeout(timeoutId);
+			timeoutId = setTimeout(() => fn.apply(this, args), wait);
+		} as T;
+	},
+
+	/**
+	 * Creates a throttled version of the given function. Throttling is a technique for
+	 * optimizing performance by limiting the number of times a function can be called
+	 * within a specified time window.
+	 * @param fn - The function to throttle.
+	 * @param wait - The time window in milliseconds.
+	 * @returns A throttled version of the function.
+	 *
+	 * @example
+	 * const add = (a: number, b: number) => a + b;
+	 * const throttledAdd = throttle(add, 500);
+	 *
+	 * throttledAdd(1, 2); // Calls the function immediately
+	 * throttledAdd(3, 4); // Calls the function after 500ms if the previous call was outside the time window
+	 *
+	 * const throttledScroll = throttle(handleScroll, 200);
+	 * window.addEventListener('scroll', throttledScroll);
+	 */
+	throttle<T extends (...args: any[]) => any>(fn: T, wait: number): (...args: Parameters<T>) => ReturnType<T> {
+		let lastRun = 0;
+		let timeoutId: NodeJS.Timeout;
+		let lastResult: ReturnType<T>;
+
+		return (...args: Parameters<T>): ReturnType<T> => {
+			const now = Date.now();
+			const timeLastRun = now - lastRun;
+
+			if (timeLastRun >= wait) {
+				lastResult = fn(...args);
+				lastRun = now;
+				return lastResult;
+			}
+
+			if (timeoutId) clearTimeout(timeoutId);
+
+			const remainingTime = wait - timeLastRun;
+
+			timeoutId = setTimeout(() => {
+				lastRun = Date.now();
+				lastResult = fn(...args);
+			}, remainingTime);
+
+			// Return the last result
+			return lastResult;
+		};
+	},
+
+	/**
+	 * Creates a version of the given function that can only be called once. The
+	 * first call to the function is executed normally, but any subsequent calls
+	 * return the result of the first call.
+	 * @param fn - The function to wrap.
+	 * @returns A version of the function that can only be called once.
+	 *
+	 * @example
+	 * const add = (a: number, b: number) => a + b;
+	 * const onceAdd = once(add);
+	 *
+	 * const result1 = onceAdd(1, 2); // Calls the function and returns 3
+	 * const result2 = onceAdd(3, 4); // Returns 3
+	 *
+	 * const init = once(() => console.log('Inicializado'));
+	 * init(); // 'Inicializado'
+	 * init(); // nada acontece
+	 */
+	once<T extends (...args: any[]) => any>(fn: T): T {
+		let called = false;
+		let result: ReturnType<T>;
+
+		return ((...args: Parameters<T>) => {
+			if (!called) {
+				called = true;
+				result = fn(...args);
+			}
+			return result;
+		}) as T;
+	},
+
+	/**
+	 * Composes a sequence of functions that process a value from left to right.
+	 * Each function in the sequence takes a single argument and returns a value
+	 * of the same type, which is then passed to the next function in the sequence.
+	 * @param fns - An array of functions to be composed.
+	 * @returns A function that takes a single argument and processes it through
+	 * the composed sequence of functions.
+	 *
+	 * @example
+	 * const addOne = (x: number) => x + 1;
+	 * const subTwo = (x: number) => x - 2;
+	 * const process = pipe(addOne, subTwo);
+	 * console.log(process(3)); // Outputs 2 (3+1-2)
+	 */
+	pipe<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
+		return (arg: T) => fns.reduce((prev, fn) => fn(prev), arg);
+	},
+
+	/**
+	 * Composes a sequence of functions that process a value from right to left.
+	 * Each function in the sequence takes a single argument and returns a value
+	 * of the same type, which is then passed to the next function in the sequence.
+	 * @param fns - An array of functions to be composed.
+	 * @returns A function that takes a single argument and processes it through
+	 * the composed sequence of functions.
+	 *
+	 * @example
+	 * const addOne = (x: number) => x + 1;
+	 * const subTwo = (x: number) => x - 2;
+	 * const process = compose(addOne, subTwo);
+	 * console.log(process(-1)); // Outputs -2  (-1-2+1)
+	 */
+	compose<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
+		// return pipe(...fns.reverse());
+		return (arg: T) => fns.reduceRight((acc, fn) => fn(acc), arg);
 	}
 };
