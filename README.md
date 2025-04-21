@@ -1,6 +1,6 @@
 <div id="top" align="center" style="text-align:center;">
 <h1>
-  <img src="logo.png" alt="Helpers Library" width="128" />
+  <img src="./logo.png" alt="Helpers Library" width="128" />
   <br>Helpers Library
   <a href="https://navto.me/heliomarpm" target="_blank"><img src="https://navto.me/assets/navigatetome-brand.png" width="32"/></a>
 
@@ -14,12 +14,12 @@
 
 <p>
   <!-- PixMe -->
-  <a href="https://www.pixme.bio/heliomarpm" target="_blank" rel="noopener noreferrer">
+  <!-- <a href="https://www.pixme.bio/heliomarpm" target="_blank" rel="noopener noreferrer">
     <img alt="pixme url" src="https://img.shields.io/badge/donate%20on-pixme-1C1E26?style=for-the-badge&labelColor=1C1E26&color=28f4f4"/>
-  </a>
+  </a> -->
   <!-- PayPal -->
   <a href="https://bit.ly/paypal-sponsor-heliomarpm" target="_blank" rel="noopener noreferrer">
-    <img alt="paypal url" src="https://img.shields.io/badge/paypal-1C1E26?style=for-the-badge&labelColor=1C1E26&color=0475fe"/>
+    <img alt="paypal url" src="https://img.shields.io/badge/donate%20on-paypal-1C1E26?style=for-the-badge&labelColor=1C1E26&color=0475fe"/>
   </a>
   <!-- Ko-fi -->
   <a href="https://ko-fi.com/heliomarpm" target="_blank" rel="noopener noreferrer">
@@ -28,6 +28,10 @@
   <!-- LiberaPay -->  
   <a href="https://liberapay.com/heliomarpm" target="_blank" rel="noopener noreferrer">
      <img alt="liberapay url" src="https://img.shields.io/badge/liberapay-1C1E26?style=for-the-badge&labelColor=1C1E26&color=f6c915"/>
+  </a>
+    <!-- GitHub Sponsors -->
+  <a href="https://github.com/sponsors/heliomarpm" target="_blank" rel="noopener noreferrer">
+    <img alt="github sponsors url" src="https://img.shields.io/badge/GitHub%20-Sponsor-1C1E26?style=for-the-badge&labelColor=1C1E26&color=db61a2"/>
   </a>
   <!-- Version -->
   <!-- <a href="https://github.com/heliomarpm/helpers/releases" target="_blank" rel="noopener noreferrer">
@@ -361,12 +365,12 @@ If you appreciate that, please consider donating to the Developer.
 
 <p>
   <!-- PixMe -->
-  <a href="https://www.pixme.bio/heliomarpm" target="_blank" rel="noopener noreferrer">
+  <!-- <a href="https://www.pixme.bio/heliomarpm" target="_blank" rel="noopener noreferrer">
     <img alt="pixme url" src="https://img.shields.io/badge/donate%20on-pixme-1C1E26?style=for-the-badge&labelColor=1C1E26&color=28f4f4"/>
-  </a>
+  </a> -->
   <!-- PayPal -->
   <a href="https://bit.ly/paypal-sponsor-heliomarpm" target="_blank" rel="noopener noreferrer">
-    <img alt="paypal url" src="https://img.shields.io/badge/paypal-1C1E26?style=for-the-badge&labelColor=1C1E26&color=0475fe"/>
+    <img alt="paypal url" src="https://img.shields.io/badge/donate%20on-paypal-1C1E26?style=for-the-badge&labelColor=1C1E26&color=0475fe"/>
   </a>
   <!-- Ko-fi -->
   <a href="https://ko-fi.com/heliomarpm" target="_blank" rel="noopener noreferrer">
