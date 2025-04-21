@@ -6,4 +6,5 @@ tests
 coverage
 tsconfig.*
 jest.config.js
+vitest.config.js
 logo.png
