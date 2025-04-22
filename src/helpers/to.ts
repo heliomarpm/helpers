@@ -1,4 +1,4 @@
-import { Is } from './is';
+import { Is } from "./is";
 
 export const To = {
 	/**
@@ -33,7 +33,7 @@ export const To = {
 	 */
 	boolean(value: number | string): boolean {
 		const str = String(value).trim().toLowerCase();
-		return Is.numeric(value) ? str !== '0' : str === 'true';
+		return Is.numeric(value) ? str !== "0" : str === "true";
 	},
 
 	/**
@@ -42,11 +42,11 @@ export const To = {
 	 * @param date - The date to be parsed, can be a Date object or a string.
 	 * @returns An object containing year, month, day, hour, minute, second, and timestamp.
 	 */
-	dateParts(date: Date | string): DatePartsType {
-		const parsedDate = typeof date === 'string' ? new Date(date) : date;
+	dateParts(date: Date | string | number): DatePartsType {
+		const parsedDate = !(date instanceof Date) ? new Date(date) : date;
 
-		if (isNaN(parsedDate.getTime())) {
-			throw new Error('Invalid date');
+		if (Number.isNaN(parsedDate.getTime())) {
+			throw new Error("Invalid date");
 		}
 
 		return {
@@ -56,7 +56,7 @@ export const To = {
 			hour: parsedDate.getHours(), // Extract hour
 			minute: parsedDate.getMinutes(), // Extract minute
 			second: parsedDate.getSeconds(), // Extract second
-			timestamp: parsedDate.getTime() // Extract timestamp
+			timestamp: parsedDate.getTime(), // Extract timestamp
 		};
 	},
 
@@ -70,8 +70,8 @@ export const To = {
 	 * @returns `number` The numeric representation of the input value.
 	 */
 	number(value: unknown): number {
-		return Is.numeric(value) ? Number(value) : NaN;
-	}
+		return Is.numeric(value) ? Number(value) : Number.NaN;
+	},
 };
 
 export type DatePartsType = {

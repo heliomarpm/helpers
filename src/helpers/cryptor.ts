@@ -1,5 +1,5 @@
-import { createHash, randomBytes } from 'crypto';
-import { promisify } from 'util';
+import { createHash, randomBytes } from "node:crypto";
+import { promisify } from "node:util";
 
 const randomBytesAsync = promisify(randomBytes);
 
@@ -8,9 +8,9 @@ export interface KeyPair {
 	privateKey: string;
 }
 
-function validateInput(inputText: string, inputName: string | null = ''): void {
-	if (typeof inputText !== 'string' || inputText.trim() === '') {
-		const name = (inputName || '').trim() === '' ? '' : `${(inputName || '').trim()} `;
+function validateInput(inputText: string, inputName: string | null = ""): void {
+	if (typeof inputText !== "string" || inputText.trim() === "") {
+		const name = (inputName || "").trim() === "" ? "" : `${(inputName || "").trim()} `;
 		throw new Error(`Input ${name}must not be empty or whitespace.`);
 	}
 }
@@ -29,12 +29,12 @@ export const Cryptor = {
 	 * ```
 	 */
 	async hash(text: string): Promise<string> {
-		validateInput(text, 'text');
+		validateInput(text, "text");
 
-		const hash = createHash('sha256');
+		const hash = createHash("sha256");
 		hash.update(text);
 
-		return hash.digest('hex');
+		return hash.digest("hex");
 	},
 
 	/**
@@ -51,8 +51,8 @@ export const Cryptor = {
 	 * ```
 	 */
 	async compareHash(text: string, hash: string): Promise<boolean> {
-		validateInput(text, 'text');
-		validateInput(hash, 'hash');
+		validateInput(text, "text");
+		validateInput(hash, "hash");
 
 		const textHash = await this.hash(text);
 		return textHash === hash;
@@ -70,12 +70,12 @@ export const Cryptor = {
 	 * console.log(salt); // Outputs a random hexadecimal string of length 16.
 	 * ```
 	 */
-	async generateSalt(length: number = 16): Promise<string> {
+	async generateSalt(length = 16): Promise<string> {
 		if (length <= 0) {
-			throw new Error('Salt length must be greater than 0.');
+			throw new Error("Salt length must be greater than 0.");
 		}
 		const salt = await randomBytesAsync(length);
-		return salt.toString('hex');
+		return salt.toString("hex");
 	},
 
 	/**
@@ -91,18 +91,18 @@ export const Cryptor = {
 	 * ```
 	 */
 	async generateKeyPair(): Promise<KeyPair> {
-		const { generateKeyPairSync } = await import('crypto');
+		const { generateKeyPairSync } = await import("node:crypto");
 
-		const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+		const { publicKey, privateKey } = generateKeyPairSync("rsa", {
 			modulusLength: 2048,
 			publicKeyEncoding: {
-				type: 'spki',
-				format: 'pem'
+				type: "spki",
+				format: "pem",
 			},
 			privateKeyEncoding: {
-				type: 'pkcs8',
-				format: 'pem'
-			}
+				type: "pkcs8",
+				format: "pem",
+			},
 		});
 
 		return { publicKey, privateKey };
@@ -128,14 +128,14 @@ export const Cryptor = {
 	 * ```
 	 */
 	async sign(data: string, privateKey: string): Promise<string> {
-		validateInput(data, 'data');
-		validateInput(privateKey, 'privateKey');
+		validateInput(data, "data");
+		validateInput(privateKey, "privateKey");
 
-		const { createSign } = await import('crypto');
+		const { createSign } = await import("node:crypto");
 
-		const signer = createSign('SHA256');
+		const signer = createSign("SHA256");
 		signer.update(data);
-		return signer.sign(privateKey, 'hex');
+		return signer.sign(privateKey, "hex");
 	},
 
 	/**
@@ -153,14 +153,14 @@ export const Cryptor = {
 	 * ```
 	 */
 	async verify(data: string, signature: string, publicKey: string): Promise<boolean> {
-		validateInput(data, 'data');
-		validateInput(signature, 'signature');
-		validateInput(publicKey, 'publicKey');
+		validateInput(data, "data");
+		validateInput(signature, "signature");
+		validateInput(publicKey, "publicKey");
 
-		const { createVerify } = await import('crypto');
+		const { createVerify } = await import("node:crypto");
 
-		const verifier = createVerify('SHA256');
+		const verifier = createVerify("SHA256");
 		verifier.update(data);
-		return verifier.verify(publicKey, signature, 'hex');
-	}
+		return verifier.verify(publicKey, signature, "hex");
+	},
 };

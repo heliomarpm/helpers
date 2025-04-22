@@ -1,14 +1,14 @@
 export enum eOS {
-	Windows = 'win32',
-	Linux = 'linux',
-	MacOS = 'darwin'
+	Windows = "win32",
+	Linux = "linux",
+	MacOS = "darwin",
 }
 
 export enum eArchitecture {
-	x86 = 'ia32',
-	x64 = 'x64',
-	Arm = 'arm',
-	Arm64 = 'arm64'
+	x86 = "ia32",
+	x64 = "x64",
+	Arm = "arm",
+	Arm64 = "arm64",
 }
 
 export const Is = {
@@ -68,7 +68,7 @@ export const Is = {
 		 */
 		get arch_Arm64(): boolean {
 			return process.arch === eArchitecture.Arm64;
-		}
+		},
 	},
 	/**
 	 * Validates a given value as a CPF (Brazilian National Register of Individuals).
@@ -81,19 +81,19 @@ export const Is = {
 		//if (!/^[\d.-]+$/.test(value)) return false;
 		if (!/^\d{11}$|^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value)) return false;
 
-		const cpf = value.replace(/\D/g, '');
+		const cpf = value.replace(/\D/g, "");
 
 		if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
 
 		const digito = (base: number): number => {
 			const sum = cpf
 				.slice(0, base)
-				.split('')
-				.reduce((acc, value, index) => acc + parseInt(value) * (base + 1 - index), 0);
+				.split("")
+				.reduce((acc, value, index) => acc + Number.parseInt(value) * (base + 1 - index), 0);
 			return ((sum * 10) % 11) % 10;
 		};
 
-		return digito(9) === parseInt(cpf[9]) && digito(10) === parseInt(cpf[10]);
+		return digito(9) === Number.parseInt(cpf[9]) && digito(10) === Number.parseInt(cpf[10]);
 	},
 
 	/**
@@ -109,7 +109,7 @@ export const Is = {
 	 * Utils.cnpj("12.ABC.345/01DE-35") // Output: true
 	 */
 	cnpj(value: string): boolean {
-		const isAlfaActive = Date.now() >= new Date('2026-07-01').getTime();
+		const isAlfaActive = Date.now() >= new Date("2026-07-01").getTime();
 
 		// if (!/^[\d.-]+$/.test(value)) return false;
 		const regexNum = /^\d{14}$|^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/;
@@ -119,14 +119,14 @@ export const Is = {
 			return false;
 		}
 
-		const sanitized = value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+		const sanitized = value.replace(/[^A-Z0-9]/gi, "").toUpperCase();
 		if (sanitized.length !== 14) return false;
 		if (/^([A-Z0-9])\1{13}$/.test(sanitized)) return false;
 		if (!isAlfaActive && !/^\d{14}$/.test(sanitized)) return false;
 
 		const charToNum = (char: string): number => char.charCodeAt(0) - 48;
 
-		const digits = sanitized.split('').map(charToNum);
+		const digits = sanitized.split("").map(charToNum);
 
 		const calcDV = (base: number): number => {
 			const weights = base === 12 ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2] : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -146,7 +146,7 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid number, `false` otherwise.
 	 */
 	numeric<T>(value: T): boolean {
-		return (typeof value === 'number' && !isNaN(value)) || (typeof value === 'string' && value.trim() !== '' && !isNaN(Number(value)));
+		return (typeof value === "number" && !Number.isNaN(value)) || (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value)));
 	},
 
 	/**
@@ -164,7 +164,7 @@ export const Is = {
 	 * Is.equals('hello', 'hello'); //output: true
 	 * Is.equals(new Set[1], new Set[2]); //output: false
 	 */
-	equals<T, U>(left: T, right: U, ignoreOrder: boolean = false): boolean {
+	equals<T, U>(left: T, right: U, ignoreOrder = false): boolean {
 		const seen = new WeakMap();
 
 		const equal = (leftValue: unknown, rightValue: unknown): boolean => {
@@ -172,7 +172,7 @@ export const Is = {
 
 			if (typeof leftValue !== typeof rightValue) return false;
 
-			if (leftValue === null || rightValue === null || typeof leftValue !== 'object') return false;
+			if (leftValue === null || rightValue === null || typeof leftValue !== "object") return false;
 
 			if (leftValue instanceof Date && rightValue instanceof Date) return leftValue.getTime() === rightValue.getTime();
 			if (leftValue instanceof RegExp && rightValue instanceof RegExp) return leftValue.toString() === rightValue.toString();
@@ -195,17 +195,18 @@ export const Is = {
 
 			if (Array.isArray(leftValue) && Array.isArray(rightValue)) {
 				if (leftValue.length !== rightValue.length) return false;
+
 				if (ignoreOrder) {
 					const rightCopy = [...rightValue];
-					return leftValue.every(leftVal => {
-						const rightIndex = rightCopy.findIndex(rightVal => equal(leftVal, rightVal));
+					return leftValue.every((leftVal) => {
+						const rightIndex = rightCopy.findIndex((rightVal) => equal(leftVal, rightVal));
 						if (rightIndex === -1) return false;
 						rightCopy.splice(rightIndex, 1);
 						return true;
 					});
-				} else {
-					return leftValue.every((leftVal, index) => equal(leftVal, rightValue[index]));
 				}
+
+				return leftValue.every((leftVal, index) => equal(leftVal, rightValue[index]));
 			}
 
 			if (seen.has(leftValue)) return seen.get(leftValue) === rightValue;
@@ -215,22 +216,32 @@ export const Is = {
 			const rightKeys = rightValue ? Object.keys(rightValue) : [];
 			if (leftKeys.length !== rightKeys.length) return false;
 
-			return leftKeys.every(leftKey => rightValue && equal((leftValue as Record<string, unknown>)[leftKey], (rightValue as Record<string, unknown>)[leftKey]));
+			return leftKeys.every((leftKey) => rightValue && equal((leftValue as Record<string, unknown>)[leftKey], (rightValue as Record<string, unknown>)[leftKey]));
 		};
 
 		return equal(left, right);
 	},
 
 	/**
-	 * Verifies if the given value is a valid date.
-	 * @param value The value to be verified.
+	 * Determines if the given value is a valid date.
+	 * Converts string or number types to Date objects for validation.
+	 *
+	 * @param value The value to be checked. Can be a Date object, a string, or a number.
 	 * @returns {boolean} `true` if the value is a valid date, `false` otherwise.
+	 *
+	 * @example
+	 *
+	 * Is.date('2022-01-01'); //output: true
+	 * Is.date(new Date()); //output: true
+	 * Is.date('invalid date'); //output: false
+	 * Is.date(1633046400000); //output: true
 	 */
-	date(value: unknown): boolean {
-		if (typeof value === 'string') {
-			value = new Date(value);
+	date(value: string | number): boolean {
+		let date = null;
+		if (typeof value === "string" || typeof value === "number") {
+			date = new Date(value);
 		}
-		return value instanceof Date && !isNaN(value.getTime());
+		return date instanceof Date && !Number.isNaN(date.getTime());
 	},
 
 	/**
@@ -249,9 +260,9 @@ export const Is = {
 	nullOrEmpty(value: unknown): boolean {
 		return (
 			!value ||
-			(typeof value === 'string' && value.trim() === '') ||
+			(typeof value === "string" && value.trim() === "") ||
 			(Array.isArray(value) && value.length === 0) ||
-			(typeof value === 'object' && Object.keys(value).length === 0)
+			(typeof value === "object" && Object.keys(value).length === 0)
 		);
 	},
 
@@ -270,7 +281,7 @@ export const Is = {
 	 * Is.object(undefined); //output: false
 	 */
 	object(value: unknown): boolean {
-		return !!value && typeof value === 'object' && !Array.isArray(value);
+		return !!value && typeof value === "object" && !Array.isArray(value);
 	},
 
 	/**
@@ -342,7 +353,7 @@ export const Is = {
 
 		// Verifica objetos thenable (compatibilidade com outras implementações)
 		const thenable = value as { then?: unknown; catch?: unknown };
-		return typeof thenable.then === 'function' && typeof thenable.catch === 'function';
+		return typeof thenable.then === "function" && typeof thenable.catch === "function";
 	},
 
 	/**
@@ -356,7 +367,7 @@ export const Is = {
 	 * Is.function('not a function'); //output: false
 	 */
 	function(value: unknown): boolean {
-		return typeof value === 'function';
+		return typeof value === "function";
 	},
 
 	/**
@@ -371,7 +382,7 @@ export const Is = {
 	url(value: string): boolean {
 		try {
 			const url = new URL(value);
-			return ['http:', 'https:'].includes(url.protocol);
+			return ["http:", "https:"].includes(url.protocol);
 		} catch {
 			return false;
 		}
@@ -387,7 +398,7 @@ export const Is = {
 	 * Is.json('Invalid JSON'); //output: false
 	 */
 	json(value: string): boolean {
-		if (typeof value !== 'string') return false;
+		if (typeof value !== "string") return false;
 
 		try {
 			JSON.parse(value);
@@ -395,5 +406,5 @@ export const Is = {
 		} catch {
 			return false;
 		}
-	}
+	},
 };

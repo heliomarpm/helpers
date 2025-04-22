@@ -1,4 +1,4 @@
-type MemoizedFn<T extends (...args: any[]) => any> = T & {
+type MemoizedFn<T extends (...args: unknown[]) => unknown> = T & {
 	clear: () => void;
 };
 
@@ -18,13 +18,13 @@ export const Utils = {
 			let soma = 0;
 			let peso = cpf.length + 1;
 			for (let i = 0; i < cpf.length; i++) {
-				soma += parseInt(cpf[i]) * peso;
+				soma += Number.parseInt(cpf[i]) * peso;
 				peso--;
 			}
 			const resto = soma % 11;
-			return resto < 2 ? '0' : (11 - resto).toString();
+			return resto < 2 ? "0" : (11 - resto).toString();
 		};
-		let cpf = '';
+		let cpf = "";
 		for (let i = 0; i < 9; i++) {
 			cpf += Math.floor(Math.random() * 10).toString();
 		}
@@ -43,23 +43,23 @@ export const Utils = {
 			const pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 			let soma = 0;
 			for (let i = 0; i < 12; i++) {
-				soma += parseInt(cnpj[i]) * pesos[i];
+				soma += Number.parseInt(cnpj[i]) * pesos[i];
 			}
 			const resto = soma % 11;
-			return resto < 2 ? '0' : (11 - resto).toString();
+			return resto < 2 ? "0" : (11 - resto).toString();
 		};
 
 		const calcSegundoDigito = (cnpj: string | string[]) => {
 			const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 			let soma = 0;
 			for (let i = 0; i < 13; i++) {
-				soma += parseInt(cnpj[i]) * pesos[i];
+				soma += Number.parseInt(cnpj[i]) * pesos[i];
 			}
 			const resto = soma % 11;
-			return resto < 2 ? '0' : (11 - resto).toString();
+			return resto < 2 ? "0" : (11 - resto).toString();
 		};
 
-		let cnpj = '';
+		let cnpj = "";
 		for (let i = 0; i < 12; i++) {
 			cnpj += Math.floor(Math.random() * 10).toString();
 		}
@@ -97,7 +97,7 @@ export const Utils = {
 		const propertyList = Array.isArray(properties) ? properties : [properties];
 
 		const stringifyValue = (value: unknown): string => {
-			return String(typeof value === 'object' ? JSON.stringify(value || '') : value || '');
+			return String(typeof value === "object" ? JSON.stringify(value || "") : value || "");
 		};
 
 		return (objA, objB) => {
@@ -105,7 +105,7 @@ export const Utils = {
 				let sortOrder = 1;
 				let propName = property;
 
-				if (property.startsWith('-')) {
+				if (property.startsWith("-")) {
 					sortOrder = -1;
 					propName = property.substring(1);
 				}
@@ -135,19 +135,12 @@ export const Utils = {
 	 * const sortedByName = orderBy(people, 'name'); // Sorts by name in ascending order.
 	 * const sortedByAgeDesc = orderBy(people, 'age', 'desc'); // Sorts by age in descending order.
 	 */
-	orderBy<T, K extends keyof T>(list: T[], key: K, orderBy: 'asc' | 'desc' = 'asc'): T[] {
+	orderBy<T, K extends keyof T>(list: T[], key: K, orderBy: "asc" | "desc" = "asc"): T[] {
 		return list.sort((a, b) => {
 			const aValue = a[key] as string | number;
 			const bValue = b[key] as string | number;
 
-			return (
-				orderBy === 'asc' ?
-					aValue > bValue ?
-						1
-					:	-1
-				: aValue < bValue ? 1
-				: -1
-			);
+			return orderBy === "asc" ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
 		});
 	},
 
@@ -171,7 +164,7 @@ export const Utils = {
 	 */
 	getNestedValue<T>(obj: Record<string, T>, path: string): T | undefined {
 		try {
-			return path.split('.').reduce((acc, key) => acc[key] as Record<string, T>, obj) as T;
+			return path.split(".").reduce((acc, key) => acc[key] as Record<string, T>, obj) as T;
 		} catch {
 			return undefined;
 		}
@@ -205,11 +198,11 @@ export const Utils = {
 	 */
 	setNestedValue<T extends Record<string, unknown>>(target: T, path: string, value: unknown): void {
 		if (!target) {
-			throw new Error('Target object is required.');
+			throw new Error("Target object is required.");
 		}
 
-		if (path.trim() === '') {
-			throw new Error('Path is required.');
+		if (path.trim() === "") {
+			throw new Error("Path is required.");
 		}
 
 		// Divide a string da chave, lidando com arrays corretamente
@@ -264,9 +257,9 @@ export const Utils = {
 			(value): value is T =>
 				value !== null &&
 				value !== undefined &&
-				(typeof value !== 'string' || value.trim() !== '') &&
+				(typeof value !== "string" || value.trim() !== "") &&
 				(!Array.isArray(value) || value.length !== 0) &&
-				(typeof value !== 'object' || Object.keys(value).length !== 0)
+				(typeof value !== "object" || Object.keys(value).length !== 0)
 		);
 	},
 
@@ -280,8 +273,8 @@ export const Utils = {
 	 * console.log(guid); // "f47ac10b-58cc-4372-a567-0e02b2c3d479"
 	 */
 	generateGuid(): string {
-		if (typeof crypto === 'undefined' || !crypto.getRandomValues) {
-			throw new Error('Crypto API not available in this environment.');
+		if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+			throw new Error("Crypto API not available in this environment.");
 		}
 
 		const randomBytes = new Uint8Array(16);
@@ -290,12 +283,12 @@ export const Utils = {
 		// Convert the bytes to a string
 		return [...randomBytes]
 			.map((byte, index) => {
-				const hex = byte.toString(16).padStart(2, '0');
+				const hex = byte.toString(16).padStart(2, "0");
 
 				// Insert dashes at the appropriate positions
 				return index === 4 || index === 6 || index === 8 || index === 10 ? `-${hex}` : hex;
 			})
-			.join('');
+			.join("");
 	},
 
 	crypto: {
@@ -308,7 +301,7 @@ export const Utils = {
 		 * const key = await generateKey();
 		 */
 		async generateKey(): Promise<CryptoKey> {
-			return crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+			return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
 		},
 
 		/**
@@ -320,14 +313,14 @@ export const Utils = {
 		async encrypt(text: string, key: CryptoKey): Promise<string> {
 			const iv: Uint8Array = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector (IV)
 			const encodedText: Uint8Array = new TextEncoder().encode(text);
-			const encryptedData: ArrayBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encodedText);
+			const encryptedData: ArrayBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedText);
 
 			// Concatenate IV + encrypted data and convert to Base64
 			const combined: Uint8Array = new Uint8Array(iv.length + encryptedData.byteLength);
 			combined.set(iv, 0);
 			combined.set(new Uint8Array(encryptedData), iv.length);
 
-			return Buffer.from(combined).toString('base64');
+			return Buffer.from(combined).toString("base64");
 		},
 
 		/**
@@ -337,14 +330,14 @@ export const Utils = {
 		 * @returns The decrypted string.
 		 */
 		async decrypt(encryptedText: string, key: CryptoKey): Promise<string> {
-			const rawData = Buffer.from(encryptedText, 'base64') as Uint8Array; // Decodifica Base64 para Uint8Array
+			const rawData = Buffer.from(encryptedText, "base64") as Uint8Array; // Decodifica Base64 para Uint8Array
 			const iv = rawData.slice(0, 12) as Uint8Array; // Extrai o IV
 			const encryptedData = rawData.slice(12) as Uint8Array; // Extrai os dados criptografados
 
-			const decryptedData = (await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, encryptedData)) as Uint8Array;
+			const decryptedData = (await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData)) as Uint8Array;
 
 			return new TextDecoder().decode(decryptedData);
-		}
+		},
 	},
 
 	/**
@@ -360,7 +353,7 @@ export const Utils = {
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	months({ locale = 'default', month = 'long' }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions['month'] } = {}): Array<string> {
+	months({ locale = "default", month = "long" }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions["month"] } = {}): Array<string> {
 		return Array.from({ length: 12 }, (_, i) => {
 			const monthName = new Date(2000, i).toLocaleString(locale, { month });
 			return monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -381,7 +374,7 @@ export const Utils = {
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 */
-	weekdays({ locale = 'default', weekday = 'long' }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions['weekday'] } = {}): Array<string> {
+	weekdays({ locale = "default", weekday = "long" }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions["weekday"] } = {}): Array<string> {
 		const firstSunday = new Date(2000, 0, 1);
 		firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
 
@@ -400,11 +393,11 @@ export const Utils = {
 	 * await sleep(1000); // Pauses for 1 second
 	 */
 	async sleep(ms: number): Promise<void> {
-		if (ms < 0 || isNaN(ms)) {
+		if (ms < 0 || Number.isNaN(ms)) {
 			throw new Error("The 'ms' parameter must be greater than 0.");
 		}
 
-		return new Promise(resolve => setTimeout(resolve, ms));
+		return new Promise((resolve) => setTimeout(resolve, ms));
 	},
 
 	/**
@@ -427,7 +420,7 @@ export const Utils = {
 	async retry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
 		const { retries = 3, delay = 1000, onRetry } = options;
 
-		if (delay < 1 || isNaN(delay)) {
+		if (delay < 1 || Number.isNaN(delay)) {
 			throw new Error("The 'delay' parameter must be greater than 0.");
 		}
 
@@ -443,7 +436,7 @@ export const Utils = {
 		}
 
 		// If we reach this point, all attempts have failed
-		throw new Error('Retry attempts exhausted');
+		throw new Error("Retry attempts exhausted");
 	},
 
 	/**
@@ -460,10 +453,10 @@ export const Utils = {
 	 * memoizedAdd(1, 2); // Calculates the result and stores it in the cache
 	 * memoizedAdd(1, 2); // Returns the cached result
 	 */
-	memoize<T extends (...args: any[]) => any>(fn: T): MemoizedFn<T> {
+	memoize<T extends (...args: unknown[]) => unknown>(fn: T): MemoizedFn<T> {
 		const cache = new Map<string, ReturnType<T>>();
 
-		const memoizedFn = (...args: Parameters<T>): ReturnType<T> => {
+		const memoized = (...args: Parameters<T>): ReturnType<T> => {
 			const key = JSON.stringify(args);
 
 			if (cache.has(key)) {
@@ -472,13 +465,13 @@ export const Utils = {
 
 			// Call the original function if the result is not cached
 			const result = fn(...args);
-			cache.set(key, result);
-			return result;
+			cache.set(key, result as ReturnType<T>);
+			return result as ReturnType<T>;
 		};
 
-		memoizedFn.clear = () => cache.clear();
+		memoized.clear = () => cache.clear();
 
-		return memoizedFn as MemoizedFn<T>;
+		return memoized as MemoizedFn<T>;
 	},
 
 	/**
@@ -499,10 +492,10 @@ export const Utils = {
 	 * const debouncedSearch = debounce(searchFunction, 300);
 	 * input.addEventListener('input', debouncedSearch);
 	 */
-	debounce<T extends (...args: any[]) => any>(fn: T, wait: number): T {
+	debounce<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): T {
 		let timeoutId: NodeJS.Timeout;
 
-		return function (this: any, ...args: Parameters<T>) {
+		return function (this: unknown, ...args: Parameters<T>) {
 			clearTimeout(timeoutId);
 			timeoutId = setTimeout(() => fn.apply(this, args), wait);
 		} as T;
@@ -526,7 +519,7 @@ export const Utils = {
 	 * const throttledScroll = throttle(handleScroll, 200);
 	 * window.addEventListener('scroll', throttledScroll);
 	 */
-	throttle<T extends (...args: any[]) => any>(fn: T, wait: number): (...args: Parameters<T>) => ReturnType<T> {
+	throttle<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): (...args: Parameters<T>) => ReturnType<T> {
 		let lastRun = 0;
 		let timeoutId: NodeJS.Timeout;
 		let lastResult: ReturnType<T>;
@@ -536,7 +529,7 @@ export const Utils = {
 			const timeLastRun = now - lastRun;
 
 			if (timeLastRun >= wait) {
-				lastResult = fn(...args);
+				lastResult = fn(...args) as ReturnType<T>;
 				lastRun = now;
 				return lastResult;
 			}
@@ -547,7 +540,7 @@ export const Utils = {
 
 			timeoutId = setTimeout(() => {
 				lastRun = Date.now();
-				lastResult = fn(...args);
+				lastResult = fn(...args) as ReturnType<T>;
 			}, remainingTime);
 
 			// Return the last result
@@ -573,14 +566,14 @@ export const Utils = {
 	 * init(); // 'Inicializado'
 	 * init(); // nada acontece
 	 */
-	once<T extends (...args: any[]) => any>(fn: T): T {
+	once<T extends (...args: unknown[]) => unknown>(fn: T): T {
 		let called = false;
 		let result: ReturnType<T>;
 
 		return ((...args: Parameters<T>) => {
 			if (!called) {
 				called = true;
-				result = fn(...args);
+				result = fn(...args) as ReturnType<T>;
 			}
 			return result;
 		}) as T;
@@ -621,5 +614,5 @@ export const Utils = {
 	compose<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
 		// return pipe(...fns.reverse());
 		return (arg: T) => fns.reduceRight((acc, fn) => fn(acc), arg);
-	}
+	},
 };
