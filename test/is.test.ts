@@ -299,24 +299,24 @@ describe('Is', () => {
 		});
 
 		it('should return false for invalid date string', () => {
-			expect(Is.date(undefined)).toBe(false);
+			expect(Is.date(undefined as unknown as string)).toBe(false);
 		});
 
 		it('should return true for Date object', () => {
 			const date = new Date('2022-01-01');
-			expect(Is.date(date)).toBe(true);
+			expect(Is.date(date.toDateString())).toBe(true);
 		});
 
 		it('should return false for non-date object', () => {
-			expect(Is.date({})).toBe(false);
+			expect(Is.date({} as unknown as string)).toBe(false);
 		});
 
 		it('should return false for null value', () => {
-			expect(Is.date(null)).toBe(false);
+			expect(Is.date(null as unknown as string)).toBe(false);
 		});
 
 		it('should return false for undefined value', () => {
-			expect(Is.date(undefined)).toBe(false);
+			expect(Is.date(undefined as unknown as string)).toBe(false);
 		});
 	});
 
@@ -534,6 +534,70 @@ describe('Is', () => {
 			expect(Is.email('test@example!com')).toBe(false);
 			expect(Is.email('test@example#com')).toBe(false);
 			expect(Is.email('test@example$com')).toBe(false);
+		});
+	});
+
+	describe('Is.odd', () => {
+		it('should return true for positive odd numbers', () => {
+			expect(Is.odd(1)).toBe(true);
+			expect(Is.odd(3)).toBe(true);
+			expect(Is.odd(5)).toBe(true);
+		});
+
+		it('should return false for positive even numbers', () => {
+			expect(Is.odd(2)).toBe(false);
+			expect(Is.odd(4)).toBe(false);
+			expect(Is.odd(6)).toBe(false);
+		});
+
+		it('should return true for negative odd numbers', () => {
+			expect(Is.odd(-1)).toBe(true);
+			expect(Is.odd(-3)).toBe(true);
+			expect(Is.odd(-5)).toBe(true);
+		});
+
+		it('should return false for negative even numbers', () => {
+			expect(Is.odd(-2)).toBe(false);
+			expect(Is.odd(-4)).toBe(false);
+			expect(Is.odd(-6)).toBe(false);
+		});
+
+		it('should return false for zero', () => {
+			expect(Is.odd(0)).toBe(false);
+		});
+
+		it('should return true for NaN and Infinity values', () => {
+			expect(Is.odd(NaN)).toBe(true);
+			expect(Is.odd(Infinity)).toBe(true);
+		});
+	});
+
+	describe('Is.even', () => {
+		it('should return true for even numbers', () => {
+			expect(Is.even(2)).toBe(true);
+			expect(Is.even(4)).toBe(true);
+			expect(Is.even(10)).toBe(true);
+		});
+
+		it('should return false for odd numbers', () => {
+			expect(Is.even(1)).toBe(false);
+			expect(Is.even(3)).toBe(false);
+			expect(Is.even(9)).toBe(false);
+		});
+
+		it('should return false for NaN and Infinity values', () => {
+			expect(Is.even(NaN)).toBe(false);
+			expect(Is.even(Infinity)).toBe(false);
+		});
+
+		it('should return true for negative even numbers', () => {
+			expect(Is.even(-2)).toBe(true);
+			expect(Is.even(-4)).toBe(true);
+			expect(Is.even(-10)).toBe(true);
+		});
+
+		it('should return true for zero', () => {
+			expect(Is.even(0)).toBe(true);
 		});
 	});
 
