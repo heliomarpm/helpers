@@ -45,7 +45,7 @@
 </div>
 
 
-## 🎯 About
+## 📚 Summary
 
 `@heliomarpm/helpers` is a comprehensive collection of TypeScript utility functions for formatting, type checking, conversion, and general utilities. This library provides a set of helper functions to make common programming tasks easier and more maintainable.
 
@@ -73,8 +73,6 @@ src/
 │   └── utils.ts     # General utilities
 └── index.ts         # Main entry point
 ```
-
-
 
 ## 📦 Installation
 
@@ -126,9 +124,9 @@ Utils.setNestedValue(target, 'animals[1]', 'cat');
 
 ```
 
-## Main functionalities
+## 🚀 Main functionalities
 
-### Usage
+Import utilities directly:
 
 ```typescript
 import { Format, Is, To, Utils } from '@heliomarpm/helpers';
@@ -334,15 +332,14 @@ Utils.crypto.decrypt(encryptedText, key); // Decrypt text
 
 ## Dependencies
 
-  This library has no dependencies
+    This library has no dependencies
 
 
 ## 🤝 Contributing
 
 Please make sure to read the [Contributing Guide](docs/CONTRIBUTING.md) before making a pull request.
 
-
-Thank you to all the people who already contributed to project!
+Thank you to everyone who has already contributed to the project!
 
 <a href="https://github.com/heliomarpm/helpers/graphs/contributors" target="_blank">
   <img src="https://contrib.rocks/image?repo=heliomarpm/helpers" />
@@ -350,18 +347,15 @@ Thank you to all the people who already contributed to project!
 
 ###### Made with [contrib.rocks](https://contrib.rocks).
 
-That said, there's a bunch of ways you can contribute to this project, like by:
+### ❤️ Support this project
+If this project helped you in any way, there are several ways to contribute.
+Please consider supporting it!
 
-- :beetle: Reporting a bug
-- :page_facing_up: Improving this documentation
-- :rotating_light: Sharing this project and recommending it to your friends
-- :dollar: Supporting this project on GitHub Sponsors or Ko-fi
-- :star2: Giving a star on this repository
-
-
-## 📢 Support the Project
-
-If you appreciate that, please consider donating to the Developer.
+- ⭐ Starring the repository
+- 🐞 Reporting bugs
+- 🧾 Improving the documentation
+- 🚨 Telling others about it
+- 💰 Supporting via GitHub Sponsors, Ko-fi, Paypal, LiberaPay
 
 <p>
   <!-- PixMe -->
