@@ -388,7 +388,7 @@ Please consider supporting it!
 [url-npm]: https://www.npmjs.com/package/@heliomarpm/helpers
 [url-npm-badge]: https://img.shields.io/npm/v/@heliomarpm/helpers.svg
 [url-downloads]: http://badge.fury.io/js/@heliomarpm/helpers.svg
-[url-downloads-badge]: https://img.shields.io/npm/dm/@heliomarpm/helpers.svg  
+[url-downloads-badge]: https://img.shields.io/npm/dy/@heliomarpm/helpers.svg  
 [url-deepscan]: https://deepscan.io/dashboard#view=project&tid=19612&pid=28935&bid=933374
 [url-deepscan-badge]: https://deepscan.io/api/teams/19612/projects/28935/branches/933374/badge/grade.svg
 [url-codefactor]: https://www.codefactor.io/repository/github/heliomarpm/helpers
