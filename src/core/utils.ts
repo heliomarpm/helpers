@@ -1,29 +1,93 @@
-type MemoizedFn<T extends (...args: unknown[]) => unknown> = T & {
+/** biome-ignore-all lint/suspicious/noExplicitAny: false positive */
+/**
+ * A utility object that provides various helper functions for common tasks.
+ * @category Types
+ * @internal
+ */
+type MemoizedFn<P extends unknown[], R> = {
+	(...args: P): R;
 	clear: () => void;
 };
 
+/**
+ * A function that takes an input of type I and returns an output of type O.
+ *
+ * @category Types
+ * @internal
+ */
+type Fn<I, O> = (input: I) => O;
+
+/**
+ * Options for retrying a function.
+ * @property {number} [retries=3] - The number of times to retry the function.
+ * @property {number} [delay=1000] - The delay in milliseconds between retries.
+ * @property {(error: Error, attempt: number) => void} [onRetry] - A callback function that is called before each retry.
+ *
+ * @example
+ * ```ts
+ * import { Utils } from '@heliomarpm/helpers';
+ *
+ * const unreliableFunction = () => {
+ *   if (Math.random() < 0.7) {
+ *     throw new Error('Random failure');
+ *   }
+ *   return 'Success';
+ * };
+ *
+ * const result = await Utils.retry(unreliableFunction, {
+ *   retries: 5,
+ *   delay: 2000,
+ *   onRetry: (error, attempt) => {
+ *     console.log(`Attempt ${attempt} failed: ${error.message}`);
+ *   }
+ * });
+ *
+ * console.log(result); // 'Success' (if successful within the retry limit)
+ * ```
+ *
+ * @category Types
+ */
 export type RetryOptions = {
 	retries?: number;
 	delay?: number;
 	onRetry?: (error: Error, attempt: number) => void;
 };
 
+/**
+ * Utils - A collection of general-purpose utility functions.
+ *
+ * @category Core
+ * @class
+ * @author 	Heliomar P. Marques <https://navto.me/heliomarpm>
+ */
 export const Utils = {
 	/**
 	 * Generates a random valid CPF (Brazilian National Register of Individuals)
 	 * @returns a string containing the generated CPF
+	 * @example
+	 * ```ts
+	 * import { Utils } from '@heliomarpm/helpers';
+	 *
+	 * const cpf = Utils.gerarCPF();
+	 * console.log(cpf); // e.g., "12345678909"
+	 * ```
+	 *
+	 * @category Utils.gerarCPF
 	 */
 	gerarCPF(): string {
 		const calcularDigito = (cpf: string | string[]) => {
 			let soma = 0;
 			let peso = cpf.length + 1;
-			for (let i = 0; i < cpf.length; i++) {
-				soma += Number.parseInt(cpf[i]) * peso;
+
+			for (const element of cpf) {
+				soma += Number.parseInt(element, 10) * peso;
 				peso--;
 			}
+
 			const resto = soma % 11;
 			return resto < 2 ? "0" : (11 - resto).toString();
 		};
+
 		let cpf = "";
 		for (let i = 0; i < 9; i++) {
 			cpf += Math.floor(Math.random() * 10).toString();
@@ -37,13 +101,23 @@ export const Utils = {
 	/**
 	 * Generates a random valid CNPJ (Brazilian National Corporate Registration Number)
 	 * @returns a string containing the generated CNPJ
+	 * @example
+	 * ```ts
+	 * import { Utils } from '@heliomarpm/helpers';
+	 *
+	 * const cnpj = Utils.gerarCNPJ();
+	 * console.log(cnpj); // e.g., "12345678000195"
+	 * ```
+	 *
+	 * @category Utils.gerarCNPJ
 	 */
 	gerarCNPJ(): string {
 		const calcPrimeiroDigito = (cnpj: string | string[]) => {
 			const pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 			let soma = 0;
+
 			for (let i = 0; i < 12; i++) {
-				soma += Number.parseInt(cnpj[i]) * pesos[i];
+				soma += Number.parseInt(cnpj[i], 10) * pesos[i];
 			}
 			const resto = soma % 11;
 			return resto < 2 ? "0" : (11 - resto).toString();
@@ -53,7 +127,7 @@ export const Utils = {
 			const pesos = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 			let soma = 0;
 			for (let i = 0; i < 13; i++) {
-				soma += Number.parseInt(cnpj[i]) * pesos[i];
+				soma += Number.parseInt(cnpj[i], 10) * pesos[i];
 			}
 			const resto = soma % 11;
 			return resto < 2 ? "0" : (11 - resto).toString();
@@ -84,6 +158,7 @@ export const Utils = {
 	 * @returns {function} a compare function
 	 *
 	 * @example
+	 * ```ts
 	 * const validations = [
 	 *     { level: "WARNING", type: "TypeA", message: "This is a warning." },
 	 *     { level: "ERROR", type: "TypeE", message: "Something went wrong." },
@@ -92,6 +167,9 @@ export const Utils = {
 	 *
 	 * const sortedValidations = validations.sort(sortByProps(['level', 'type', '-message']));
 	 * console.log(sortedValidations); // [{ level: "ERROR", type: "TypeE", message: "Something went wrong." }, ...]
+	 * ```
+	 *
+	 * @category Utils.sortByProps
 	 */
 	sortByProps(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
 		const propertyList = Array.isArray(properties) ? properties : [properties];
@@ -131,9 +209,15 @@ export const Utils = {
 	 * @returns A new array sorted by the specified key in the specified order.
 	 *
 	 * @example
+	 * ```ts
 	 * const people = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
 	 * const sortedByName = orderBy(people, 'name'); // Sorts by name in ascending order.
 	 * const sortedByAgeDesc = orderBy(people, 'age', 'desc'); // Sorts by age in descending order.
+	 * console.log(sortedByName); // [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }]
+	 * console.log(sortedByAgeDesc); // [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }]
+	 * ```
+	 *
+	 * @category Utils.orderBy
 	 */
 	orderBy<T, K extends keyof T>(list: T[], key: K, orderBy: "asc" | "desc" = "asc"): T[] {
 		return list.sort((a, b) => {
@@ -152,6 +236,7 @@ export const Utils = {
 	 * @returns The nested value or `undefined` if the path is invalid.
 	 *
 	 * @example
+	 * ```ts
 	 * const data = {
 	 *   user: {
 	 *     name: {
@@ -161,6 +246,8 @@ export const Utils = {
 	 *   }
 	 * };
 	 * const firstName = getNestedValue(data, "user.name.first"); // "John"
+	 * ```
+	 * @category Utils.getNestedValue
 	 */
 	getNestedValue<T>(obj: Record<string, T>, path: string): T | undefined {
 		try {
@@ -178,6 +265,7 @@ export const Utils = {
 	 * @param value The value to set the nested value to.
 	 *
 	 * @example
+	 * ```ts
 	 * interface User {
 	 *   user: {
 	 *     name: {
@@ -195,6 +283,8 @@ export const Utils = {
 	 *   }
 	 * };
 	 * setNestedValue<User>(data, "user.name.first", "Jane"); // Sets data.user.name.first to "Jane"
+	 * ```
+	 * @category Utils.setNestedValue
 	 */
 	setNestedValue<T extends Record<string, unknown>>(target: T, path: string, value: unknown): void {
 		if (!target) {
@@ -208,7 +298,8 @@ export const Utils = {
 		// Divide a string da chave, lidando com arrays corretamente
 		const keys = path.match(/[^.[\]]+/g) as string[];
 
-		keys.reduce((acc: Record<string, unknown>, key: string, index: number) => {
+		let acc: Record<string, unknown> = target;
+		keys.forEach((key: string, index: number) => {
 			const isLastKey = index === keys.length - 1;
 			const nextKey = keys[index + 1];
 			const isNextKeyArrayIndex = nextKey !== undefined && /^\d+$/.test(nextKey);
@@ -222,9 +313,9 @@ export const Utils = {
 				if (!(parsedKey in acc)) {
 					acc[parsedKey] = isNextKeyArrayIndex ? [] : {};
 				}
+				acc = acc[parsedKey] as Record<string, unknown>;
 			}
-			return acc[parsedKey] as Record<string, unknown>;
-		}, target);
+		});
 	},
 
 	/**
@@ -234,8 +325,12 @@ export const Utils = {
 	 * @returns The first argument if it is not null or undefined, otherwise the second argument.
 	 *
 	 * @example
-	 * const foo = null;
-	 * const bar = ifNull(foo, "baz"); // "baz"
+	 * ```ts
+	 * const foo = "hello";
+	 * const bar = ifNull(foo, "baz"); // "hello"
+	 * ```
+	 *
+	 * @category Utils.ifNull
 	 */
 	ifNull<T>(value: T, fallback: T): T {
 		return value ?? fallback;
@@ -248,9 +343,19 @@ export const Utils = {
 	 * @returns The first valid value or `undefined` if all values are null, undefined, or empty.
 	 *
 	 * @example
+	 * ```ts
 	 * const result = ifNullOrEmpty(null, '', undefined, 'Hello', 'World'); // "Hello"
 	 * const result2 = ifNullOrEmpty(null, '', 0); // 0
 	 * const result3 = ifNullOrEmpty([], {}); // undefined
+	 * ```
+	 *
+	 * @remarks
+	 * A value is considered "empty" if it is:
+	 * - An empty string (`''` or strings with only whitespace)
+	 * - An empty array (`[]`)
+	 * - An empty object (`{}`)
+	 *
+	 * @category Utils.ifNullOrEmpty
 	 */
 	ifNullOrEmpty<T>(...values: (T | null | undefined)[]): T | undefined {
 		return values.find(
@@ -264,33 +369,55 @@ export const Utils = {
 	},
 
 	/**
-	 * Generates a random GUID in the format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`.
-	 * @returns A random GUID.
+	 * Generates a random UUID (universally unique identifier) according to the v4 variant
+	 * (RFC 4122). The generated UUID is a string of 36 characters, with 8-4-4-4-12
+	 * hexadecimal digits separated by hyphens.
+	 *
+	 * Note: This function relies on the `crypto.randomUUID` or `crypto.getRandomValues`
+	 * functions to generate random numbers. If neither of these functions is available,
+	 * an error is thrown.
+	 * @returns A random UUID string.
 	 *
 	 * @example
-	 *
-	 * const guid = generateGuid();
-	 * console.log(guid); // "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+	 * ```ts
+	 * const uuid = Utils.generateUUIDv4();
+	 * console.log(uuid); // e.g., "550e8400-e29b-41d4-a716-446655440000"
+	 * ```
+	 * @category Utils.generateGuid
 	 */
-	generateGuid(): string {
-		if (typeof crypto === "undefined" || !crypto.getRandomValues) {
-			throw new Error("Crypto API not available in this environment.");
+	generateUUIDv4(): string {
+		if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+			return crypto.randomUUID();
 		}
 
-		const randomBytes = new Uint8Array(16);
-		crypto.getRandomValues(randomBytes);
+		if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+			const randomBytes = new Uint8Array(16);
+			crypto.getRandomValues(randomBytes);
 
-		// Convert the bytes to a string
-		return [...randomBytes]
-			.map((byte, index) => {
-				const hex = byte.toString(16).padStart(2, "0");
+			// Set version bits to 4
+			randomBytes[6] = (randomBytes[6] & 0x0f) | 0x40;
+			// Set variant bits to 10xx (variant 1)
+			randomBytes[8] = (randomBytes[8] & 0x3f) | 0x80;
 
-				// Insert dashes at the appropriate positions
-				return index === 4 || index === 6 || index === 8 || index === 10 ? `-${hex}` : hex;
-			})
-			.join("");
+			// Convert to hex string with dashes
+			return [
+				[...randomBytes.slice(0, 4)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+				[...randomBytes.slice(4, 6)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+				[...randomBytes.slice(6, 8)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+				[...randomBytes.slice(8, 10)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+				[...randomBytes.slice(10, 16)].map((b) => b.toString(16).padStart(2, "0")).join(""),
+			].join("-");
+		}
+
+		throw new Error("Crypto API not available.");
 	},
 
+	/**
+	 * A set of cryptographic utility functions for key generation, encryption, and decryption using the Web Crypto API.
+	 *
+	 * @category Utils.crypto
+	 * @namespace crypto
+	 */
 	crypto: {
 		/**
 		 * Generates a new 256-bit AES-GCM key.
@@ -298,10 +425,15 @@ export const Utils = {
 		 * @returns A Promise that resolves to a CryptoKey that can be used for encryption and decryption.
 		 *
 		 * @example
+		 * ```ts
 		 * const key = await generateKey();
+		 * ```
 		 */
 		async generateKey(): Promise<CryptoKey> {
-			return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+			if (typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined") {
+				return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+			}
+			throw new Error("Crypto API not available.");
 		},
 
 		/**
@@ -309,14 +441,28 @@ export const Utils = {
 		 * @param text The plaintext string to encrypt.
 		 * @param key The CryptoKey used for encryption.
 		 * @returns A Promise that resolves to the encrypted Base64 string.
+		 *
+		 * @example
+		 * ```ts
+		 * const key = await generateKey();
+		 * const encrypted = await encrypt("Hello, World!", key);
+		 * console.log(encrypted);
 		 */
 		async encrypt(text: string, key: CryptoKey): Promise<string> {
-			const iv: Uint8Array = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector (IV)
-			const encodedText: Uint8Array = new TextEncoder().encode(text);
-			const encryptedData: ArrayBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedText);
+			if (typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined") {
+				if (key.algorithm.name !== "AES-GCM") {
+					throw new Error("Invalid key algorithm. Only AES-GCM is supported.");
+				}
+			} else {
+				throw new Error("Crypto API not available.");
+			}
+
+			const iv = crypto.getRandomValues(new Uint8Array(12)); // Initialization Vector (IV)
+			const encodedText = new TextEncoder().encode(text);
+			const encryptedData = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encodedText);
 
 			// Concatenate IV + encrypted data and convert to Base64
-			const combined: Uint8Array = new Uint8Array(iv.length + encryptedData.byteLength);
+			const combined = new Uint8Array(iv.length + encryptedData.byteLength);
 			combined.set(iv, 0);
 			combined.set(new Uint8Array(encryptedData), iv.length);
 
@@ -328,13 +474,29 @@ export const Utils = {
 		 * @param encryptedText The Base64 string to decrypt.
 		 * @param key The CryptoKey used for decryption.
 		 * @returns The decrypted string.
+		 *
+		 * @example
+		 * ```ts
+		 * const key = await generateKey();
+		 * const encrypted = await encrypt("Hello, World!", key);
+		 * const decrypted = await decrypt(encrypted, key);
+		 * console.log(decrypted);
+		 * ```
 		 */
 		async decrypt(encryptedText: string, key: CryptoKey): Promise<string> {
-			const rawData = Buffer.from(encryptedText, "base64") as Uint8Array; // Decodifica Base64 para Uint8Array
-			const iv = rawData.slice(0, 12) as Uint8Array; // Extrai o IV
-			const encryptedData = rawData.slice(12) as Uint8Array; // Extrai os dados criptografados
+			if (typeof crypto !== "undefined" && typeof crypto.subtle !== "undefined") {
+				if (key.algorithm.name !== "AES-GCM") {
+					throw new Error("Invalid key algorithm. Only AES-GCM is supported.");
+				}
+			} else {
+				throw new Error("Crypto API not available.");
+			}
 
-			const decryptedData = (await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData)) as Uint8Array;
+			const rawData = Buffer.from(encryptedText, "base64"); // Decodifica Base64 para Uint8Array
+			const iv = rawData.slice(0, 12); // Extrai o IV
+			const encryptedData = rawData.slice(12); // Extrai os dados criptografados
+
+			const decryptedData = (await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encryptedData)) as ArrayBuffer;
 
 			return new TextDecoder().decode(decryptedData);
 		},
@@ -349,9 +511,12 @@ export const Utils = {
 	 * @returns An array of month names (e.g., "January", "February", ...) for the specified locale.
 	 *
 	 * @example
+	 * ```ts
 	 * const months = monthNames('en-US'); // ["January", "February", ..., "December"]
+	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+	 * @category Utils.months
 	 */
 	months({ locale = "default", month = "long" }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions["month"] } = {}): Array<string> {
 		return Array.from({ length: 12 }, (_, i) => {
@@ -369,10 +534,13 @@ export const Utils = {
 	 * @returns {string[]} An array of full weekday names (e.g., "Sunday", "Monday", ...) for the specified locale.
 	 *
 	 * @example
+	 * ```ts
 	 * const days = dayNames({ locale: 'en-US', weekday: 'short' });
 	 * // Output: ["Sun", "Mon", ..., "Sat"]
+	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+	 * @category Utils.weekdays
 	 */
 	weekdays({ locale = "default", weekday = "long" }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions["weekday"] } = {}): Array<string> {
 		const firstSunday = new Date(2000, 0, 1);
@@ -390,7 +558,11 @@ export const Utils = {
 	 * @returns A promise that resolves after the specified duration.
 	 *
 	 * @example
+	 * ```
 	 * await sleep(1000); // Pauses for 1 second
+	 * ```
+	 *
+	 * @category Utils.sleep
 	 */
 	async sleep(ms: number): Promise<void> {
 		if (ms < 0 || Number.isNaN(ms)) {
@@ -411,11 +583,15 @@ export const Utils = {
 	 * @returns A promise that resolves to the result of the function, or rejects with the last error.
 	 *
 	 * @example
+	 * ```
 	 * await retry(() => fetch('https://example.com/api/data'), {
 	 *   retries: 5,
 	 *   delay: 500,
 	 *   onRetry: (error, attempt) => console.log(`Attempt ${attempt} failed with error ${error.message}`)
 	 * });
+	 * ```
+	 *
+	 * @category Utils.retry
 	 */
 	async retry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
 		const { retries = 3, delay = 1000, onRetry } = options;
@@ -440,38 +616,47 @@ export const Utils = {
 	},
 
 	/**
-	 * Creates a memoized version of the given function. Memoization is a technique for
-	 * optimizing performance by storing the results of expensive function calls and
-	 * reusing them when the same inputs occur again.
+	 * Memoizes a function to avoid redundant computation.
+	 *
 	 * @param fn - The function to memoize.
 	 * @returns A memoized version of the function.
 	 *
 	 * @example
+	 * ```ts
 	 * const add = (a: number, b: number) => a + b;
 	 * const memoizedAdd = memoize(add);
 	 *
-	 * memoizedAdd(1, 2); // Calculates the result and stores it in the cache
-	 * memoizedAdd(1, 2); // Returns the cached result
+	 * const result1 = memoizedAdd(1, 2); // Calls the original function
+	 * const result2 = memoizedAdd(1, 2); // Returns cached result
+	 * ```
+	 *
+	 * @remarks
+	 * The memoized function has a `clear` method that can be used to clear the cache.
+	 *
+	 * ```ts
+	 * memoizedAdd.clear(); // Clears the cache
+	 * ```
+	 *
+	 * @category Utils.memoize
 	 */
-	memoize<T extends (...args: unknown[]) => unknown>(fn: T): MemoizedFn<T> {
-		const cache = new Map<string, ReturnType<T>>();
+	memoize<P extends unknown[], R>(fn: (...args: P) => R): MemoizedFn<P, R> {
+		const cache = new Map<string, R>();
 
-		const memoized = (...args: Parameters<T>): ReturnType<T> => {
+		const memoized = (...args: P): R => {
 			const key = JSON.stringify(args);
 
 			if (cache.has(key)) {
-				return cache.get(key)!;
+				return cache.get(key) as R;
 			}
 
 			// Call the original function if the result is not cached
 			const result = fn(...args);
-			cache.set(key, result as ReturnType<T>);
-			return result as ReturnType<T>;
+			cache.set(key, result);
+			return result;
 		};
 
 		memoized.clear = () => cache.clear();
-
-		return memoized as MemoizedFn<T>;
+		return memoized;
 	},
 
 	/**
@@ -483,6 +668,7 @@ export const Utils = {
 	 * @returns A debounced version of the function.
 	 *
 	 * @example
+	 * ```ts
 	 * const add = (a: number, b: number) => a + b;
 	 * const debouncedAdd = debounce(add, 500);
 	 *
@@ -491,6 +677,9 @@ export const Utils = {
 	 *
 	 * const debouncedSearch = debounce(searchFunction, 300);
 	 * input.addEventListener('input', debouncedSearch);
+	 * ```
+	 *
+	 * @category Utils.debounce
 	 */
 	debounce<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): T {
 		let timeoutId: NodeJS.Timeout;
@@ -510,6 +699,7 @@ export const Utils = {
 	 * @returns A throttled version of the function.
 	 *
 	 * @example
+	 * ```ts
 	 * const add = (a: number, b: number) => a + b;
 	 * const throttledAdd = throttle(add, 500);
 	 *
@@ -518,6 +708,9 @@ export const Utils = {
 	 *
 	 * const throttledScroll = throttle(handleScroll, 200);
 	 * window.addEventListener('scroll', throttledScroll);
+	 * ```
+	 *
+	 * @category Utils.throttle
 	 */
 	throttle<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): (...args: Parameters<T>) => ReturnType<T> {
 		let lastRun = 0;
@@ -549,13 +742,14 @@ export const Utils = {
 	},
 
 	/**
-	 * Creates a version of the given function that can only be called once. The
-	 * first call to the function is executed normally, but any subsequent calls
-	 * return the result of the first call.
-	 * @param fn - The function to wrap.
-	 * @returns A version of the function that can only be called once.
+	 * Creates a version of the given function that can only be called once.
+	 * The first call to the function is executed normally, but any subsequent
+	 * calls return the result of the first call.
+	 * @param fn - The function to wrap, which takes arguments of type P and returns R.
+	 * @returns A version of the function that can only be called once, taking P and returning R.
 	 *
 	 * @example
+	 * ```ts
 	 * const add = (a: number, b: number) => a + b;
 	 * const onceAdd = once(add);
 	 *
@@ -565,54 +759,110 @@ export const Utils = {
 	 * const init = once(() => console.log('Inicializado'));
 	 * init(); // 'Inicializado'
 	 * init(); // nada acontece
+	 * ```
+	 *
+	 * @category Utils.once
 	 */
-	once<T extends (...args: unknown[]) => unknown>(fn: T): T {
+	once<P extends unknown[], R>(fn: (...args: P) => R): (...args: P) => R {
 		let called = false;
-		let result: ReturnType<T>;
+		let result: R;
 
-		return ((...args: Parameters<T>) => {
+		return (...args: P): R => {
 			if (!called) {
 				called = true;
-				result = fn(...args) as ReturnType<T>;
+				result = fn(...args);
 			}
 			return result;
-		}) as T;
+		};
 	},
 
 	/**
-	 * Composes a sequence of functions that process a value from left to right.
-	 * Each function in the sequence takes a single argument and returns a value
-	 * of the same type, which is then passed to the next function in the sequence.
+	 * Composes multiple unary functions from left to right.
+	 * Ensures type safety between function outputs and inputs
+	 *
+	 * @param fns - An array of functions to be composed.
+	 * @returns A function that takes a single argument and processes it through
+	 * the composed sequence of functions.
+	 *
+	 * @throws Will throw an error if no functions are provided or if any argument is not a function.
+	 *
+	 * @example
+	 * ```ts
+	 * const addOne = (x: number) => x + 1;
+	 * const numToString = (x: number) => String(x);
+	 * const length = (s: string) => s.length;
+	 *
+	 * const process = Utils.pipe(addOne, numToString, length);
+	 * console.log(process(5)); // 1
+	 * ```
+	 * @category Utils.pipe
+	 */
+	pipe: <T extends unknown[], R>(...fns: { [K in keyof T]: Fn<any, any> }): ((arg: T[0]) => R) => {
+		if (!fns || fns.length === 0) {
+			throw new Error("No functions provided to pipe");
+		}
+
+		return (input: T[0]) => {
+			return fns.reduce((acc, fn, index) => {
+				if (typeof fn !== "function") {
+					throw new Error(`Argument at index ${index} is not a function`);
+				}
+				return fn(acc);
+			}, input) as R;
+		};
+	},
+
+	/**
+	 * Composes multiple unary functions from right to left.
+	 * Ensures type safety between function outputs and inputs
+	 *
 	 * @param fns - An array of functions to be composed.
 	 * @returns A function that takes a single argument and processes it through
 	 * the composed sequence of functions.
 	 *
 	 * @example
+	 * ```ts
 	 * const addOne = (x: number) => x + 1;
-	 * const subTwo = (x: number) => x - 2;
-	 * const process = pipe(addOne, subTwo);
-	 * console.log(process(3)); // Outputs 2 (3+1-2)
+	 * const double = (x: number) => x * 2;
+	 * const process = compose(addOne, double);
+	 * console.log(process(5)); // Outputs 11 (5*2+1)
+	 * ```
+	 * @category Utils.compose
 	 */
-	pipe<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
-		return (arg: T) => fns.reduce((prev, fn) => fn(prev), arg);
+	compose: <T extends unknown[], R>(...fns: { [K in keyof T]: Fn<any, any> }): ((arg: T[0]) => R) => {
+		if (!fns || fns.length === 0) {
+			throw new Error("No functions provided to compose");
+		}
+
+		return (input: T[0]) => {
+			return fns.reduceRight((acc, fn, index) => {
+				if (typeof fn !== "function") {
+					throw new Error(`Argument at index ${index} is not a function`);
+				}
+				return fn(acc);
+			}, input) as R;
+		};
 	},
 
 	/**
-	 * Composes a sequence of functions that process a value from right to left.
-	 * Each function in the sequence takes a single argument and returns a value
-	 * of the same type, which is then passed to the next function in the sequence.
-	 * @param fns - An array of functions to be composed.
-	 * @returns A function that takes a single argument and processes it through
-	 * the composed sequence of functions.
+	 * Generates a random integer between the specified minimum and maximum values, inclusive.
+	 * @param min - The minimum value (inclusive).
+	 * @param max - The maximum value (inclusive).
+	 * @returns A random integer between `min` and `max`.
 	 *
 	 * @example
-	 * const addOne = (x: number) => x + 1;
-	 * const subTwo = (x: number) => x - 2;
-	 * const process = compose(addOne, subTwo);
-	 * console.log(process(-1)); // Outputs -2  (-1-2+1)
+	 * ```ts
+	 * const randomNum = Utils.randomBetween(1000, 2000);
+	 * console.log(randomNum); // Outputs a random integer between 1000 and 2000
+	 * ```
+	 *
+	 * @category Utils.randomBetween
 	 */
-	compose<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
-		// return pipe(...fns.reverse());
-		return (arg: T) => fns.reduceRight((acc, fn) => fn(acc), arg);
+	randomBetween(min: number, max: number): number {
+		if (min >= max) {
+			throw new Error("The 'min' parameter must be less than 'max'.");
+		}
+
+		return Math.floor(Math.random() * (max - min + 1)) + min;
 	},
 };
