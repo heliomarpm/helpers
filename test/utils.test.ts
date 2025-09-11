@@ -989,7 +989,7 @@ describe("Utils", () => {
 
 			const process = Utils.compose(addOne);
 
-			expect(process(3)).toBe(4); // 3 -> addOne -> 4
+			expect(process(3 as unknown)).toBe(4); // 3 -> addOne -> 4
 		});
 
 		it("should compose functions that return different types", () => {
