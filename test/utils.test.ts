@@ -928,15 +928,15 @@ describe("Utils", () => {
 		it("should compose multiple functions", () => {
 			const addOne = (x: number) => x + 1;
 			const subTwo = (x: number) => x - 2;
+			const valueIs = (x: string) => `Value is: ${x}`;
 
-			const process = Utils.pipe(addOne, subTwo);
+			const process = Utils.pipe(addOne, subTwo, valueIs);
 
-			expect(process(3)).toBe(2); // 3 -> addOne -> 4 -> subTwo -> 2
+			expect(process(3)).toBe("Value is: 2"); // 3 -> addOne -> 4 -> subTwo -> 2
 		});
 
 		it("should compose single function", () => {
 			const addOne = (x: number) => x + 1;
-
 			const process = Utils.pipe(addOne);
 
 			expect(process(3)).toBe(4); // 3 -> addOne -> 4
@@ -978,10 +978,11 @@ describe("Utils", () => {
 		it("should compose multiple functions", () => {
 			const addOne = (x: number) => x + 1;
 			const subTwo = (x: number) => x - 2;
+			const valueIs = (x: string) => `Value is: ${x}`;
 
-			const process = Utils.compose(addOne, subTwo);
+			const process = Utils.compose(valueIs, addOne, subTwo);
 
-			expect(process(3)).toBe(2); // 3 -> subTwo -> 1 -> addOne -> 2
+			expect(process(3)).toBe("Value is: 2"); // 3 -> subTwo -> 1 -> addOne -> 2
 		});
 
 		it("should compose single function", () => {
@@ -989,7 +990,7 @@ describe("Utils", () => {
 
 			const process = Utils.compose(addOne);
 
-			expect(process(3)).toBe(4); // 3 -> addOne -> 4
+			expect(process(3 as unknown)).toBe(4); // 3 -> addOne -> 4
 		});
 
 		it("should compose functions that return different types", () => {

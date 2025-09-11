@@ -17,6 +17,9 @@ type MemoizedFn<P extends unknown[], R> = {
  */
 type Fn<I, O> = (input: I) => O;
 
+type AnyValue = null | string | number | boolean | object | DictionaryType | Array<AnyValue>;
+type DictionaryType = { [key: string]: AnyValue };
+
 /**
  * Options for retrying a function.
  * @property {number} [retries=3] - The number of times to retry the function.
@@ -798,19 +801,28 @@ export const Utils = {
 	 * @category Utils.pipe
 	 */
 	pipe: <T extends unknown[], R>(...fns: { [K in keyof T]: Fn<any, any> }): ((arg: T[0]) => R) => {
-		if (!fns || fns.length === 0) {
+		if (fns.length === 0) {
 			throw new Error("No functions provided to pipe");
 		}
-
-		return (input: T[0]) => {
-			return fns.reduce((acc, fn, index) => {
-				if (typeof fn !== "function") {
-					throw new Error(`Argument at index ${index} is not a function`);
-				}
-				return fn(acc);
-			}, input) as R;
-		};
+		if (fns.length === 1) {
+			return fns[0];
+		}
+		return fns.reduce((acc, fn) => (input) => fn(acc(input))) as (arg: T[0]) => R;
 	},
+	// pipe: <T extends AnyValue[], R>(...fns: { [K in keyof T]: Fn<AnyValue, AnyValue> }): ((arg: T[0]) => R) => {
+	// 	if (fns.length === 0) {
+	// 		throw new Error("No functions provided to pipe");
+	// 	}
+
+	// 	return (input: T[0]) => {
+	// 		return fns.reduce((acc, fn, index) => {
+	// 			if (typeof fn !== "function") {
+	// 				throw new Error(`Argument at index ${index} is not a function`);
+	// 			}
+	// 			return fn(acc);
+	// 		}, input) as R;
+	// 	};
+	// },
 
 	/**
 	 * Composes multiple unary functions from right to left.
@@ -820,28 +832,27 @@ export const Utils = {
 	 * @returns A function that takes a single argument and processes it through
 	 * the composed sequence of functions.
 	 *
+	 * @throws Will throw an error if no functions are provided or if any argument is not a function.
+	 *
 	 * @example
 	 * ```ts
 	 * const addOne = (x: number) => x + 1;
-	 * const double = (x: number) => x * 2;
-	 * const process = compose(addOne, double);
-	 * console.log(process(5)); // Outputs 11 (5*2+1)
+	 * const numToString = (x: number) => String(x);
+	 * const length = (s: string) => s.length;
+	 *
+	 * const process = Utils.compose(length, numToString, addOne);
+	 * console.log(process(5)); // 1
 	 * ```
 	 * @category Utils.compose
 	 */
 	compose: <T extends unknown[], R>(...fns: { [K in keyof T]: Fn<any, any> }): ((arg: T[0]) => R) => {
-		if (!fns || fns.length === 0) {
+		if (fns.length === 0) {
 			throw new Error("No functions provided to compose");
 		}
-
-		return (input: T[0]) => {
-			return fns.reduceRight((acc, fn, index) => {
-				if (typeof fn !== "function") {
-					throw new Error(`Argument at index ${index} is not a function`);
-				}
-				return fn(acc);
-			}, input) as R;
-		};
+		if (fns.length === 1) {
+			return fns[0];
+		}
+		return fns.reduceRight((acc, fn) => (input) => fn(acc(input))) as (arg: T[0]) => R;
 	},
 
 	/**
