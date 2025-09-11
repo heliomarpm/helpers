@@ -1,7 +1,7 @@
 {
   "name": "@heliomarpm/helpers",
   "version": "0.2.0",
-  "description": "A library with many useful features",
+  "description": "A utility for NodeJS App with many useful features",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "Heliomar P. Marques",
@@ -34,18 +34,20 @@
     "validations"
   ],
   "scripts": {
-    "check": "biome check --write ./src",
-    "lint": "biome lint --write ./src",
-    "format": "biome format --write ./src && biome format --write ./test",
+    "check": "biome check --write",
+    "lint": "biome lint --write",
+    "format": "biome format --write",
     "test": "vitest --no-watch",
     "test:c": "vitest --no-watch --coverage",
     "prebuild": "rimraf dist",
     "build:dev": "tsc -p tsconfig.json",
     "build": "tsc -p tsconfig.prod.json",
-    "pub:release": "node ./node_modules/gh_deploy/index.mjs"
+    "pub:release": "node ./node_modules/gh_deploy/index.mjs",
+    "clean": "rm -rf node_modules coverage dist .docs/.vitepress/cache .docs/.vitepress/dist .docs/app",
+    "postclean": "npm cache clean --force"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "^2.2.3",
     "@vitest/coverage-v8": "^3.0.9",
     "@vitest/ui": "^3.0.9",
     "gh_deploy": "github:heliomarpm/gh_deploy",
