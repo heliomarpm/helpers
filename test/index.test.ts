@@ -1,53 +1,53 @@
-import { describe, it, expect } from 'vitest';
-import { Is, To, Utils } from '../src';
+import { describe, expect, it } from "vitest";
+import { Is, To, Utils } from "../src";
 
 interface IPerson {
 	name: string;
 	age: number;
 }
 const people: IPerson[] = [
-	{ name: 'John', age: 23 },
-	{ name: 'Jane', age: 19 },
-	{ name: 'Bob', age: 35 }
+	{ name: "John", age: 23 },
+	{ name: "Jane", age: 19 },
+	{ name: "Bob", age: 35 },
 ];
 
-describe('test', () => {
-	it('test dynamicSort ascending', () => {
-		const n = Utils.orderBy(people, 'age');
+describe("test", () => {
+	it("test dynamicSort ascending", () => {
+		const n = Utils.orderBy(people, "age");
 		expect(n[0].age).toBe(19);
 	});
 
-	it('test dynamicSort descending', () => {
-		const n = Utils.orderBy(people, 'age', 'desc');
+	it("test dynamicSort descending", () => {
+		const n = Utils.orderBy(people, "age", "desc");
 		expect(n[0].age).toBe(35);
 	});
 
-	it('test is numeric', () => {
-		const b = Is.numeric('15.4');
+	it("test is numeric", () => {
+		const b = Is.numeric("15.4");
 		expect(b).toBeTruthy();
 	});
 
-	it('test is not numeric', () => {
-		const b = !Is.numeric('15px');
+	it("test is not numeric", () => {
+		const b = !Is.numeric("15px");
 		expect(b).toBeTruthy();
 	});
 
-	it('test number 0 to boolean', () => {
-		const b = !To.boolean('0');
+	it("test number 0 to boolean", () => {
+		const b = !To.boolean("0");
 		expect(b).toBeTruthy();
 	});
 
-	it('test number to boolean', () => {
-		const b = To.boolean('55');
+	it("test number to boolean", () => {
+		const b = To.boolean("55");
 		expect(b).toBeTruthy();
 	});
 
-	it('test `true` to boolean', () => {
-		const b = To.boolean('true');
+	it("test `true` to boolean", () => {
+		const b = To.boolean("true");
 		expect(b).toBeTruthy();
 	});
 
-	it('test dateExplode', () => {
+	it("test dateExplode", () => {
 		const date = new Date();
 		const dateExploded = To.dateParts(date);
 		expect(dateExploded.year).toBe(date.getFullYear());
@@ -58,7 +58,7 @@ describe('test', () => {
 		expect(dateExploded.second).toBe(date.getSeconds());
 	});
 
-	it('test dateExplode with string', () => {
+	it("test dateExplode with string", () => {
 		const date = new Date();
 		const dateExploded = To.dateParts(date.toString());
 		expect(dateExploded.year).toBe(date.getFullYear());
