@@ -1,32 +1,9 @@
 <div id="top" align="center">
-<h1>
-
-  <img src="./logo.png" alt="Helpers Library" width="128" />
-  <br>Helpers Library <a href="https://navto.me/heliomarpm" target="_blank"><img src="https://navto.me/assets/navigatetome-brand.png" width="32"/></a>
-
-  [![DeepScan grade][url-deepscan-badge]][url-deepscan]
-  [![CodeFactor][url-codefactor-badge]][url-codefactor]
-  [![Test][url-test-badge]][url-test]
-  [![Coverage][url-coverage-badge]][url-coverage-report]
-
-  <!--![CodeQL][url-codeql] ![Publish][url-publish] --> [![NPM version][url-npm-badge]][url-npm]
-  [![Downloads][url-downloads-badge]][url-downloads]
-  
-  <!-- ![lodash](https://img.shields.io/github/package-json/dependency-version/heliomarpm/helpers/lodash)   -->
-</h1>
-
-<div class="badges">
-
-  [![PayPal][url-paypal-badge]][url-paypal]
-  [![Ko-fi][url-kofi-badge]][url-kofi]
-  [![Liberapay][url-liberapay-badge]][url-liberapay]
-  [![GitHub Sponsors][url-github-sponsors-badge]][url-github-sponsors]
-  
+  <h1>
+    <!-- <img src="./logo.png" alt="Helpers Library" width="128" /> -->
+    <br>Helpers Library <a href="https://navto.me/heliomarpm" target="_blank"><img src="https://navto.me/assets/navigatetome-brand.png" width="32"/></a>
+  </h1>
 </div>
-</div>
-
->[!NOTE]
-> Cryptor utility has been removed from this package and made available separately at [@heliomarpm/cryptor](https://www.npmjs.com/package/@heliomarpm/cryptor)
 
 ## 📚 Summary
 
@@ -108,9 +85,6 @@ import { Format, Is, To, Utils } from '@heliomarpm/helpers';
 
 ## 📚 API Reference
 
-See the [API documentation](https://heliomarpm.github.io/helpers) for a complete list of available functions and their signatures.
-
-
 ### Format Helpers
 
 #### Brazilian Formats (ptBr)
@@ -191,15 +165,6 @@ Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
 // Mask a part of a string with a single character
 Format.maskIt('1234567890', 3, 6, '*'); // '123****890'
 Format.maskItParts('Heliomar P. Marques', '*', 1); // 'H******* P. M******'
-
-// Truncates a given text to a maximum length and appends an ellipsis
-Format.truncate('Hello, world!', 9, 'ooo!'); // 'Helloooo!'
-Format.truncate('Short text', 10, "..."); // 'Short text'
-
-// Interpolates a string with values
-Format.interpolate('Hello, {name}!', { name: 'John' }); // 'Hello, John!'
-Format.interpolate('The division of {0} by {1} is {1}.', 4, 2); // 'The division of 4 by 2 is 2.'
-
 ```
 
 ### Is Helpers (Validation)
@@ -252,7 +217,7 @@ Utils.getNestedValue(obj, 'user.name'); // Get nested object value
 Utils.setNestedValue(obj, 'user.name', value); // Set nested object value
 Utils.ifNull(value, defaultValue); // Null coalescing
 Utils.ifNullOrEmpty(value, value2, defaultValue); // Returns the first non-null, non-undefined, and non-empty value from the given arguments.
-Utils.generateUUIDv4(); // Generates UUID v4 (e.g '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d')
+Utils.generateGuid(); // Generate GUID (e.g. '00000000-0000-0000-0000-000000000000') 
 Utils.months({locale: 'pt-BR', month: 'long'}); // Get month names array (e.g. ['Janeiro', 'Fevereiro', ...])
 Utils.weekdays({locale: 'pt-BR', weekday: 'long'}); // Get weekday names array (e.g. ['Domingo', 'Segunda-feira', ...])
 Utils.sleep(1000); // Sleep for 1 second
@@ -263,7 +228,6 @@ Utils.throttle(fn, 100); // Throttle function
 Utils.once(fn); // Once function
 Utils.pipe(fn1, fn2, fn3); // Pipe function
 Utils.compose(fn1, fn2, fn3); // Compose function
-Utils.randomBetween(1, 10); // Random number between 1 and 10
 
 // Crypto utilities
 Utils.crypto.generateKey(); // Generate encryption key
@@ -294,8 +258,8 @@ Utils.crypto.decrypt(encryptedText, key); // Decrypt text
 
 We welcome contributions! Please read:
 
-- [Code of Conduct](docs/CODE_OF_CONDUCT.md)
-- [Contributing Guide](docs/CONTRIBUTING.md)
+- [Code of Conduct](./CODE_OF_CONDUCT.md)
+- [Contributing Guide](./CONTRIBUTING.md)
 
 Thank you to everyone who has already contributed to the project!
 
@@ -332,7 +296,7 @@ Help us maintain and improve this template:
 
 ## 📝 License
 
-[MIT © Heliomar P. Marques](LICENSE)  <a href="#top">🔝</a>
+[MIT © Heliomar P. Marques](./LICENSE)  <a href="#top">🔝</a>
 
 ----
 <!-- Sponsor badges -->
@@ -344,30 +308,3 @@ Help us maintain and improve this template:
 [url-liberapay]: https://liberapay.com/heliomarpm
 [url-github-sponsors-badge]: https://img.shields.io/badge/GitHub%20-Sponsor-1C1E26?style=for-the-badge&labelColor=1C1E26&color=db61a2
 [url-github-sponsors]: https://github.com/sponsors/heliomarpm
-
-<!-- GitHub Actions badges -->
-[url-codeql-badge]: https://github.com/heliomarpm/cryptoh/actions/workflows/codeql.yml/badge.svg 
-[url-codeql]: https://github.com/heliomarpm/cryptoh/security/code-scanning
-[url-test-badge]: https://github.com/heliomarpm/cryptoh/actions/workflows/0.test.yml/badge.svg
-[url-test]: https://github.com/heliomarpm/cryptoh/actions/workflows/0.test.yml
-[url-coverage-badge2]: https://img.shields.io/badge/coverage-dynamic.svg?label=coverage&color=informational&style=flat&logo=jest&query=$.coverage&url=https://heliomarpm.github.io/cryptoh/coverage-badge.json
-[url-coverage-badge]: https://img.shields.io/endpoint?url=https://heliomarpm.github.io/cryptoh/coverage/coverage-badge.json
-[url-coverage-report]: https://heliomarpm.github.io/cryptoh/coverage
-
-<!-- https://img.shields.io/endpoint?url=https://heliomarpm.github.io/cryptoh/coverage-badge.json&label=coverage&suffix=%25 -->
-[url-release-badge]: https://github.com/heliomarpm/cryptoh/actions/workflows/3.release.yml/badge.svg
-[url-release]: https://github.com/heliomarpm/cryptoh/actions/workflows/3.release.yml
-[url-publish-badge]: https://github.com/heliomarpm/cryptoh/actions/workflows/4.publish-npm.yml/badge.svg 
-[url-publish]: https://github.com/heliomarpm/cryptoh/actions/workflows/4.publish-npm.yml
-
-<!-- other badges -->
-[url-npm]: https://www.npmjs.com/package/@heliomarpm/helpers
-[url-npm-badge]: https://img.shields.io/npm/v/@heliomarpm/helpers.svg
-[url-downloads]: http://badge.fury.io/js/@heliomarpm/helpers.svg
-[url-downloads-badge]: https://img.shields.io/npm/d18m/@heliomarpm/helpers.svg  
-[url-deepscan]: https://deepscan.io/dashboard#view=project&tid=19612&pid=28935&bid=933374
-[url-deepscan-badge]: https://deepscan.io/api/teams/19612/projects/28935/branches/933374/badge/grade.svg
-[url-codefactor]: https://www.codefactor.io/repository/github/heliomarpm/helpers
-[url-codefactor-badge]: https://www.codefactor.io/repository/github/heliomarpm/helpers/badge
-[url-codeql]: https://github.com/heliomarpm/helpers/actions/workflows/codeql.yml/badge.svg 
-[url-publish]: https://github.com/heliomarpm/helpers/actions/workflows/publish.yml/badge.svg
