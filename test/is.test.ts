@@ -1,10 +1,12 @@
+// biome-ignore-all lint/suspicious/noThenProperty: false positive
+// biome-ignore-all lint/suspicious/noExplicitAny: false positive
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { Is, Utils } from "../src";
 
 describe("Is", () => {
 	describe("cnpj", () => {
-		let cnpjValidos: Array<any>;
-		let cnpjInvalidos: Array<any>;
+		let cnpjValidos: Array<string>;
+		let cnpjInvalidos: Array<string>;
 
 		beforeAll(() => {
 			cnpjValidos = Array.from({ length: 2000 }, () => Utils.gerarCNPJ());
@@ -37,17 +39,21 @@ describe("Is", () => {
 				const n = String(i).repeat(2);
 				return `${n}.${n}.${n}/${n}${n}-${n}`;
 			});
-			values.forEach((value) => expect(Is.cnpj(value)).toBe(false));
+			values.forEach((value) => {
+				expect(Is.cnpj(value)).toBe(false);
+			});
 		});
 
 		it("should return false for CNPJ with repeated letters", () => {
 			const values = Array.from({ length: 26 }, (_, i) => {
-				const a = String.fromCharCode(65 + i); // 'A' até 'Z'
-				return `${a}${a}.${a}${a}${a}.${a}${a}${a}/${a}${a}${a}${a}-${a}${a}`;
+				const letter = String.fromCharCode(65 + i); // 'A' até 'Z'
+				return `${letter}${letter}.${letter}${letter}${letter}.${letter}${letter}${letter}/${letter}${letter}${letter}${letter}-${letter}${letter}`;
 			});
 
 			vi.spyOn(Date, "now").mockImplementation(() => new Date("2026-07-01").getTime());
-			values.forEach((value) => expect(Is.cnpj(value)).toBe(false));
+			values.forEach((value) => {
+				expect(Is.cnpj(value)).toBe(false);
+			});
 		});
 
 		it("should return true for valid CNPJ with letters and numbers after July 1st, 2026", () => {
@@ -64,8 +70,8 @@ describe("Is", () => {
 	});
 
 	describe("cpf", () => {
-		let cpfValidos: Array<any>;
-		let cpfInvalidos: Array<any>;
+		let cpfValidos: Array<string>;
+		let cpfInvalidos: Array<string>;
 
 		beforeAll(() => {
 			cpfValidos = Array.from({ length: 2000 }, () => Utils.gerarCPF());
@@ -96,11 +102,13 @@ describe("Is", () => {
 				const n = String(i).repeat(2);
 				return `${n}.${n}.${n}/${n}${n}-${n}`;
 			});
-			values.forEach((value) => expect(Is.cpf(value)).toBe(false));
+			values.forEach((value) => {
+				expect(Is.cpf(value)).toBe(false);
+			});
 		});
 	});
 
-	describe("Is.equals", () => {
+	describe("equals", () => {
 		it("returns true for equal primitive values", () => {
 			expect(Is.equals(1, 1)).toBe(true);
 			expect(Is.equals("a", "a")).toBe(true);
@@ -255,7 +263,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.numeric", () => {
+	describe("numeric", () => {
 		it("should return true for number primitives", () => {
 			expect(Is.numeric(1)).toBe(true);
 			expect(Is.numeric(-1)).toBe(true);
@@ -293,7 +301,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.date", () => {
+	describe("date", () => {
 		it("should return true for valid date string", () => {
 			expect(Is.date("2022-01-01")).toBe(true);
 		});
@@ -369,7 +377,7 @@ describe("Is", () => {
 	});
 
 	describe("arch_x86", () => {
-		let originalArch: any;
+		let originalArch: NodeJS.Architecture;
 
 		beforeEach(() => {
 			originalArch = process.arch;
@@ -403,7 +411,7 @@ describe("Is", () => {
 	});
 
 	describe("arch_Arm", () => {
-		let originalArch: any;
+		let originalArch: NodeJS.Architecture;
 
 		beforeEach(() => {
 			originalArch = process.arch;
@@ -436,7 +444,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.nullOrEmpty", () => {
+	describe("nullOrEmpty", () => {
 		it("returns true for null value", () => {
 			expect(Is.nullOrEmpty(null)).toBe(true);
 		});
@@ -478,7 +486,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.object", () => {
+	describe("object", () => {
 		it("should return true for a valid object", () => {
 			expect(Is.object({ name: "John", age: 30 })).toBe(true);
 		});
@@ -516,14 +524,59 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.email", () => {
-		it("should return true for valid email addresses", () => {
-			expect(Is.email("heliomarpm@proton.me")).toBe(true);
-			expect(Is.email("test@example.com")).toBe(true);
-			expect(Is.email("hello.world@example.co.uk")).toBe(true);
+	describe("email", () => {
+		it("should validate common email formats", () => {
+			expect(Is.email("user@email.com")).toBe(true);
+			expect(Is.email("first.last@email.com")).toBe(true);
+			expect(Is.email("user.name+tag@email.com")).toBe(true);
+			expect(Is.email("user-name@email.com")).toBe(true);
+			expect(Is.email("user_name@email.com")).toBe(true);
+			expect(Is.email("u@email.com")).toBe(true);
+			expect(Is.email("USER.NAME@email.br")).toBe(true);
+			expect(Is.email("USER.NAME@e-mail.BR")).toBe(true);
+			expect(Is.email("user@domain.COM")).toBe(true);
+			expect(Is.email("user@domain.CoM")).toBe(true);
+			expect(Is.email("user@dom123.com")).toBe(true);
 		});
 
+		it("should validate emails with multiple subdomains", () => {
+			expect(Is.email("user@sub.example.com")).toBe(true);
+			expect(Is.email("user@sub.sub2.example.co.uk")).toBe(true);
+			expect(Is.email("user@e-email.com.br")).toBe(true);
+		});
+
+		it("should validate emails with special characters in local part", () => {
+			expect(Is.email("user!name@example.com")).toBe(true);
+			expect(Is.email("user#name@example.com")).toBe(true);
+			expect(Is.email("user$name@example.com")).toBe(true);
+			expect(Is.email("user%name@example.com")).toBe(true);
+			expect(Is.email("user&name@example.com")).toBe(true);
+			expect(Is.email("user*name@example.com")).toBe(true);
+			expect(Is.email("$@example.com")).toBe(true);
+			expect(Is.email("#@example.com")).toBe(true);
+			expect(Is.email("!@example.com")).toBe(true);
+			expect(Is.email("!test@example.com")).toBe(true);
+		});
+
+		it("should accept borderline valid emails", () => {
+			expect(Is.email("a@b.co")).toBe(true); // menor possível
+			expect(Is.email("user@123.com")).toBe(true); // domínio numérico
+			expect(Is.email("user@sub-domain.com")).toBe(true); // subdomínio com hífen
+			expect(Is.email("user_name+tag@domain.co.uk")).toBe(true); // mistura com +
+		});
+
+		// Emails inválidos
+		it("should reject emails with invalid domain characters", () => {
+			expect(Is.email("user@example!.com")).toBe(false);
+			expect(Is.email("user@example#.com")).toBe(false);
+			expect(Is.email("user@example$.com")).toBe(false);
+			expect(Is.email("user@example%.com")).toBe(false);
+			expect(Is.email("user.name@example...com")).toBe(false);
+		});
 		it("should return false for invalid email addresses", () => {
+			expect(Is.email("user...@example.com")).toBe(false);
+			expect(Is.email("user...name@example.com")).toBe(false);
+			expect(Is.email("user..name@example.com")).toBe(false);
 			expect(Is.email("invalid_email")).toBe(false);
 			expect(Is.email("test@example")).toBe(false);
 			expect(Is.email("@example.com")).toBe(false);
@@ -531,13 +584,50 @@ describe("Is", () => {
 		});
 
 		it("should return false for email addresses with special characters", () => {
+			expect(Is.email("@@example.com")).toBe(false);
+		});
+
+		it("should reject emails with invalid TLD", () => {
+			expect(Is.email("user@example.!BR")).toBe(false);
+			expect(Is.email("user@example.com!")).toBe(false);
+			expect(Is.email("user@example.c@m")).toBe(false);
+		});
+
+		it("should reject emails with missing parts", () => {
+			expect(Is.email("user@")).toBe(false);
+			expect(Is.email("@example.com")).toBe(false);
+			expect(Is.email("user@.com")).toBe(false);
+			expect(Is.email("user.example.com")).toBe(false);
+		});
+
+		it("should reject emails with spaces", () => {
+			expect(Is.email("user name@example.com")).toBe(false);
+			expect(Is.email("user@ex ample.com")).toBe(false);
+			expect(Is.email(" user@example.com")).toBe(false);
+			expect(Is.email("user@example.com ")).toBe(false);
+		});
+
+		it("should reject emails with consecutive dots", () => {
+			expect(Is.email("user..name@example.com")).toBe(false);
+			expect(Is.email("user@example..com")).toBe(false);
+			expect(Is.email("user@example.com..")).toBe(false);
+		});
+
+		it("should reject emails with invalid starting/ending characters", () => {
+			expect(Is.email(".user@example.com")).toBe(false);
+			expect(Is.email("user.@example.com")).toBe(false);
+			expect(Is.email("user@-example.com")).toBe(false);
+			expect(Is.email("user@example-.com")).toBe(false);
+		});
+
+		it("should reject emails with invalid characters in domain", () => {
 			expect(Is.email("test@example!com")).toBe(false);
 			expect(Is.email("test@example#com")).toBe(false);
 			expect(Is.email("test@example$com")).toBe(false);
 		});
 	});
 
-	describe("Is.odd", () => {
+	describe("odd", () => {
 		it("should return true for positive odd numbers", () => {
 			expect(Is.odd(1)).toBe(true);
 			expect(Is.odd(3)).toBe(true);
@@ -572,7 +662,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.even", () => {
+	describe("even", () => {
 		it("should return true for even numbers", () => {
 			expect(Is.even(2)).toBe(true);
 			expect(Is.even(4)).toBe(true);
@@ -601,13 +691,13 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.uuid", () => {
+	describe("uuid", () => {
 		it("should return true for a valid UUID with lowercase letters", () => {
-			expect(Is.uuid("12345678-1234-1234-1234-123456789012")).toBe(true);
+			expect(Is.uuid(Utils.generateUUIDv4().toLowerCase())).toBe(true);
 		});
 
 		it("should return true for a valid UUID with uppercase letters", () => {
-			expect(Is.uuid("12345678-1234-1234-1234-123456789012")).toBe(true);
+			expect(Is.uuid(Utils.generateUUIDv4().toUpperCase())).toBe(true);
 		});
 
 		it("should return false for an invalid UUID with extra characters", () => {
@@ -618,23 +708,26 @@ describe("Is", () => {
 			expect(Is.uuid("12345678-1234-1234-1234-12345678")).toBe(false);
 		});
 
-		it("should return false for an invalid UUID with non-hexadecimal characters", () => {
-			expect(Is.uuid("12345678-1234-1234-1234-12345678901g")).toBe(false);
-		});
-
 		it("should return false for an empty string", () => {
 			expect(Is.uuid("")).toBe(false);
 		});
+		it("should return false for an invalid UUID with non-hexadecimal characters", () => {
+			expect(Is.uuid("12345678-1234-1234-1234-12345678901g")).toBe(false);
+		});
 	});
 
-	describe("Is.function", () => {
+	describe("function", () => {
 		it("returns true for a named function", () => {
-			function testFunction() {}
+			function testFunction() {
+				// empty because placeholder for future implementation
+			}
 			expect(Is.function(testFunction)).toBe(true);
 		});
 
 		it("returns true for an arrow function", () => {
-			const testFunction = () => {};
+			const testFunction = () => {
+				/* empty */
+			};
 			expect(Is.function(testFunction)).toBe(true);
 		});
 
@@ -659,18 +752,26 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.promise", () => {
+	describe("promise", () => {
 		it("returns true for a resolved promise", () => {
 			expect(Is.promise(Promise.resolve())).toBe(true);
 		});
 
 		it("returns true for a pending promise", () => {
-			expect(Is.promise(new Promise(() => {}))).toBe(true);
+			expect(
+				Is.promise(
+					new Promise(() => {
+						/* empty */
+					})
+				)
+			).toBe(true);
 		});
 
 		it("returns true for a rejected promise", () => {
 			const rejectedPromise = Promise.reject(new Error("test"));
-			rejectedPromise.catch(() => {}); // Evita unhandled rejection
+			rejectedPromise.catch(() => {
+				/* empty */
+			}); // Evita unhandled rejection
 			expect(Is.promise(rejectedPromise)).toBe(true);
 		});
 
@@ -696,24 +797,35 @@ describe("Is", () => {
 
 		it("returns true for custom thenable objects", () => {
 			const thenable = {
-				then: () => {},
-				catch: () => {},
+				then: () => true,
+				catch: () => {
+					throw new Error("test");
+				},
 			};
+
 			expect(Is.promise(thenable)).toBe(true);
 		});
 
 		it("returns false for objects with only then method", () => {
-			const fakePromise = { then: () => {} };
+			const fakePromise = {
+				then: () => {
+					/* empty */
+				},
+			};
 			expect(Is.promise(fakePromise)).toBe(false);
 		});
 
 		it("returns false for objects with only catch method", () => {
-			const fakePromise = { catch: () => {} };
+			const fakePromise = {
+				catch: () => {
+					throw new Error("test");
+				},
+			};
 			expect(Is.promise(fakePromise)).toBe(false);
 		});
 	});
 
-	describe("Is.url", () => {
+	describe("url", () => {
 		it("should return true for valid URLs with HTTP protocol", () => {
 			expect(Is.url("http://www.example.com")).toBe(true);
 		});
@@ -743,7 +855,7 @@ describe("Is", () => {
 		});
 	});
 
-	describe("Is.json", () => {
+	describe("json", () => {
 		it("should return true for valid JSON strings", () => {
 			expect(Is.json('{"key": "value"}')).toBe(true);
 			expect(Is.json('{"key": 123}')).toBe(true);
