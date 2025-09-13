@@ -1,6 +1,6 @@
 <div id="top" align="center">
   <h1>
-    <!-- <img src="./logo.png" alt="Helpers Library" width="128" /> -->
+    <img src="/../logo.png" alt="Helpers Library" width="128" />
     <br>Helpers Library <a href="https://navto.me/heliomarpm" target="_blank"><img src="https://navto.me/assets/navigatetome-brand.png" width="32"/></a>
   </h1>
 </div>
@@ -87,7 +87,7 @@ import { Format, Is, To, Utils } from '@heliomarpm/helpers';
 
 
 <details>
-  <summary>Format Helpers</summary
+  <summary>Format Helpers</summary>
 
 #### Brazilian Formats (ptBr)
 
@@ -331,7 +331,7 @@ Help us maintain and improve this template:
 
 ## 📝 License
 
-[MIT © Heliomar P. Marques](./LICENSE)  <a href="#top">🔝</a>
+[MIT © Heliomar P. Marques](./LICENSE.md)  <a href="#top">🔝</a>
 
 ----
 <!-- Sponsor badges -->

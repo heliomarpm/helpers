@@ -94,7 +94,7 @@ export const Format = {
 		 * informado como parâmetro.
 		 * @param {string} value O valor a ser formatado.
 		 * @param {string} [defaultAreaCode=''] DDD padrão a ser usado.
-		 * @param {boolean} [suppressError=false] Se verdadeiro, retorna o valor sem formatação em vez de lançar um erro.
+		 * @param {string} [fallback="Telefone está incorreto!"] O valor a ser retornado caso o valor informado esteja incorreto.
 		 * @returns {string} O valor formatado.
 		 * @throws {Error} Se o valor informado tiver menos de 8 ou mais de 11 dígitos.
 		 *
@@ -225,7 +225,7 @@ export const Format = {
 	 * - 'ddd': abbreviated weekday name (Sun, Mon, ...)
 	 * - 'dd': two-digit day (01-31)
 	 *
-	 * @param {string|Date} dateValue - The date to format.
+	 * @param {Date|string|number} date - The date to format.
 	 * @param {string} format - The desired format for the output string.
 	 * @param {string} locale - The locale to use.
 	 * @returns {string} The date formatted as a string.

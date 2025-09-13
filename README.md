@@ -112,7 +112,7 @@ import { Format, Is, To, Utils } from '@heliomarpm/helpers';
 See the [API documentation](https://heliomarpm.github.io/helpers) for a complete list of available functions and their signatures.
 
 <details>
-  <summary>Format Helpers</summary
+  <summary>Format Helpers</summary>
 
 #### Brazilian Formats (ptBr)
 
