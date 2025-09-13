@@ -218,8 +218,8 @@ export const Is = {
 
 	/**
 	 * Verifies if two values are equal.
-	 * @param a The first value to be compared.
-	 * @param b The second value to be compared.
+	 * @param left The first value to be compared.
+	 * @param right The second value to be compared.
 	 * @param ignoreOrder If `true`, ignores the order of elements in arrays and objects.
 	 * @returns {boolean} `true` if the values are equal, `false` otherwise.
 	 *

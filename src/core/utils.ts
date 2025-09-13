@@ -1157,7 +1157,7 @@ export const Utils = {
 	/**
 	 * Returns the day of the year (1-365) (ISO 8601)
 	 *
-	 * @param {Date} [date=new Date()] - The date to get the day of the year for.
+	 * @param {Date|string|number} [input=new Date()] - The date to get the day of the year for.
 	 * @returns {number} The day of the year (1-365).
 	 *
 	 * @example
