@@ -1,9 +1,19 @@
+/**
+ * Operating System Enums
+ *
+ * @category Types
+ */
 export enum eOS {
 	Windows = "win32",
 	Linux = "linux",
 	MacOS = "darwin",
 }
 
+/**
+ * Processor Architecture Enums
+ *
+ * @category Types
+ */
 export enum eArchitecture {
 	x86 = "ia32",
 	x64 = "x64",
@@ -11,7 +21,43 @@ export enum eArchitecture {
 	Arm64 = "arm64",
 }
 
+const _EMAIL_REGEX = new RegExp(
+	// parte local
+	"^(?!\\.)[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+(?<!\\.)" +
+		// @
+		"@" +
+		// domínio
+		"(?!-)[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*" +
+		// TLD no mínimo 2 letras
+		"\\.[A-Za-z]{2,}$"
+);
+
+/**
+ * Is - A collection of type-checking and validation utilities.
+ *
+ * @category Core
+ * @class
+ * @author Heliomar P. Marques <https://navto.me/heliomarpm>*
+ */
 export const Is = {
+	/**
+	 * Plarform - A collection of utilities to check the operating system and processor architecture.
+	 *
+	 * @example
+	 * ```ts
+	 * import { Is } from '@heliomarpm/helpers';
+	 * console.log(Is.plataform.windowsOS); // Output: true or false
+	 * console.log(Is.plataform.linuxOS);   // Output: true or false
+	 * console.log(Is.plataform.macOS);     // Output: true or false
+	 * console.log(Is.plataform.arch_x86);  // Output: true or false
+	 * console.log(Is.plataform.arch_x64);  // Output: true or false
+	 * console.log(Is.plataform.arch_Arm);  // Output: true or false
+	 * console.log(Is.plataform.arch_Arm64); // Output: true or false
+	 * ```
+	 *
+	 * @category Is.plataform
+	 * @namespace plataform
+	 */
 	plataform: {
 		/**
 		 * Verifies that it's running on the Windows OS.
@@ -75,6 +121,13 @@ export const Is = {
 	 *
 	 * @param value - The value to be validated as a CPF.
 	 * @returns `true` if the input value is a valid CPF, `false` otherwise.
+	 *
+	 * @example
+	 * ```ts
+	 * Is.cpf("12345678909") // Output: true
+	 * ```
+	 *
+	 * @category Is.cpf
 	 */
 	cpf(value: string): boolean {
 		// Verifica se o CPF contém apenas números, pontos ou traços
@@ -89,11 +142,11 @@ export const Is = {
 			const sum = cpf
 				.slice(0, base)
 				.split("")
-				.reduce((acc, value, index) => acc + Number.parseInt(value) * (base + 1 - index), 0);
+				.reduce((acc, value, index) => acc + Number.parseInt(value, 10) * (base + 1 - index), 0);
 			return ((sum * 10) % 11) % 10;
 		};
 
-		return digito(9) === Number.parseInt(cpf[9]) && digito(10) === Number.parseInt(cpf[10]);
+		return digito(9) === Number.parseInt(cpf[9], 10) && digito(10) === Number.parseInt(cpf[10], 10);
 	},
 
 	/**
@@ -105,8 +158,11 @@ export const Is = {
 	 * @returns `true` if the input value is a valid CNPJ, `false` otherwise.
 	 *
 	 * @example
-	 *
+	 * ```ts
 	 * Utils.cnpj("12.ABC.345/01DE-35") // Output: true
+	 * ```
+	 *
+	 * @category Is.cnpj
 	 */
 	cnpj(value: string): boolean {
 		const isAlfaActive = Date.now() >= new Date("2026-07-01").getTime();
@@ -144,6 +200,17 @@ export const Is = {
 	 * A valid number is either a number primitive or a string that can be parsed to a number.
 	 * @param value The value to be verified.
 	 * @returns {boolean} `true` if the value is a valid number, `false` otherwise.
+	 *
+	 * @example
+	 * ```ts
+	 * Is.numeric('123'); //output: true
+	 * Is.numeric('123.45'); //output: true
+	 * Is.numeric('abc'); //output: false
+	 * Is.numeric(NaN); //output: false
+	 * Is.numeric(3); //output: true
+	 * ```
+	 *
+	 * @category Is.numeric
 	 */
 	numeric<T>(value: T): boolean {
 		return (typeof value === "number" && !Number.isNaN(value)) || (typeof value === "string" && value.trim() !== "" && !Number.isNaN(Number(value)));
@@ -157,56 +224,83 @@ export const Is = {
 	 * @returns {boolean} `true` if the values are equal, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.equals({ a: 1, b: 2 }, { b: 2, a: 1 }); //output: true
 	 * Is.equals([1, 2, 3], [3, 2, 1], true); //output: true
 	 * Is.equals({ a: 1, b: 2 }, { a: 1, b: 3 }); //output: false
 	 * Is.equals([1, 2, 3], [1, 2, 3]); //output: true
 	 * Is.equals('hello', 'hello'); //output: true
 	 * Is.equals(new Set[1], new Set[2]); //output: false
+	 * ```
+	 *
+	 * @category Is.equals
 	 */
 	equals<T, U>(left: T, right: U, ignoreOrder = false): boolean {
 		const seen = new WeakMap();
 
 		const equal = (leftValue: unknown, rightValue: unknown): boolean => {
 			if (Object.is(leftValue, rightValue)) return true;
-
 			if (typeof leftValue !== typeof rightValue) return false;
-
 			if (leftValue === null || rightValue === null || typeof leftValue !== "object") return false;
 
-			if (leftValue instanceof Date && rightValue instanceof Date) return leftValue.getTime() === rightValue.getTime();
-			if (leftValue instanceof RegExp && rightValue instanceof RegExp) return leftValue.toString() === rightValue.toString();
-
-			if (leftValue instanceof Map && rightValue instanceof Map) {
-				if (leftValue.size !== rightValue.size) return false;
-				for (const [leftKey, leftVal] of leftValue.entries()) {
-					if (!rightValue.has(leftKey) || !equal(leftVal, rightValue.get(leftKey))) return false;
-				}
-				return true;
-			}
-
-			if (leftValue instanceof Set && rightValue instanceof Set) {
-				if (leftValue.size !== rightValue.size) return false;
-				for (const leftVal of leftValue) {
-					if (!rightValue.has(leftVal)) return false;
-				}
-				return true;
-			}
-
-			if (Array.isArray(leftValue) && Array.isArray(rightValue)) {
-				if (leftValue.length !== rightValue.length) return false;
-
-				if (ignoreOrder) {
-					const rightCopy = [...rightValue];
-					return leftValue.every((leftVal) => {
-						const rightIndex = rightCopy.findIndex((rightVal) => equal(leftVal, rightVal));
-						if (rightIndex === -1) return false;
-						rightCopy.splice(rightIndex, 1);
+			const typeHandlers: Array<{
+				test: (a: unknown, b: unknown) => boolean;
+				handler: (a: unknown, b: unknown) => boolean;
+			}> = [
+				{
+					test: (a, b) => a instanceof Date && b instanceof Date,
+					handler: (a, b) => (a as Date).getTime() === (b as Date).getTime(),
+				},
+				{
+					test: (a, b) => a instanceof RegExp && b instanceof RegExp,
+					handler: (a, b) => (a as RegExp).toString() === (b as RegExp).toString(),
+				},
+				{
+					test: (a, b) => a instanceof Map && b instanceof Map,
+					handler: (a, b) => {
+						const mapA = a as Map<unknown, unknown>;
+						const mapB = b as Map<unknown, unknown>;
+						if (mapA.size !== mapB.size) return false;
+						for (const [key, val] of mapA.entries()) {
+							if (!mapB.has(key) || !equal(val, mapB.get(key))) return false;
+						}
 						return true;
-					});
-				}
+					},
+				},
+				{
+					test: (a, b) => a instanceof Set && b instanceof Set,
+					handler: (a, b) => {
+						const setA = a as Set<unknown>;
+						const setB = b as Set<unknown>;
+						if (setA.size !== setB.size) return false;
+						for (const val of setA) {
+							if (!setB.has(val)) return false;
+						}
+						return true;
+					},
+				},
+				{
+					test: (a, b) => Array.isArray(a) && Array.isArray(b),
+					handler: (a, b) => {
+						const arrA = a as unknown[];
+						const arrB = b as unknown[];
+						if (arrA.length !== arrB.length) return false;
+						if (ignoreOrder) {
+							const rightCopy = [...arrB];
+							return arrA.every((av) => {
+								const idx = rightCopy.findIndex((bv) => equal(av, bv));
+								if (idx === -1) return false;
+								rightCopy.splice(idx, 1);
+								return true;
+							});
+						}
+						return arrA.every((av, i) => equal(av, arrB[i]));
+					},
+				},
+			];
 
-				return leftValue.every((leftVal, index) => equal(leftVal, rightValue[index]));
+			for (const { test, handler } of typeHandlers) {
+				if (test(leftValue, rightValue)) return handler(leftValue, rightValue);
 			}
 
 			if (seen.has(leftValue)) return seen.get(leftValue) === rightValue;
@@ -216,7 +310,7 @@ export const Is = {
 			const rightKeys = rightValue ? Object.keys(rightValue) : [];
 			if (leftKeys.length !== rightKeys.length) return false;
 
-			return leftKeys.every((leftKey) => rightValue && equal((leftValue as Record<string, unknown>)[leftKey], (rightValue as Record<string, unknown>)[leftKey]));
+			return leftKeys.every((key) => rightValue && equal((leftValue as Record<string, unknown>)[key], (rightValue as Record<string, unknown>)[key]));
 		};
 
 		return equal(left, right);
@@ -230,11 +324,14 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid date, `false` otherwise.
 	 *
 	 * @example
-	 *
+	 * ```ts
 	 * Is.date('2022-01-01'); //output: true
 	 * Is.date(new Date()); //output: true
 	 * Is.date('invalid date'); //output: false
 	 * Is.date(1633046400000); //output: true
+	 * ```
+	 *
+	 * @category Is.date
 	 */
 	date(value: string | number): boolean {
 		let date = null;
@@ -250,12 +347,15 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is null, undefined, an empty string, or an empty object/array, `false` otherwise.
 	 *
 	 * @example
-	 *
+	 * ```ts
 	 * Is.nullOrEmpty(''); //output: true
 	 * Is.nullOrEmpty(null); //output: true
 	 * Is.nullOrEmpty(undefined); //output: true
 	 * Is.nullOrEmpty([]); //output: true
 	 * Is.nullOrEmpty({}); //output: true
+	 * ```
+	 *
+	 * @category Is.nullOrEmpty
 	 */
 	nullOrEmpty(value: unknown): boolean {
 		return (
@@ -272,28 +372,62 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid object, `false` otherwise.
 	 *
 	 * @example
-	 *
+	 * ```ts
 	 * Is.object({ a: 1 }); //output: true
 	 * Is.object({}); //output: true
 	 * Is.object([]); //output: false
 	 * Is.object([{a:1}]); //output: false
 	 * Is.object(null); //output: false
 	 * Is.object(undefined); //output: false
+	 * ```
+	 *
+	 * @category Is.object
 	 */
 	object(value: unknown): boolean {
-		return !!value && typeof value === "object" && !Array.isArray(value);
+		return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 	},
 
 	/**
 	 * Verifies if the given value is a valid email address.
-	 * @param value The value to be verified.
+	 * @param value The email to be verified.
 	 * @returns {boolean} `true` if the value is a valid email address, `false` otherwise.
 	 *
 	 * @example
-	 * Is.email('heliomarpm@proton.me'); //output: true
+	 * ```ts
+	 * Is.email('foo.bar@email.com'); //output: true
+	 * Is.email('invalid-email'); //output: false
+	 * ```
+	 *
+	 * @category Is.email
 	 */
 	email(value: string): boolean {
-		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+		if (typeof value !== "string" || value.trim() === "") return false;
+
+		// bloqueia dois pontos seguidos
+		if (/\.\./.test(value)) return false;
+
+		if (value.indexOf("@") === -1) return false;
+
+		const [localPart, domain] = value.split("@");
+
+		// RFC 5321: Parte local máximo 64 caracteres
+		if (!localPart || localPart.length > 64) return false;
+
+		// RFC 5321: Email completo máximo 254 caracteres
+		if (value.length > 254) return false;
+
+		// Domínio precisa ter pelo menos um ponto
+		if (!domain || domain.indexOf(".") === -1) return false;
+
+		// Cada parte do domínio não pode começar/terminar com hífen
+		const domainParts = domain.split(".");
+		for (const part of domainParts) {
+			if (!part || part.startsWith("-") || part.endsWith("-")) {
+				return false;
+			}
+		}
+
+		return _EMAIL_REGEX.test(value);
 	},
 
 	/**
@@ -302,8 +436,12 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is an odd number, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.odd(3); //output: true
 	 * Is.odd(2); //output: false
+	 * ```
+	 *
+	 * @category Is.odd
 	 */
 	odd(value: number): boolean {
 		return value % 2 !== 0;
@@ -315,8 +453,12 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is an even number, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.even(2); //output: true
 	 * Is.even(3); //output: false
+	 * ```
+	 *
+	 * @category Is.even
 	 */
 	even(value: number): boolean {
 		return value % 2 === 0;
@@ -328,8 +470,12 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid UUID, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.uuid('12345678-1234-1234-1234-123456789012'); //output: true
 	 * Is.uuid('12345678-1234-1234-1234-1234567890123'); //output: false
+	 * ```
+	 *
+	 * @category Is.uuid
 	 */
 	uuid(value: string): boolean {
 		return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -341,9 +487,13 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a promise, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.promise(Promise.resolve()); //output: true
 	 * Is.promise(new Promise(() => {})); //output: true
 	 * Is.promise('not a promise'); //output: false
+	 * ```
+	 *
+	 * @category Is.promise
 	 */
 	promise(value: unknown): boolean {
 		if (!value) return false;
@@ -362,9 +512,13 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a function, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.function(function() {}); //output: true
 	 * Is.function(() => {}); //output: true
 	 * Is.function('not a function'); //output: false
+	 * ```
+	 *
+	 * @category Is.function
 	 */
 	function(value: unknown): boolean {
 		return typeof value === "function";
@@ -376,8 +530,12 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid URL, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.url('https://www.example.com'); //output: true
 	 * Is.url('invalid-url'); //output: false
+	 * ```
+	 *
+	 * @category Is.url
 	 */
 	url(value: string): boolean {
 		try {
@@ -394,8 +552,12 @@ export const Is = {
 	 * @returns {boolean} `true` if the value is a valid JSON string, `false` otherwise.
 	 *
 	 * @example
+	 * ```ts
 	 * Is.json('{"key": "value"}'); //output: true
 	 * Is.json('Invalid JSON'); //output: false
+	 * ```
+	 *
+	 * @category Is.json
 	 */
 	json(value: string): boolean {
 		if (typeof value !== "string") return false;

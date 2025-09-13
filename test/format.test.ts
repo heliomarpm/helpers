@@ -408,4 +408,83 @@ describe("Format Class", () => {
 			expect(Format.maskItParts("")).toBe("");
 		});
 	});
+
+	describe("truncate function", () => {
+		it("truncates a text that is longer than the maximum length", () => {
+			const text = "Hello, world!";
+			const maxLength = 5;
+			const expected = "He...";
+			expect(Format.truncate(text, maxLength)).toBe(expected);
+		});
+
+		it("truncates a text that is equal to the maximum length", () => {
+			const text = "Hello";
+			const maxLength = 5;
+			const expected = "Hello";
+			expect(Format.truncate(text, maxLength)).toBe(expected);
+		});
+
+		it("truncates a text that is shorter than the maximum length", () => {
+			const text = "Short text";
+			const maxLength = 20;
+			const expected = "Short text";
+			expect(Format.truncate(text, maxLength)).toBe(expected);
+		});
+
+		it("uses a custom ellipsis string", () => {
+			const text = "Hello, world!";
+			const maxLength = 5;
+			const ellipsis = "...!";
+			const expected = "H...!";
+			expect(Format.truncate(text, maxLength, ellipsis)).toBe(expected);
+		});
+
+		it("throws an error if maxLength is less than or equal to the ellipsis length", () => {
+			const text = "Hello, world!";
+			const maxLength = 2;
+			expect(() => Format.truncate(text, maxLength)).toThrowError("maxLength must be greater than ellipsis length");
+		});
+	});
+
+	describe("interpolate function", () => {
+		it("interpolates a template string with a single variable", () => {
+			const template = "Hello, {0}!";
+			const variable = "World";
+			expect(Format.interpolate(template, variable)).toBe("Hello, World!");
+		});
+
+		it("interpolates a template string with multiple variables", () => {
+			const template = "The sum of ({0} + {0}) is {1}.";
+			const variables = [2, 4];
+			expect(Format.interpolate(template, ...variables)).toBe("The sum of (2 + 2) is 4.");
+		});
+
+		it("returns the original template if no variables are provided", () => {
+			const template = "Hello, {0}!";
+			expect(Format.interpolate(template)).toBe("Hello, {0}!");
+		});
+
+		it("returns an empty string if the template is empty", () => {
+			expect(Format.interpolate("")).toBe("");
+		});
+
+		it("throws an error if the index is out of range", () => {
+			const template = "Hello, {1}!";
+			const variable = "World";
+			expect(() => Format.interpolate(template, variable)).toThrowError("Placeholder index out of range");
+		});
+
+		it("throws an error if an index is missing", () => {
+			const template = "Hello, {0}! {1}";
+			const variable = "World";
+			expect(() => Format.interpolate(template, variable)).toThrowError("Placeholder index out of range");
+		});
+
+		it("throws an error if no placeholders are found in the template", () => {
+			const template = "Hello, {a}!";
+			const variable = "World";
+
+			expect(() => Format.interpolate(template, variable)).toThrowError("No placeholders found in template");
+		});
+	});
 });

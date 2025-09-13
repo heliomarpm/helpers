@@ -1,8 +1,15 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: false positive
+// biome-ignore-all lint/style/noNonNullAssertion: false positive
 import { afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from "vitest";
+
 import { Utils } from "../src";
 
 describe("Utils", () => {
-	describe("gerarCPF", () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	describe("gerarCPF function", () => {
 		it("deve gerar um CPF válido", () => {
 			const cpf = Utils.gerarCPF();
 			expect(cpf).toMatch(/^\d{11}$/); // Verifica se o CPF tem 11 dígitos
@@ -15,7 +22,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("gerarCNPJ", () => {
+	describe("gerarCNPJ function", () => {
 		it("deve gerar um CNPJ válido", () => {
 			const cnpj = Utils.gerarCNPJ();
 			expect(cnpj).toMatch(/^\d{14}$/); // Verifica se o CNPJ tem 14 dígitos
@@ -28,7 +35,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("sortByProps", () => {
+	describe("sortByProps function", () => {
 		const data = [
 			{ name: "Bob", age: 25 },
 			{ name: "Charlie", age: 35 },
@@ -72,7 +79,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("orderBy", () => {
+	describe("orderBy function", () => {
 		const data = [
 			{ name: "Charlie", age: 35 },
 			{ name: "Alice", age: 30 },
@@ -94,7 +101,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("getNestedValue", () => {
+	describe("getNestedValue function", () => {
 		const data = {
 			user: {
 				name: {
@@ -121,7 +128,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("setNestedValue", () => {
+	describe("setNestedValue function", () => {
 		it("sets a nested value in an existing object", () => {
 			const target = {
 				user: {
@@ -168,11 +175,11 @@ describe("Utils", () => {
 		});
 		it("throws an error with a null target object", () => {
 			const target = null;
-			expect(() => Utils.setNestedValue(target!, "user.name.first", "Jane")).toThrow("Target object is required.");
+			expect(() => Utils.setNestedValue(target as never, "user.name.first", "Jane")).toThrow("Target object is required.");
 		});
 		it("throws an error with an undefined target object", () => {
 			const target = undefined;
-			expect(() => Utils.setNestedValue(target!, "user.name.first", "Jane")).toThrow("Target object is required.");
+			expect(() => Utils.setNestedValue(target as never, "user.name.first", "Jane")).toThrow("Target object is required.");
 		});
 	});
 
@@ -198,7 +205,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("ifNullOrEmpty", () => {
+	describe("ifNullOrEmpty function", () => {
 		it("returns undefined for null and undefined values", () => {
 			expect(Utils.ifNullOrEmpty(null, undefined)).toBeUndefined();
 		});
@@ -239,36 +246,90 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("generateGuid Function", () => {
+	describe("generateUUIDv4 Function", () => {
 		it("should generate a valid GUID", () => {
-			const guid = Utils.generateGuid();
+			const guid = Utils.generateUUIDv4();
 			expect(guid).toMatch(/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/);
 		});
 
-		it("should generate unique GUIDs", () => {
-			const guid1 = Utils.generateGuid();
-			const guid2 = Utils.generateGuid();
+		it("should generate unique UUIDs", () => {
+			const guid1 = Utils.generateUUIDv4();
+			const guid2 = Utils.generateUUIDv4();
 
 			expect(guid1).not.toBe(guid2);
 		});
 
 		it("should generate a string of correct length", () => {
-			const guid = Utils.generateGuid();
+			const guid = Utils.generateUUIDv4();
 
 			expect(guid.length).toBe(36);
+		});
+
+		it("should generate unique UUIDs on multiple calls", () => {
+			const uuids = new Set();
+			const numberOfUUIDs = 100;
+
+			for (let i = 0; i < numberOfUUIDs; i++) {
+				const uuid = Utils.generateUUIDv4();
+				uuids.add(uuid);
+			}
+
+			expect(uuids.size).toBe(numberOfUUIDs);
+		});
+
+		it("should generate a valid UUIDv4 using crypto.randomUUID when available", () => {
+			const mockUUID = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+			vi.spyOn(crypto, "randomUUID").mockReturnValue(mockUUID);
+
+			const result = Utils.generateUUIDv4();
+
+			expect(result).toBe(mockUUID);
+			expect(crypto.randomUUID).toHaveBeenCalledOnce();
+		});
+
+		it("should generate a valid UUIDv4 using fallback method when crypto.randomUUID is not available", () => {
+			const originalCrypto = global.crypto;
+
+			vi.stubGlobal("crypto.randomUUID", undefined);
+
+			const result = Utils.generateUUIDv4();
+
+			// Verifica formato UUIDv4
+			expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+			expect(typeof result).toBe("string");
+			expect(result.length).toBe(36);
+
+			vi.stubGlobal("crypto", originalCrypto);
+		});
+
+		it("should have correct version and variant bits in fallback method", () => {
+			const originalCrypto = global.crypto;
+
+			vi.stubGlobal("crypto.randomUUID", undefined);
+
+			const uuid = Utils.generateUUIDv4();
+			const parts = uuid.split("-");
+
+			// Verifica versão (4) no terceiro grupo
+			expect(parts[2].charAt(0)).toBe("4");
+
+			// Verifica variante (8,9,a,b) no quarto grupo
+			expect(["8", "9", "a", "b"]).toContain(parts[3].charAt(0).toLowerCase());
+
+			vi.stubGlobal("crypto", originalCrypto);
 		});
 
 		it("should throw an error when the Crypto API is not available", () => {
 			const originalCrypto = global.crypto;
 			vi.stubGlobal("crypto", undefined);
 
-			expect(() => Utils.generateGuid()).toThrow("Crypto API not available in this environment.");
+			expect(() => Utils.generateUUIDv4()).toThrow("Crypto API not available.");
 
 			vi.stubGlobal("crypto", originalCrypto);
 		});
 	});
 
-	describe("Crypto Helper", () => {
+	describe("Crypto Helper function", () => {
 		let key: CryptoKey;
 
 		beforeAll(async () => {
@@ -495,7 +556,9 @@ describe("Utils", () => {
 
 			try {
 				await Utils.retry(fn, { retries: 3, onRetry });
-			} catch {}
+			} catch {
+				/* empty */
+			}
 
 			expect(onRetry).toHaveBeenCalledTimes(2);
 		});
@@ -511,7 +574,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("memoize", () => {
+	describe("memoize function", () => {
 		it("memoizes a simple function", () => {
 			const add = (a: number, b: number) => a + b;
 			const memoizedAdd = Utils.memoize(add);
@@ -558,7 +621,7 @@ describe("Utils", () => {
 		it("handles non-primitive argument types", () => {
 			const obj1 = { a: 1 };
 			const obj2 = { b: 2 };
-			const addObjects = (obj1: any, obj2: any) => ({ ...obj1, ...obj2 });
+			const addObjects = (obj1: object, obj2: object) => ({ ...obj1, ...obj2 });
 			const memoizedAddObjects = Utils.memoize(addObjects);
 
 			expect(memoizedAddObjects(obj1, obj2)).toEqual({ a: 1, b: 2 });
@@ -566,7 +629,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("debounce", () => {
+	describe("debounce function", () => {
 		beforeEach(() => {
 			vi.useFakeTimers();
 		});
@@ -861,33 +924,31 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("pipe", () => {
+	describe("pipe function", () => {
 		it("should compose multiple functions", () => {
 			const addOne = (x: number) => x + 1;
 			const subTwo = (x: number) => x - 2;
-			const process = Utils.pipe(addOne, subTwo);
-			expect(process(3)).toBe(2);
+			const valueIs = (x: string) => `Value is: ${x}`;
+
+			const process = Utils.pipe(addOne, subTwo, valueIs);
+
+			expect(process(3)).toBe("Value is: 2"); // 3 -> addOne -> 4 -> subTwo -> 2
 		});
 
 		it("should compose single function", () => {
 			const addOne = (x: number) => x + 1;
 			const process = Utils.pipe(addOne);
-			expect(process(3)).toBe(4);
+
+			expect(process(3)).toBe(4); // 3 -> addOne -> 4
 		});
 
-		it("should return identity function when no functions are provided", () => {
-			const process = Utils.pipe();
-			expect(process(3)).toBe(3);
-		});
-
-		it("should throw error when functions return different types", () => {
+		it("should compose functions that return different types", () => {
 			const addOne = (x: number) => x + 1;
-			const toString = (x: number) => x.toString();
+			const numToString = (x: number) => String(x);
 
-			const process = Utils.pipe(addOne, toString);
+			const process = Utils.pipe(addOne, numToString);
 
-			expect(() => process(3)).not.toThrowError();
-			expect(process(3)).toBe("4");
+			expect(process(3)).toBe("4"); // 3 -> addOne -> 4 -> numToString -> "4"
 		});
 
 		it("should throw error when functions are incompatible at runtime", () => {
@@ -899,51 +960,111 @@ describe("Utils", () => {
 			expect(() => process(3)).toThrowError();
 		});
 
-		it("should throw error when function throws error", () => {
+		it("should propagate errors from any function", () => {
 			const addOne = (x: number) => x + 1;
 			const throwError = (x: number) => {
 				throw new Error(`Test error: ${x}`);
 			};
 			const process = Utils.pipe(addOne, throwError);
-			expect(() => process(3)).toThrowError("Test error: 4");
+			expect(() => process(3)).toThrow("Test error: 4");
+		});
+
+		it("should return identity function when no functions are provided", () => {
+			expect(() => Utils.pipe()).toThrow("No functions provided to pipe");
 		});
 	});
 
-	describe("compose", () => {
+	describe("compose function", () => {
 		it("should compose multiple functions", () => {
 			const addOne = (x: number) => x + 1;
 			const subTwo = (x: number) => x - 2;
-			const process = Utils.compose(addOne, subTwo);
-			expect(process(-1)).toBe(-2);
+			const valueIs = (x: string) => `Value is: ${x}`;
+
+			const process = Utils.compose(valueIs, addOne, subTwo);
+
+			expect(process(3)).toBe("Value is: 2"); // 3 -> subTwo -> 1 -> addOne -> 2
 		});
 
 		it("should compose single function", () => {
 			const addOne = (x: number) => x + 1;
+
 			const process = Utils.compose(addOne);
-			expect(process(3)).toBe(4);
+
+			expect(process(3 as unknown)).toBe(4); // 3 -> addOne -> 4
 		});
 
-		it("should return identity function when no functions are provided", () => {
-			const process = Utils.compose();
-			expect(process(3)).toBe(3);
-		});
-
-		it("should throw error when functions return different types", () => {
+		it("should compose functions that return different types", () => {
 			const addOne = (x: number) => x + 1;
-			const toString = (x: number) => x.toString();
-			const process = Utils.compose(addOne, toString);
-			expect(() => process(3)).not.toThrowError();
-			expect(process(3)).toBe("31");
+			const numToString = (x: number) => String(x);
+
+			const process = Utils.compose(addOne, numToString);
+
+			expect(process(3)).toBe("31"); // 3 -> numToString -> "3" -> addOne -> "3" + 1 = "31"
 		});
 
 		it("should throw error when functions are incompatible at runtime", () => {
 			const addOne = (x: number) => x + 1;
-			const fail = (x: number) => {
-				throw new Error(`Erro proposital: ${x}`);
-			};
-			const process = Utils.compose(addOne, fail);
+			const breakIt = (x: string) => x.toUpperCase(); // espera string, mas vai receber number
 
-			expect(() => process(3)).toThrowError("Erro proposital: 3");
+			const process = Utils.compose(addOne, breakIt); // breakIt recebe number, erro esperado
+
+			expect(() => process(3)).toThrowError();
+		});
+
+		it("should propagate errors from any function", () => {
+			const addOne = (x: number) => x + 1;
+			const throwError = (x: number) => {
+				throw new Error(`Test error: ${x}`);
+			};
+			const process = Utils.compose(addOne, throwError);
+			expect(() => process(3)).toThrow("Test error: 3");
+		});
+
+		it("should return identity function when no functions are provided", () => {
+			expect(() => Utils.compose()).toThrow("No functions provided to compose");
+		});
+	});
+
+	describe("randomBetween function", () => {
+		it("returns a random integer between min and max", () => {
+			const min = 1;
+			const max = 10;
+			const result = Utils.randomBetween(min, max);
+			expect(result).toBeGreaterThanOrEqual(min);
+			expect(result).toBeLessThanOrEqual(max);
+		});
+
+		it("throws an error when min is greater than or equal to max", () => {
+			const min = 10;
+			const max = 1;
+			expect(() => Utils.randomBetween(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
+		});
+
+		it("returns a random integer that is inclusive of min and max", () => {
+			const min = 1;
+			const max = 10;
+			const results: number[] = [];
+
+			for (let i = 0; i < 100; i++) {
+				results.push(Utils.randomBetween(min, max));
+			}
+
+			expect(results).toContain(min);
+			expect(results).toContain(max);
+		});
+
+		it("returns a different random integer on each call", () => {
+			const min = 1000;
+			const max = 3000;
+
+			const result1 = Utils.randomBetween(min, max);
+			const result2 = Utils.randomBetween(min, max);
+
+			expect(result1).not.toBe(result2);
+			expect(result1).toBeGreaterThanOrEqual(min);
+			expect(result1).toBeLessThanOrEqual(max);
+			expect(result2).toBeGreaterThanOrEqual(min);
+			expect(result2).toBeLessThanOrEqual(max);
 		});
 	});
 });

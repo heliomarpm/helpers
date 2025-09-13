@@ -142,4 +142,5 @@ coverage
 .env
 .docs/.vitepress/cache
 .docs/app/*
+.doc/logo.png
 #!.docs/app/typedoc-sidebar.json

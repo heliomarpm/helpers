@@ -1,8 +1,42 @@
+/**
+ * Format - A collection of formatting utilities for strings, numbers, and dates.
+ *
+ * @category Core
+ * @class
+ * @author Heliomar P. Marques <https://navto.me/heliomarpm>
+ */
 export const Format = {
 	/**
 	 * Formatações em português brasileiro.
+	 *
+	 * @example
+	 * ```ts
+	 * import { Format } from '@heliomarpm/helpers';
+	 *
+	 * const cnpj = Format.ptBr.cnpj('12345678000195'); // Output: '12.345.678/0001-95'
+	 * const cpf = Format.ptBr.cpf('12345678909'); // Output: '123.456.789-09'
+	 * const cep = Format.ptBr.cep('12345678'); // Output: '12345-678'
+	 * const telefone1 = Format.ptBr.telefone('11987654321'); // Output: '(11) 98765-4321'
+	 * const telefone2 = Format.ptBr.telefone('987654321', '11'); // Output: '(11) 98765-4321'
+	 * const valorPorExtenso = Format.ptBr.valorPorExtenso(123456); // Output: 'cento e vinte e três mil quatrocentos e cinquenta e seis'
+	 * ```
+	 *
+	 * @namespace ptBr
+	 * @category Format.ptBr
 	 */
 	ptBr: {
+		/**
+		 * Formata um CNPJ.
+		 *
+		 * @param {string} value O valor a ser formatado.
+		 * @param {string} fallback O valor a ser retornado caso o valor informado esteja incorreto.
+		 * @returns {string} O CNPJ formatado.
+		 *
+		 * @example
+		 * ```ts
+		 * const cnpj = Format.ptBr.cnpj('12345678000195'); // Output: '12.345.678/0001-95'
+		 * ```
+		 */
 		cnpj: (value: string, fallback = "CNPJ está incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
@@ -11,6 +45,18 @@ export const Format = {
 			}
 			return number.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
 		},
+		/**
+		 * Formata um CPF.
+		 *
+		 * @param {string} value O valor a ser formatado.
+		 * @param {string} fallback O valor a ser retornado caso o valor informado esteja incorreto.
+		 * @returns {string} O CPF formatado.
+		 *
+		 * @example
+		 * ```ts
+		 * const cpf = Format.ptBr.cpf('12345678909'); // Output: '123.456.789-09'
+		 * ```
+		 */
 		cpf: (value: string, fallback = "CPF está incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
@@ -19,6 +65,18 @@ export const Format = {
 			}
 			return number.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 		},
+		/**
+		 * Formata um CEP.
+		 *
+		 * @param {string} value O valor a ser formatado.
+		 * @param {string} [fallback="CEP está incorreto!"] O valor a ser retornado caso o valor informado esteja incorreto.
+		 * @returns {string} O CEP formatado.
+		 *
+		 * @example
+		 * ```ts
+		 * const cep = Format.ptBr.cep('12345678'); // Output: '12345-678'
+		 * ```
+		 */
 		cep: (value: string, fallback = "CEP está incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
@@ -39,6 +97,12 @@ export const Format = {
 		 * @param {boolean} [suppressError=false] Se verdadeiro, retorna o valor sem formatação em vez de lançar um erro.
 		 * @returns {string} O valor formatado.
 		 * @throws {Error} Se o valor informado tiver menos de 8 ou mais de 11 dígitos.
+		 *
+		 * @example
+		 * ```ts
+		 * const telefone1 = Format.ptBr.telefone('11987654321'); // Output: '(11) 98765-4321'
+		 * const telefone2 = Format.ptBr.telefone('987654321', '11'); // Output: '(11) 98765-4321'
+		 * ```
 		 */
 		telefone: (value: string, defaultAreaCode = "", fallback = "Telefone está incorreto!"): string => {
 			let number = Format.onlyNumbers(value);
@@ -64,7 +128,7 @@ export const Format = {
 		 * @returns Uma string com o valor escrito por extenso.
 		 *
 		 * @example
-		 * ```js
+		 * ```ts
 		 * 	Format.valorPorExtenso(1000); // Output: "mil"
 		 * 	Format.valorPorExtenso(1000000); // Output: "um milhão"
 		 * 	Format.valorPorExtenso(1000000000); // Output: "um bilhão"
@@ -167,11 +231,12 @@ export const Format = {
 	 * @returns {string} The date formatted as a string.
 	 *
 	 * @example
-	 * ```js
+	 * ```ts
 	 * Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // Output: 'Sunday, 02 March 2025'
 	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+	 * @category Format.date
 	 */
 	date: (date: Date | string | number, format: string, locale: Intl.LocalesArgument = "default"): string => {
 		let dateValue = date;
@@ -231,10 +296,11 @@ export const Format = {
 	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+	 * @category Format.currency
 	 */
 	currency: (value: number, options: { locale: Intl.LocalesArgument; currency: string } = { locale: "pt-BR", currency: "BRL" }): string => {
 		const result = value.toLocaleString(options.locale, { style: "currency", currency: options.currency });
-		return result.replace(/\u00A0/g, " "); // Substitui o espaço não quebrável (\u00A0) por um espaço comum
+		return result.replace(/\u00A0/gu, " "); // Substitui o espaço não quebrável (\u00A0) por um espaço comum
 	},
 
 	/**
@@ -250,6 +316,7 @@ export const Format = {
 	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
+	 * @category Format.number
 	 */
 	number: (value: number, locale: Intl.LocalesArgument = "default"): string => {
 		return value.toLocaleString(locale, { minimumFractionDigits: 2 });
@@ -268,12 +335,14 @@ export const Format = {
 	 * @returns A string representing the abbreviated number with a suffix.
 	 *
 	 * @example
-	 * ```typescript
+	 * ```ts
 	 * abbreviateNumber(1500); // '1.50K'
 	 * abbreviateNumber(2000000); // '2.00M'
 	 * abbreviateNumber(123_456_789); // '123.46M'
 	 * abbreviateNumber(1e33); // '1.00D'
 	 * ```
+	 *
+	 * @category Format.abbreviateNumber
 	 */
 	abbreviateNumber: (value: number, { fractionDigits = 2, removeEndZero = true } = {}): string => {
 		const abbreviations = [
@@ -314,10 +383,11 @@ export const Format = {
 	 * @returns {string} The resulting string with only numeric characters.
 	 *
 	 * @example
-	 * ```js
+	 * ```ts
 	 * onlyNumbers('123abc'); // '123'
 	 * onlyNumbers('abc'); // ''
 	 * ```
+	 * @category Format.onlyNumbers
 	 */
 	onlyNumbers: (value: string): string => value.replace(/\D/g, ""),
 
@@ -334,6 +404,7 @@ export const Format = {
 	 * Format.padZerosByRef(2, 90); // '02'
 	 * Format.padZerosByRef(12, 110); // '012'
 	 * ```
+	 * @category Format.padZerosByRef
 	 */
 	padZerosByRef(value: number, refValue: number): string {
 		const numDigits = Math.floor(Math.log10(refValue) + 1);
@@ -352,6 +423,8 @@ export const Format = {
 	 * titleCase('john doe de souza'); // 'John Doe de Souza'
 	 * titleCase('maria da silva'); // 'Maria da Silva'
 	 * ```
+	 *
+	 * @category Format.titleCase
 	 */
 	titleCase(name: string): string {
 		if (!name.trim()) return "";
@@ -377,14 +450,16 @@ export const Format = {
 	 * @param {number} [startIndex=0] - The starting index of the substring to mask (inclusive).
 	 * @param {number | null} [finalIndex=null] - The ending index of the substring to mask (exclusive). If null, masks until the end of the string.
 	 * @returns {string} The masked string.
+
+	 * @throws {Error} maskChar must be a single character
 	 *
 	 * @example
 	 * ```js
 	 * maskIt('1234567890', '*', 2, 5); // '12*****90'
 	 * maskIt('1234567890', '#', 3); // '123########'
 	 * ```
-	 * @throws {Error} Invalid start or final index.
-	 * @throws {Error} maskChar must be a single character
+	 *
+	 * @category Format.maskIt
 	 */
 	maskIt(value: string, maskChar = "*", startIndex = 0, finalIndex: number | null = null): string {
 		let startIndexNum = Number.parseInt(startIndex.toString(), 10);
@@ -412,6 +487,7 @@ export const Format = {
 	 * @param {string} [maskChar='*'] - The character to use for masking.
 	 * @param {number} [visibleChars=1] - The number of visible characters in the masked part.
 	 * @returns {string} The masked string.
+	 * @throws {Error} maskChar must be a single character
 	 *
 	 * @example
 	 * ```js
@@ -419,7 +495,8 @@ export const Format = {
 	 * maskItParts('+55 (11) 91888-0000', '#', 1); // '+5# (1#) 9####-0###'
 	 * maskItParts('123.444.555-67', '_', 2); // '12_.44_.55_-67'
 	 * ```
-	 * @throws {Error} maskChar must be a single character
+	 *
+	 * @category Format.maskItParts
 	 */
 	maskItParts(text: string, maskChar = "*", visibleChars = 1): string {
 		if (maskChar.length !== 1) {
@@ -437,5 +514,69 @@ export const Format = {
 			const maskedPart = maskChar.repeat(match.length - effectiveVisibleChars);
 			return visiblePart + maskedPart;
 		});
+	},
+
+	/**
+	 * Truncates a given text to a maximum length and appends an ellipsis.
+	 *
+	 * @param {string} text - The text to truncate.
+	 * @param {number} maxLength - The maximum allowed length of the text.
+	 * @param {string} [ellipsis="..."] - The string to append to the end of the
+	 *   truncated text.
+	 * @returns {string} The truncated text.
+	 *
+	 * @throws {Error} If maxLength is less than or equal to the length of ellipsis.
+	 *
+	 * @example
+	 * ```js
+	 * truncate('Hello, world!', 5); // 'He...'
+	 * truncate('Short text', 20); // 'Short text'
+	 * ```
+	 *
+	 * @category Format.truncate
+	 */
+	truncate: (text: string, maxLength: number, ellipsis = "..."): string => {
+		if (maxLength <= ellipsis.length) throw new Error("maxLength must be greater than ellipsis length");
+		if (text.length <= maxLength) return text;
+
+		return text.slice(0, maxLength - ellipsis.length) + ellipsis;
+	},
+
+	/**
+	 * Interpolates a template string with the provided variables.
+	 *
+	 * @param {string} template - The template string to interpolate.
+	 * @param {...string | number} variables - The variables to interpolate into the template.
+	 * @returns {string} The interpolated template string.
+	 *
+	 * @throws {Error} If a placeholder index is out of range of the provided variables.
+	 * @example
+	 * ```js
+	 * interpolate('Hello, {0}!', 'World'); // 'Hello, World!'
+	 * interpolate('The sum of {0} and {1} is {2}.', 1, 2, 3); // 'The sum of 1 and 2 is 3.'
+	 * ```
+	 *
+	 * @category Format.interpolate
+	 */
+	interpolate: (template: string, ...variables: Array<string | number>): string => {
+		if (!template) return "";
+		if (variables.length === 0) return template;
+
+		// Encontra todos os índices usados no template
+		const matches = template.match(/{(\d+)}/g) || [];
+		const indexes = matches.map((m) => Number.parseInt(m.replace(/[{}]/g, ""), 10));
+
+		if (indexes.length > 0) {
+			const maxIndex = Math.max(...indexes);
+			if (maxIndex >= variables.length) {
+				throw new Error("Placeholder index out of range");
+			}
+		}
+
+		if (indexes.length === 0 && variables.length > 0) {
+			throw new Error("No placeholders found in template");
+		}
+
+		return template.replace(/{(\d+)}/g, (_, index) => (index < variables.length ? String(variables[index]) : `{${index}}`));
 	},
 };
