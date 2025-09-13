@@ -9,7 +9,8 @@
   [![Test][url-test-badge]][url-test]
   [![Coverage][url-coverage-badge]][url-coverage-report]
 
-  <!--![CodeQL][url-codeql] ![Publish][url-publish] --> [![NPM version][url-npm-badge]][url-npm]
+  <!--![CodeQL][url-codeql] ![Publish][url-publish] --> 
+  [![NPM version][url-npm-badge]][url-npm]
   [![Downloads][url-downloads-badge]][url-downloads]
   
   <!-- ![lodash](https://img.shields.io/github/package-json/dependency-version/heliomarpm/helpers/lodash)   -->
@@ -188,6 +189,9 @@ Format.padZerosByRef(5, 100); // '005'
 Format.titleCase('john doe'); // 'John Doe'
 Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
 
+// Slugify a string
+Format.slugify('Hello, World!'); // 'hello-world'
+
 // Mask a part of a string with a single character
 Format.maskIt('1234567890', 3, 6, '*'); // '123****890'
 Format.maskItParts('Heliomar P. Marques', '*', 1); // 'H******* P. M******'
@@ -211,6 +215,7 @@ Is.cnpj('12.ABC.345/01DE-35'); //after 2026, the CNPJ will transition to a new f
 Is.numeric('123'); // true
 Is.equals(obj1, obj2); // Deep comparison
 Is.date('2023-12-31'); // Validates date
+Is.dateBetween(new Date('2022-01-15'), new Date('2022-01-01'), new Date('2022-01-31')); // Checks if a date is between min and max
 Is.nullOrEmpty(value); // Checks for null/empty
 Is.object({}); // Validates object type
 Is.email('user@example.com'); // Validates email
@@ -263,7 +268,14 @@ Utils.throttle(fn, 100); // Throttle function
 Utils.once(fn); // Once function
 Utils.pipe(fn1, fn2, fn3); // Pipe function
 Utils.compose(fn1, fn2, fn3); // Compose function
-Utils.randomBetween(1, 10); // Random number between 1 and 10
+Utils.randomNum(1, 10); // Random number between 1 and 10
+Utils.clamp(5, 1, 10); // Clamp number between 1 and 10 (e.g. 5)
+Utils.omit({ id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' }, ['name', 'age']); // Omit object properties (e.g. { id: 1, email: 'dL5mW@example.com' })
+Utils.deepOmit({ id: 1, items: [{  name: 'item 1' }, {  name: 'item 2' }] }, ['items.0']);  // Deep omit object properties (e.g. { id: 1, items: [{  name: 'item 2' }] })
+Utils.pick({ id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' }, ['name', 'age']); // Pick object properties (e.g. { name: 'John', age: 30 })
+Utils.deepPick({ id: 1, items: [{  name: 'item 1' }, {  name: 'item 2' }] }, ['items.0']);  // Deep pick object properties (e.g. { id: 1, items: [{  name: 'item 1' }] })
+Utils.chunk([1, 2, 3, 4, 5], 2); // Chunk array into smaller arrays (e.g. [[1, 2], [3, 4], [5]])
+Utils.groupby([{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }], (person) => person.age); // Group array by key (e.g. { 25: [{ name: 'Bob', age: 25 }], 30: [{ name: 'Alice', age: 30 }] }); 
 
 // Crypto utilities
 Utils.crypto.generateKey(); // Generate encryption key
