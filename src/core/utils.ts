@@ -1,4 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: false positive */
+
+import { To } from "./to";
+
 /**
  * A utility object that provides various helper functions for common tasks.
  * @category Types
@@ -16,9 +19,6 @@ type MemoizedFn<P extends unknown[], R> = {
  * @internal
  */
 type Fn<I, O> = (input: I) => O;
-
-type AnyValue = null | string | number | boolean | object | DictionaryType | Array<AnyValue>;
-type DictionaryType = { [key: string]: AnyValue };
 
 /**
  * Options for retrying a function.
@@ -168,13 +168,13 @@ export const Utils = {
 	 *     { level: "ERROR", type: "TypeE", message: "Another error." },
 	 * ];
 	 *
-	 * const sortedValidations = validations.sort(sortByProps(['level', 'type', '-message']));
+	 * const sortedValidations = validations.sort(Utils.sortBy(['level', 'type', '-message']));
 	 * console.log(sortedValidations); // [{ level: "ERROR", type: "TypeE", message: "Something went wrong." }, ...]
 	 * ```
 	 *
-	 * @category Utils.sortByProps
+	 * @category Utils.sortBy
 	 */
-	sortByKeys(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
+	sortBy(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
 		const propertyList = Array.isArray(properties) ? properties : [properties];
 
 		const stringifyValue = (value: unknown): string => {
@@ -199,6 +199,13 @@ export const Utils = {
 			}
 			return 0;
 		};
+	},
+
+	/**
+	 * @deprecated Use `Utils.sortBy` instead
+	 */
+	sortByProps(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
+		return this.sortBy(properties);
 	},
 
 	/**
@@ -229,6 +236,62 @@ export const Utils = {
 
 			return orderBy === "asc" ? (aValue > bValue ? 1 : -1) : aValue < bValue ? 1 : -1;
 		});
+	},
+
+	/**
+	 * Groups an array of objects by a specified key.
+	 *
+	 * @template T - The type of objects in the array.
+	 * @template K - The type of the key to group by.
+	 * @param arr - The array of objects to group.
+	 * @param keyFn - A function that takes an object and returns the key to group by.
+	 * @returns An object where each key is a unique value of the specified key and each value is an array of objects with that key.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const people = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
+	 * const grouped = Utils.groupBy(people, (person) => person.age);
+	 * console.log(grouped); // { 30: [{ name: 'Alice', age: 30 }], 25: [{ name: 'Bob', age: 25 }] }
+	 * ```
+	 *
+	 * @category Utils.groupBy
+	 */
+	groupBy: <T, K extends keyof unknown>(arr: T[], keyFn: (item: T) => K): Record<K, T[]> => {
+		return arr.reduce(
+			(acc, item) => {
+				const key = keyFn(item);
+				if (!acc[key]) acc[key] = [];
+				acc[key].push(item);
+				return acc;
+			},
+			{} as Record<K, T[]>
+		);
+	},
+
+	/**
+	 * Divide an array into smaller chunks of a specified size.
+	 *
+	 * @param arr - The array to chunk.
+	 * @param size - The size of each chunk.
+	 * @returns An array of chunks.
+	 *
+	 * @example
+	 * ```ts
+	 * const arr = [1, 2, 3, 4, 5];
+	 * const chunks = Utils.chunk(arr, 2);
+	 * console.log(chunks); // [[1, 2], [3, 4], [5]]
+	 * ```
+	 *
+	 * @category Utils.chunk
+	 */
+	chunk: <T>(arr: T[], size: number): T[][] => {
+		if (size <= 0) throw new Error("Chunk size must be greater than 0");
+		const chunks: T[][] = [];
+		for (let i = 0; i < arr.length; i += size) {
+			chunks.push(arr.slice(i, i + size));
+		}
+		return chunks;
 	},
 
 	/**
@@ -1092,58 +1155,93 @@ export const Utils = {
 	},
 
 	/**
-	 * Divide an array into smaller chunks of a specified size.
+	 * Returns the day of the year (1-365) (ISO 8601)
 	 *
-	 * @param arr - The array to chunk.
-	 * @param size - The size of each chunk.
-	 * @returns An array of chunks.
+	 * @param {Date} [date=new Date()] - The date to get the day of the year for.
+	 * @returns {number} The day of the year (1-365).
 	 *
 	 * @example
 	 * ```ts
-	 * const arr = [1, 2, 3, 4, 5];
-	 * const chunks = Utils.chunk(arr, 2);
-	 * console.log(chunks); // [[1, 2], [3, 4], [5]]
+	 * const today = new Date();
+	 * const dayOfYear = Utils.dayOfYear(today);
+	 * console.log(dayOfYear); // 1-365
 	 * ```
 	 *
-	 * @category Utils.chunk
+	 * @category Utils.dayOfYear
 	 */
-	chunk: <T>(arr: T[], size: number): T[][] => {
-		if (size <= 0) throw new Error("Chunk size must be greater than 0");
-		const chunks: T[][] = [];
-		for (let i = 0; i < arr.length; i += size) {
-			chunks.push(arr.slice(i, i + size));
-		}
-		return chunks;
+	dayOfYear: (input: Date | string | number = new Date()): number => {
+		const date = To.date(input);
+		// Zera a hora para evitar problemas de timezone
+		const start = new Date(Date.UTC(date.getUTCFullYear(), 0, 0));
+		const current = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+		const oneDay = 1000 * 60 * 60 * 24;
+
+		return Math.floor((current - start.getTime()) / oneDay);
 	},
 
 	/**
-	 * Groups an array of objects by a specified key.
+	 * Returns the week of the year (ISO 8601)
 	 *
-	 * @template T - The type of objects in the array.
-	 * @template K - The type of the key to group by.
-	 * @param arr - The array of objects to group.
-	 * @param keyFn - A function that takes an object and returns the key to group by.
-	 * @returns An object where each key is a unique value of the specified key and each value is an array of objects with that key.
+	 * @param {Date|string|number} [input=new Date()] - The date to get the week of the year for.
+	 * @returns {number} The week of the year (1-53).
 	 *
 	 * @example
-	 *
 	 * ```ts
-	 * const people = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
-	 * const grouped = Utils.groupBy(people, (person) => person.age);
-	 * console.log(grouped); // { 30: [{ name: 'Alice', age: 30 }], 25: [{ name: 'Bob', age: 25 }] }
+	 * const today = new Date();
+	 * const weekOfYear = Utils.weekOfYear(today);
+	 * console.log(weekOfYear); // 1-53
 	 * ```
 	 *
-	 * @category Utils.groupBy
+	 * @category Utils.weekOfYear
 	 */
-	groupBy: <T, K extends keyof unknown>(arr: T[], keyFn: (item: T) => K): Record<K, T[]> => {
-		return arr.reduce(
-			(acc, item) => {
-				const key = keyFn(item);
-				if (!acc[key]) acc[key] = [];
-				acc[key].push(item);
-				return acc;
-			},
-			{} as Record<K, T[]>
-		);
+	weekOfYear: (input: Date | string | number = new Date()): number => {
+		const date = To.date(input);
+		const temp = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+
+		// Ajusta para a quinta-feira da semana atual (regra ISO)
+		const day = temp.getUTCDay() || 7;
+		temp.setUTCDate(temp.getUTCDate() + 4 - day);
+
+		// Calcula o número da semana
+		const yearStart = new Date(Date.UTC(temp.getUTCFullYear(), 0, 1));
+		const weekNo = Math.ceil(((Number(temp) - Number(yearStart)) / 86400000 + 1) / 7);
+
+		return weekNo;
+	},
+
+	/**
+	 * Returns the easter date
+	 *
+	 * @param {Date|string|number} [input=new Date()] - The date to get the easter date for.
+	 * @returns {Date} The easter date.
+	 *
+	 * @example
+	 * ```ts
+	 * const today = new Date();
+	 * const easterDate = Utils.easterDate(today);
+	 * console.log(easterDate); // <Date>
+	 * ```
+	 *
+	 * @category Utils.easterDate
+	 */
+	easterDate: (input: Date | string | number = new Date()): Date => {
+		const date = To.date(input);
+		const year = date.getFullYear();
+
+		// Cálculos baseados no algoritmo de computus (Método de Meeus)
+		const goldenNumber = year % 19; // Número áureo
+		const century = Math.floor(year / 100);
+		const skippedLeapYears = Math.floor(century / 4);
+		const correctionFactor = Math.floor((century + 8) / 25);
+		const moonCorrection = Math.floor((century - correctionFactor + 1) / 3);
+
+		const epact = (19 * goldenNumber + century - skippedLeapYears - moonCorrection + 15) % 30;
+		const weekdayCorrection = (32 + 2 * (century % 4) + 2 * Math.floor((year % 100) / 4) - epact - (year % 4)) % 7;
+		const marchOffset = Math.floor((goldenNumber + 11 * epact + 22 * weekdayCorrection) / 451);
+
+		const month = Math.floor((epact + weekdayCorrection - 7 * marchOffset + 114) / 31) - 1; // 0 = jan
+		const day = ((epact + weekdayCorrection - 7 * marchOffset + 114) % 31) + 1;
+
+		return new Date(year, month - 1, day);
 	},
 };

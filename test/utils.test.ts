@@ -35,7 +35,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("sortByKeys function", () => {
+	describe("sortBy function", () => {
 		const data = [
 			{ name: "Bob", age: 25 },
 			{ name: "Charlie", age: 35 },
@@ -43,21 +43,21 @@ describe("Utils", () => {
 		];
 
 		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
-			const unsorted = [...data].sort(Utils.sortByKeys("not-a-property"));
+			const unsorted = [...data].sort(Utils.sortBy("not-a-property"));
 			expect(unsorted[0].name).toBe("Bob");
 			expect(unsorted[1].name).toBe("Charlie");
 			expect(unsorted[2].name).toBe("Alice");
 		});
 
 		it("deve ordenar por uma propriedade em ordem ascendente", () => {
-			const sorted = [...data].sort(Utils.sortByKeys("name"));
+			const sorted = [...data].sort(Utils.sortBy("name"));
 			expect(sorted[0].name).toBe("Alice");
 			expect(sorted[1].name).toBe("Bob");
 			expect(sorted[2].name).toBe("Charlie");
 		});
 
 		it("deve ordenar por uma propriedade em ordem descendente", () => {
-			const sorted = [...data].sort(Utils.sortByKeys("-age"));
+			const sorted = [...data].sort(Utils.sortBy("-age"));
 			expect(sorted[0].age).toBe(35);
 			expect(sorted[1].age).toBe(30);
 			expect(sorted[2].age).toBe(25);
@@ -69,7 +69,7 @@ describe("Utils", () => {
 				{ name: "Bob", age: 25 },
 				{ name: "Alice", age: 20 },
 			];
-			const sorted = data.sort(Utils.sortByKeys(["name", "age"]));
+			const sorted = data.sort(Utils.sortBy(["name", "age"]));
 			expect(sorted[0].name).toBe("Alice");
 			expect(sorted[0].age).toBe(20);
 			expect(sorted[1].name).toBe("Alice");
@@ -239,10 +239,7 @@ describe("Utils", () => {
 		});
 
 		it("returns undefined when no valid values are provided", () => {
-			const emptyArray = [];
-			const emptyObj = {};
-
-			expect(Utils.ifNullOrEmpty(null, undefined, "", emptyArray, emptyObj)).toBeUndefined();
+			expect(Utils.ifNullOrEmpty(null, undefined, "", [] as never, {} as never)).toBeUndefined();
 		});
 	});
 
@@ -1373,6 +1370,65 @@ describe("Utils", () => {
 					{ name: "Charlie", age: 30 },
 				],
 			});
+		});
+	});
+
+	describe("dayOfYear", () => {
+		it("should return the correct day of the year for a specific date", () => {
+			const today = new Date();
+			const expectedDayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+			const actualDayOfYear = Utils.dayOfYear(today);
+			expect(actualDayOfYear).toBe(expectedDayOfYear);
+		});
+
+		it("should return 1 for January 1st", () => {
+			const date = new Date(2022, 0, 1); // January 1st
+			const actualDayOfYear = Utils.dayOfYear(date);
+			expect(actualDayOfYear).toBe(1);
+		});
+
+		it("should return the correct day of the year for a date in February", () => {
+			const actualDayOfYear = Utils.dayOfYear("2025-02-15");
+			expect(actualDayOfYear).toBe(46);
+		});
+
+		it("should return the correct day of the year for a date in December", () => {
+			const date = new Date(2022, 11, 25); // December 25th
+			const actualDayOfYear = Utils.dayOfYear(date);
+			expect(actualDayOfYear).toBe(359);
+		});
+
+		it("should return the correct day of the year for a date in a leap year", () => {
+			const date = new Date(2020, 1, 1); // February 1st
+			const actualDayOfYear = Utils.dayOfYear(date);
+			expect(actualDayOfYear).toBe(32);
+		});
+	});
+
+	describe("weekOfYear", () => {
+		it("should return the correct week of the year for a given date", () => {
+			const date = new Date("2022-01-01"); // January 1st
+			const result = Utils.weekOfYear(date);
+			expect(result).toBe(52);
+		});
+
+		it("should return the correct week of the year for the current date", () => {
+			const date = new Date();
+			const result = Utils.weekOfYear(date);
+			expect(result).toBeGreaterThanOrEqual(1);
+			expect(result).toBeLessThanOrEqual(52);
+		});
+
+		it("should return the correct week of the year for a string input", () => {
+			const input = "2022-01-03";
+			const result = Utils.weekOfYear(input);
+			expect(result).toBe(1);
+		});
+
+		it("should return the correct week of the year for a number input", () => {
+			const input = 1640995200000; // 2022-01-01 00:00:00 UTC
+			const result = Utils.weekOfYear(input);
+			expect(result).toBe(52);
 		});
 	});
 });
