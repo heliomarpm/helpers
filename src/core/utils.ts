@@ -835,6 +835,7 @@ export const Utils = {
 	 * @throws Will throw an error if no functions are provided or if any argument is not a function.
 	 *
 	 * @example
+	 *
 	 * ```ts
 	 * const addOne = (x: number) => x + 1;
 	 * const numToString = (x: number) => String(x);
@@ -854,6 +855,10 @@ export const Utils = {
 		}
 		return fns.reduceRight((acc, fn) => (input) => fn(acc(input))) as (arg: T[0]) => R;
 	},
+	// compose<T>(...fns: Array<(arg: T) => T>): (arg: T) => T {
+	// 	// return pipe(...fns.reverse());
+	// 	return (arg: T) => fns.reduceRight((acc, fn) => fn(acc), arg);
+	// }
 
 	/**
 	 * Generates a random integer between the specified minimum and maximum values, inclusive.
