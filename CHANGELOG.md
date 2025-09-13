@@ -1,3 +1,11 @@
+# [0.4.0](https://github.com/heliomarpm/helpers/compare/v0.3.0...v0.4.0) (2025-09-13)
+
+
+### Features
+
+* add dateBetween method to Is utility with comprehensive tests ([b08e398](https://github.com/heliomarpm/helpers/commit/b08e39872b26a3f0b185e68df88740c07c2839fd))
+* add slugify function to Format utility with comprehensive tests ([7665691](https://github.com/heliomarpm/helpers/commit/7665691b90545cc3e31ac70de7cadbad9c3e40c1))
+
 # [0.3.0](https://github.com/heliomarpm/helpers/compare/v0.2.0...v0.3.0) (2025-09-13)
 
 
