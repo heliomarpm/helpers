@@ -77,7 +77,7 @@ export const Utils = {
 	 *
 	 * @category Utils.gerarCPF
 	 */
-	gerarCPF(): string {
+	gerarCPF: (): string => {
 		const calcularDigito = (cpf: string | string[]) => {
 			let soma = 0;
 			let peso = cpf.length + 1;
@@ -114,7 +114,7 @@ export const Utils = {
 	 *
 	 * @category Utils.gerarCNPJ
 	 */
-	gerarCNPJ(): string {
+	gerarCNPJ: (): string => {
 		const calcPrimeiroDigito = (cnpj: string | string[]) => {
 			const pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
 			let soma = 0;
@@ -174,7 +174,7 @@ export const Utils = {
 	 *
 	 * @category Utils.sortByProps
 	 */
-	sortByProps(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
+	sortByKeys(properties: string | string[]): (objA: Record<string, unknown>, objB: Record<string, unknown>) => number {
 		const propertyList = Array.isArray(properties) ? properties : [properties];
 
 		const stringifyValue = (value: unknown): string => {
@@ -222,7 +222,7 @@ export const Utils = {
 	 *
 	 * @category Utils.orderBy
 	 */
-	orderBy<T, K extends keyof T>(list: T[], key: K, orderBy: "asc" | "desc" = "asc"): T[] {
+	orderBy: <T, K extends keyof T>(list: T[], key: K, orderBy: "asc" | "desc" = "asc"): T[] => {
 		return list.sort((a, b) => {
 			const aValue = a[key] as string | number;
 			const bValue = b[key] as string | number;
@@ -252,7 +252,7 @@ export const Utils = {
 	 * ```
 	 * @category Utils.getNestedValue
 	 */
-	getNestedValue<T>(obj: Record<string, T>, path: string): T | undefined {
+	getNestedValue: <T>(obj: Record<string, T>, path: string): T | undefined => {
 		try {
 			return path.split(".").reduce((acc, key) => acc[key] as Record<string, T>, obj) as T;
 		} catch {
@@ -289,7 +289,7 @@ export const Utils = {
 	 * ```
 	 * @category Utils.setNestedValue
 	 */
-	setNestedValue<T extends Record<string, unknown>>(target: T, path: string, value: unknown): void {
+	setNestedValue: <T extends Record<string, unknown>>(target: T, path: string, value: unknown): void => {
 		if (!target) {
 			throw new Error("Target object is required.");
 		}
@@ -335,7 +335,7 @@ export const Utils = {
 	 *
 	 * @category Utils.ifNull
 	 */
-	ifNull<T>(value: T, fallback: T): T {
+	ifNull: <T>(value: T, fallback: T): T => {
 		return value ?? fallback;
 	},
 
@@ -360,7 +360,7 @@ export const Utils = {
 	 *
 	 * @category Utils.ifNullOrEmpty
 	 */
-	ifNullOrEmpty<T>(...values: (T | null | undefined)[]): T | undefined {
+	ifNullOrEmpty: <T>(...values: (T | null | undefined)[]): T | undefined => {
 		return values.find(
 			(value): value is T =>
 				value !== null &&
@@ -388,7 +388,7 @@ export const Utils = {
 	 * ```
 	 * @category Utils.generateGuid
 	 */
-	generateUUIDv4(): string {
+	generateUUIDv4: (): string => {
 		if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
 			return crypto.randomUUID();
 		}
@@ -521,7 +521,7 @@ export const Utils = {
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 * @category Utils.months
 	 */
-	months({ locale = "default", month = "long" }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions["month"] } = {}): Array<string> {
+	months: ({ locale = "default", month = "long" }: { locale?: Intl.LocalesArgument; month?: Intl.DateTimeFormatOptions["month"] } = {}): Array<string> => {
 		return Array.from({ length: 12 }, (_, i) => {
 			const monthName = new Date(2000, i).toLocaleString(locale, { month });
 			return monthName.charAt(0).toUpperCase() + monthName.slice(1);
@@ -545,7 +545,7 @@ export const Utils = {
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 * @category Utils.weekdays
 	 */
-	weekdays({ locale = "default", weekday = "long" }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions["weekday"] } = {}): Array<string> {
+	weekdays: ({ locale = "default", weekday = "long" }: { locale?: Intl.LocalesArgument; weekday?: Intl.DateTimeFormatOptions["weekday"] } = {}): Array<string> => {
 		const firstSunday = new Date(2000, 0, 1);
 		firstSunday.setDate(firstSunday.getDate() - firstSunday.getDay());
 
@@ -567,7 +567,7 @@ export const Utils = {
 	 *
 	 * @category Utils.sleep
 	 */
-	async sleep(ms: number): Promise<void> {
+	sleep: async (ms: number): Promise<void> => {
 		if (ms < 0 || Number.isNaN(ms)) {
 			throw new Error("The 'ms' parameter must be greater than 0.");
 		}
@@ -596,7 +596,7 @@ export const Utils = {
 	 *
 	 * @category Utils.retry
 	 */
-	async retry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
+	retry: async <T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> => {
 		const { retries = 3, delay = 1000, onRetry } = options;
 
 		if (delay < 1 || Number.isNaN(delay)) {
@@ -610,7 +610,7 @@ export const Utils = {
 				if (attempt === retries) throw error;
 
 				onRetry?.(error as Error, attempt);
-				await this.sleep(delay);
+				await Utils.sleep(delay);
 			}
 		}
 
@@ -642,7 +642,7 @@ export const Utils = {
 	 *
 	 * @category Utils.memoize
 	 */
-	memoize<P extends unknown[], R>(fn: (...args: P) => R): MemoizedFn<P, R> {
+	memoize: <P extends unknown[], R>(fn: (...args: P) => R): MemoizedFn<P, R> => {
 		const cache = new Map<string, R>();
 
 		const memoized = (...args: P): R => {
@@ -684,7 +684,7 @@ export const Utils = {
 	 *
 	 * @category Utils.debounce
 	 */
-	debounce<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): T {
+	debounce: <T extends (...args: unknown[]) => unknown>(fn: T, wait: number): T => {
 		let timeoutId: NodeJS.Timeout;
 
 		return function (this: unknown, ...args: Parameters<T>) {
@@ -715,7 +715,7 @@ export const Utils = {
 	 *
 	 * @category Utils.throttle
 	 */
-	throttle<T extends (...args: unknown[]) => unknown>(fn: T, wait: number): (...args: Parameters<T>) => ReturnType<T> {
+	throttle: <T extends (...args: unknown[]) => unknown>(fn: T, wait: number): ((...args: Parameters<T>) => ReturnType<T>) => {
 		let lastRun = 0;
 		let timeoutId: NodeJS.Timeout;
 		let lastResult: ReturnType<T>;
@@ -766,7 +766,7 @@ export const Utils = {
 	 *
 	 * @category Utils.once
 	 */
-	once<P extends unknown[], R>(fn: (...args: P) => R): (...args: P) => R {
+	once: <P extends unknown[], R>(fn: (...args: P) => R): ((...args: P) => R) => {
 		let called = false;
 		let result: R;
 
@@ -868,17 +868,282 @@ export const Utils = {
 	 *
 	 * @example
 	 * ```ts
-	 * const randomNum = Utils.randomBetween(1000, 2000);
+	 * const randomNum = Utils.randomNum(1000, 2000);
 	 * console.log(randomNum); // Outputs a random integer between 1000 and 2000
 	 * ```
 	 *
-	 * @category Utils.randomBetween
+	 * @category Utils.randomNum
 	 */
-	randomBetween(min: number, max: number): number {
+	randomNum: (min: number, max: number): number => {
 		if (min >= max) {
 			throw new Error("The 'min' parameter must be less than 'max'.");
 		}
 
 		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+
+	/**
+	 * Clamps a number between a minimum and maximum value.
+	 * @param num - The number to clamp.
+	 * @param min - The minimum value.
+	 * @param max - The maximum value.
+	 * @returns The clamped number.
+	 *
+	 * @example
+	 * ```ts
+	 * const clampedValue = Utils.clamp(10, 1, 5);
+	 * console.log(clampedValue); // Outputs: 5
+	 * ```
+	 *
+	 * @category Utils.clamp
+	 */
+	clamp: (num: number, min: number, max: number): number => {
+		if (min > max) {
+			throw new Error("The 'min' parameter must be less than or equal to 'max'.");
+		}
+		return Math.min(Math.max(num, min), max);
+	},
+
+	/**
+	 * Creates a new object by omitting specified keys from the original object.
+	 *
+	 * @param obj - The source object.
+	 * @param keys - An array of keys to omit from the source object.
+	 * @returns A new object containing all key-value pairs except the omitted keys.
+	 *
+	 * @example
+	 * ```ts
+	 * const user = { id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' };
+	 *
+	 * const omittedUser = Utils.omit(user, ['id', 'email']);
+	 * console.log(omittedUser); // { name: 'John', age: 30 }
+	 * ```
+	 *
+	 * @category Utils.omit
+	 */
+	omit: <T extends Record<string, unknown>, K extends keyof T>(obj: T, keys: readonly K[]): Omit<T, K> => {
+		if (typeof obj !== "object" || obj === null) {
+			throw new Error("The 'obj' parameter must be a non-null object.");
+		}
+		if (!Array.isArray(keys)) {
+			throw new Error("The 'keys' parameter must be an array of strings.");
+		}
+
+		return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key as K))) as Omit<T, K>;
+	},
+
+	/**
+	 * Creates a new object by omitting specified paths from the original object.
+	 *
+	 * @param obj - The source object.
+	 * @param paths - An array of paths to omit from the source object.
+	 * @returns A new object containing all key-value pairs except the omitted paths.
+	 *
+	 * @example
+	 * ```ts
+	 * const user = { id: 1, name: 'John', age: 34, childs: [ {name: 'John II', age: 10 }, { name: 'Jane II', age: 8 }, { name: 'dog', age: 2 } ]  };
+	 *
+	 * const omittedDog = Utils.deepOmit(user, ['id', 'age', 'childs.2']);
+	 * console.log(omittedDog); // { name: 'John', childs: [ {name: 'John II', age: 10 }, { name: 'Jane II', age: 8 } ] }
+	 *
+	 * const omittedProps = Utils.deepOmit(user, ['id', 'age', 'childs']);
+	 * console.log(omittedProps); // { name: 'John' }
+	 * ```
+	 *
+	 * @category Utils.deepOmit
+	 *
+	 */
+	deepOmit: <T extends Record<string, unknown>>(obj: T, paths: readonly string[]): Partial<T> => {
+		if (typeof obj !== "object" || obj === null) {
+			throw new Error("The 'obj' parameter must be a non-null object.");
+		}
+		if (!Array.isArray(paths)) {
+			throw new Error("The 'paths' parameter must be an array of strings.");
+		}
+
+		// Clonagem profunda segura
+		const clone = typeof structuredClone === "function" ? structuredClone(obj) : JSON.parse(JSON.stringify(obj));
+
+		for (const path of paths) {
+			const parts = path.split(".");
+			let current = clone;
+
+			for (let i = 0; i < parts.length - 1; i++) {
+				const key = parts[i];
+				if (!(key in current)) {
+					current = undefined;
+					break;
+				}
+				current = current[key];
+			}
+
+			if (current !== undefined) {
+				const last = parts.at(-1);
+
+				if (last) {
+					// Se for array e last for índice
+					if (Array.isArray(current) && !Number.isNaN(Number(last))) {
+						current.splice(Number(last), 1);
+					} else {
+						delete current[last];
+					}
+				}
+			}
+		}
+
+		return clone;
+	},
+
+	/**
+	 * Creates a new object by picking specified keys from the original object.
+	 *
+	 * @param obj - The source object.
+	 * @param keys - An array of keys to pick from the source object.
+	 * @returns A new object containing only the picked key-value pairs.
+	 *
+	 * @example
+	 * ```ts
+	 * const user = { id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' };
+	 * const pickedUser = Utils.pick(user, ['id', 'name']);
+	 * console.log(pickedUser); // { id: 1, name: 'John' }
+	 * ```
+	 *
+	 * @category Utils.pick
+	 */
+	pick: <T extends Record<string, unknown>, K extends keyof T>(obj: T, keys: readonly K[]): Pick<T, K> => {
+		if (typeof obj !== "object" || obj === null) {
+			throw new Error("The 'obj' parameter must be a non-null object.");
+		}
+		if (!Array.isArray(keys)) {
+			throw new Error("The 'keys' parameter must be an array of strings.");
+		}
+
+		return Object.fromEntries(keys.filter((key) => key in obj).map((key) => [key, obj[key]])) as Pick<T, K>;
+	},
+
+	/**
+	 * Creates a new object by picking specified paths from the original object.
+	 *
+	 * @param obj - The source object.
+	 * @param paths - An array of paths to pick from the source object.
+	 * @returns A new object containing only the picked key-value pairs.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const user = { id: 1, name: 'John', age: 34, childs: [ {name: 'John II', age: 10 }, { name: 'Jane II', age: 8 }, { name: 'dog', age: 2 } ]  };
+	 *
+	 * const pickedDog = Utils.deepPick(user, ['id', 'age', 'childs.2']);
+	 * console.log(pickedDog); // { id: 1, age: 34, childs: [ {name: 'dog', age: 2 } ] }
+	 *
+	 * const pickedProps = Utils.deepPick(user, ['id', 'age', 'childs']);
+	 * console.log(pickedProps); // { id: 1, age: 34, childs: [ {name: 'John II', age: 10 }, { name: 'Jane II', age: 8 }, { name: 'dog', age: 2 } ] }
+	 * ```
+	 *
+	 * @category Utils.deepPick
+	 */
+	deepPick: <T extends Record<string, unknown>>(obj: T, paths: readonly string[]): Partial<T> => {
+		if (typeof obj !== "object" || obj === null) {
+			throw new Error("The 'obj' parameter must be a non-null object.");
+		}
+		if (!Array.isArray(paths)) {
+			throw new Error("The 'paths' parameter must be an array of strings.");
+		}
+
+		const result = {};
+
+		for (const path of paths) {
+			const parts = path.split(".");
+			let currentSrc: T = obj;
+			let currentDst: Record<string, unknown> = result;
+
+			for (let i = 0; i < parts.length; i++) {
+				const key = parts[i];
+				if (!(key in currentSrc)) break;
+
+				// Se for o último nó, copia valor
+				if (i === parts.length - 1) {
+					// deep clone para não compartilhar referência.
+					currentDst[key] = typeof structuredClone === "function" ? structuredClone(currentSrc[key]) : JSON.parse(JSON.stringify(currentSrc[key]));
+				} else {
+					// Se próximo nível não existir em destino, cria (array ou objeto)
+					if (!(key in currentDst)) {
+						currentDst[key] = Array.isArray(currentSrc[key]) ? [] : {};
+					}
+					currentDst = currentDst[key] as Record<string, unknown>;
+					currentSrc = currentSrc[key] as T;
+				}
+			}
+		}
+
+		// Limpa arrays vazios
+		const cleanArrays = <T>(obj: T): T => {
+			if (Array.isArray(obj)) {
+				return obj.filter((v) => v !== undefined).map(cleanArrays) as unknown as T;
+			}
+			if (obj && typeof obj === "object") {
+				return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, cleanArrays(v)])) as unknown as T;
+			}
+			return obj;
+		};
+
+		// e no final da sua função:
+		return cleanArrays(result);
+	},
+
+	/**
+	 * Divide an array into smaller chunks of a specified size.
+	 *
+	 * @param arr - The array to chunk.
+	 * @param size - The size of each chunk.
+	 * @returns An array of chunks.
+	 *
+	 * @example
+	 * ```ts
+	 * const arr = [1, 2, 3, 4, 5];
+	 * const chunks = Utils.chunk(arr, 2);
+	 * console.log(chunks); // [[1, 2], [3, 4], [5]]
+	 * ```
+	 *
+	 * @category Utils.chunk
+	 */
+	chunk: <T>(arr: T[], size: number): T[][] => {
+		if (size <= 0) throw new Error("Chunk size must be greater than 0");
+		const chunks: T[][] = [];
+		for (let i = 0; i < arr.length; i += size) {
+			chunks.push(arr.slice(i, i + size));
+		}
+		return chunks;
+	},
+
+	/**
+	 * Groups an array of objects by a specified key.
+	 *
+	 * @template T - The type of objects in the array.
+	 * @template K - The type of the key to group by.
+	 * @param arr - The array of objects to group.
+	 * @param keyFn - A function that takes an object and returns the key to group by.
+	 * @returns An object where each key is a unique value of the specified key and each value is an array of objects with that key.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const people = [{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }];
+	 * const grouped = Utils.groupBy(people, (person) => person.age);
+	 * console.log(grouped); // { 30: [{ name: 'Alice', age: 30 }], 25: [{ name: 'Bob', age: 25 }] }
+	 * ```
+	 *
+	 * @category Utils.groupBy
+	 */
+	groupBy: <T, K extends keyof unknown>(arr: T[], keyFn: (item: T) => K): Record<K, T[]> => {
+		return arr.reduce(
+			(acc, item) => {
+				const key = keyFn(item);
+				if (!acc[key]) acc[key] = [];
+				acc[key].push(item);
+				return acc;
+			},
+			{} as Record<K, T[]>
+		);
 	},
 };
