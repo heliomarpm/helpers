@@ -132,6 +132,36 @@ export const To = {
 	},
 
 	/**
+	 * Converts a value to a Date object.
+	 *
+	 * @param {Date|string|number} input - The value to be converted to a Date object.
+	 * @returns {Date} The Date object representation of the input value.
+	 *
+	 * @example
+	 * ```ts
+	 * To.date(new Date()); //output: <Date>
+	 * To.date(1693456000000); //output: <Date>
+	 * To.date('2023-08-01'); //output: <Date>
+	 * To.date('2023-08-01T00:00:00'); //output: <Date>
+	 * To.date('2023-08-01 00:00:00'); //output: <Date>
+	 * To.date('2023-08-01 00:00:00.000'); //output: <Date>
+	 * To.date('2023-08-01 00:00:00.000Z'); //output: <Date>
+	 * ```
+	 *
+	 * @category To.date
+	 */
+	date(input: Date | string | number): Date {
+		if (input instanceof Date) return input;
+		const date = new Date(input);
+
+		if (Number.isNaN(date.getTime())) {
+			throw new Error("Invalid date");
+		}
+
+		return date;
+	},
+
+	/**
 	 * Converts a value to a number, following these rules:
 	 *   - Numeric values are considered as-is.
 	 *   - Strings that match the regular expression `/^\d+$/` are considered as numeric.
