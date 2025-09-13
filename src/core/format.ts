@@ -443,6 +443,28 @@ export const Format = {
 	},
 
 	/**
+	 * Converts a string to a slug.
+	 *
+	 * @param str The string to convert.
+	 * @returns The slugified string.
+	 *
+	 * @example
+	 *
+	 *
+	 * ```ts
+	 * Format.slugify('Hello, world!'); // 'hello-world'
+	 * ```
+	 *
+	 * @category Format.slugify
+	 */
+	slugify(str: string): string {
+		return str
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-+|-+$/g, "");
+	},
+
+	/**
 	 * Masks a substring of a string with a specified character.
 	 *
 	 * @param {string} value - The original string to mask.

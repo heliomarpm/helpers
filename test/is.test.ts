@@ -874,4 +874,41 @@ describe("Is", () => {
 			expect(Is.json("")).toBe(false);
 		});
 	});
+
+	describe("dateBetween", () => {
+		it("should return true for a date within the range", () => {
+			const date = new Date("2025-01-15");
+			const start = new Date("2025-01-01");
+			const end = new Date("2025-01-31");
+			expect(Is.dateBetween(date, start, end)).toBe(true);
+		});
+
+		it("should return false for a date before the start of the range", () => {
+			const date = new Date("2021-12-31");
+			const start = new Date("2025-01-01");
+			const end = new Date("2025-01-31");
+			expect(Is.dateBetween(date, start, end)).toBe(false);
+		});
+
+		it("should return false for a date after the end of the range", () => {
+			const date = new Date("2025-02-01");
+			const start = new Date("2025-01-01");
+			const end = new Date("2025-01-31");
+			expect(Is.dateBetween(date, start, end)).toBe(false);
+		});
+
+		it("should return true for a date equal to the start of the range", () => {
+			const date = new Date("2025-01-01");
+			const start = new Date("2025-01-01");
+			const end = new Date("2025-01-31");
+			expect(Is.dateBetween(date, start, end)).toBe(true);
+		});
+
+		it("should return true for a date equal to the end of the range", () => {
+			const date = new Date("2025-01-31");
+			const start = new Date("2025-01-01");
+			const end = new Date("2025-01-31");
+			expect(Is.dateBetween(date, start, end)).toBe(true);
+		});
+	});
 });

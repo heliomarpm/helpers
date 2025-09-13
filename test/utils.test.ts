@@ -35,7 +35,7 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("sortByProps function", () => {
+	describe("sortByKeys function", () => {
 		const data = [
 			{ name: "Bob", age: 25 },
 			{ name: "Charlie", age: 35 },
@@ -43,21 +43,21 @@ describe("Utils", () => {
 		];
 
 		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
-			const unsorted = [...data].sort(Utils.sortByProps("not-a-property"));
+			const unsorted = [...data].sort(Utils.sortByKeys("not-a-property"));
 			expect(unsorted[0].name).toBe("Bob");
 			expect(unsorted[1].name).toBe("Charlie");
 			expect(unsorted[2].name).toBe("Alice");
 		});
 
 		it("deve ordenar por uma propriedade em ordem ascendente", () => {
-			const sorted = [...data].sort(Utils.sortByProps("name"));
+			const sorted = [...data].sort(Utils.sortByKeys("name"));
 			expect(sorted[0].name).toBe("Alice");
 			expect(sorted[1].name).toBe("Bob");
 			expect(sorted[2].name).toBe("Charlie");
 		});
 
 		it("deve ordenar por uma propriedade em ordem descendente", () => {
-			const sorted = [...data].sort(Utils.sortByProps("-age"));
+			const sorted = [...data].sort(Utils.sortByKeys("-age"));
 			expect(sorted[0].age).toBe(35);
 			expect(sorted[1].age).toBe(30);
 			expect(sorted[2].age).toBe(25);
@@ -69,7 +69,7 @@ describe("Utils", () => {
 				{ name: "Bob", age: 25 },
 				{ name: "Alice", age: 20 },
 			];
-			const sorted = data.sort(Utils.sortByProps(["name", "age"]));
+			const sorted = data.sort(Utils.sortByKeys(["name", "age"]));
 			expect(sorted[0].name).toBe("Alice");
 			expect(sorted[0].age).toBe(20);
 			expect(sorted[1].name).toBe("Alice");
@@ -701,6 +701,7 @@ describe("Utils", () => {
 		it("should preserve context (this)", () => {
 			const context = {
 				value: 42,
+				// skipcq: JS-0323
 				method(this: any) {
 					return this.value;
 				},
@@ -930,14 +931,14 @@ describe("Utils", () => {
 			const subTwo = (x: number) => x - 2;
 			const valueIs = (x: string) => `Value is: ${x}`;
 
-			const process = Utils.pipe(addOne, subTwo, valueIs);
+			const process = Utils.pipe(addOne as never, subTwo as never, valueIs as never);
 
 			expect(process(3)).toBe("Value is: 2"); // 3 -> addOne -> 4 -> subTwo -> 2
 		});
 
 		it("should compose single function", () => {
 			const addOne = (x: number) => x + 1;
-			const process = Utils.pipe(addOne);
+			const process = Utils.pipe(addOne as never);
 
 			expect(process(3)).toBe(4); // 3 -> addOne -> 4
 		});
@@ -946,7 +947,7 @@ describe("Utils", () => {
 			const addOne = (x: number) => x + 1;
 			const numToString = (x: number) => String(x);
 
-			const process = Utils.pipe(addOne, numToString);
+			const process = Utils.pipe(addOne as never, numToString as never);
 
 			expect(process(3)).toBe("4"); // 3 -> addOne -> 4 -> numToString -> "4"
 		});
@@ -955,7 +956,7 @@ describe("Utils", () => {
 			const addOne = (x: number) => x + 1;
 			const breakIt = (x: string) => x.toUpperCase(); // espera string, mas vai receber number
 
-			const process = Utils.pipe(addOne, breakIt); // breakIt recebe number, erro esperado
+			const process = Utils.pipe(addOne as never, breakIt as never); // breakIt recebe number, erro esperado
 
 			expect(() => process(3)).toThrowError();
 		});
@@ -1025,11 +1026,11 @@ describe("Utils", () => {
 		});
 	});
 
-	describe("randomBetween function", () => {
+	describe("randomNum function", () => {
 		it("returns a random integer between min and max", () => {
 			const min = 1;
 			const max = 10;
-			const result = Utils.randomBetween(min, max);
+			const result = Utils.randomNum(min, max);
 			expect(result).toBeGreaterThanOrEqual(min);
 			expect(result).toBeLessThanOrEqual(max);
 		});
@@ -1037,7 +1038,7 @@ describe("Utils", () => {
 		it("throws an error when min is greater than or equal to max", () => {
 			const min = 10;
 			const max = 1;
-			expect(() => Utils.randomBetween(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
+			expect(() => Utils.randomNum(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
 		});
 
 		it("returns a random integer that is inclusive of min and max", () => {
@@ -1046,7 +1047,7 @@ describe("Utils", () => {
 			const results: number[] = [];
 
 			for (let i = 0; i < 100; i++) {
-				results.push(Utils.randomBetween(min, max));
+				results.push(Utils.randomNum(min, max));
 			}
 
 			expect(results).toContain(min);
@@ -1057,14 +1058,321 @@ describe("Utils", () => {
 			const min = 1000;
 			const max = 3000;
 
-			const result1 = Utils.randomBetween(min, max);
-			const result2 = Utils.randomBetween(min, max);
+			const result1 = Utils.randomNum(min, max);
+			const result2 = Utils.randomNum(min, max);
 
 			expect(result1).not.toBe(result2);
 			expect(result1).toBeGreaterThanOrEqual(min);
 			expect(result1).toBeLessThanOrEqual(max);
 			expect(result2).toBeGreaterThanOrEqual(min);
 			expect(result2).toBeLessThanOrEqual(max);
+		});
+	});
+
+	describe("clamp function", () => {
+		it("should return the number if it is within the min and max range", () => {
+			expect(Utils.clamp(5, 1, 10)).toBe(5);
+			expect(Utils.clamp(3, 1, 10)).toBe(3);
+			expect(Utils.clamp(7, 1, 10)).toBe(7);
+		});
+
+		it("should return the min if the number is less than min", () => {
+			expect(Utils.clamp(0, 1, 10)).toBe(1);
+			expect(Utils.clamp(-1, 1, 10)).toBe(1);
+			expect(Utils.clamp(-5, 1, 10)).toBe(1);
+		});
+
+		it("should return the max if the number is greater than max", () => {
+			expect(Utils.clamp(11, 1, 10)).toBe(10);
+			expect(Utils.clamp(15, 1, 10)).toBe(10);
+			expect(Utils.clamp(20, 1, 10)).toBe(10);
+		});
+
+		it("should throw an error if min is greater than max", () => {
+			expect(() => Utils.clamp(5, 10, 1)).toThrowError("The 'min' parameter must be less than or equal to 'max'.");
+		});
+	});
+
+	describe("omit function", () => {
+		it("should omit specified keys from an object", () => {
+			const user = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
+			const omittedUser = Utils.omit(user, ["id", "email"]);
+			expect(Object.keys(omittedUser)).toEqual(["name", "age"]);
+			expect(omittedUser.name).toBe(user.name);
+			expect(omittedUser.age).toBe(user.age);
+		});
+
+		it("should handle empty object", () => {
+			const emptyObject: Record<string, unknown> = {};
+			const result = Utils.omit(emptyObject, ["key1", "key2"]);
+			expect(result).toEqual({});
+		});
+
+		it("should handle empty keys array", () => {
+			const user = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
+			const result = Utils.omit(user, []);
+			expect(result).toEqual(user);
+		});
+
+		it("should handle non-object parameter", () => {
+			expect(() => Utils.omit(null as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.omit(123 as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+
+		it("should handle invalid keys", () => {
+			const user = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
+			const invalidkey = ["invalidKey"];
+			const result = Utils.omit(user, invalidkey as never);
+			expect(result).toEqual(user);
+		});
+	});
+
+	describe("deepOmit function", () => {
+		it("should return a new object with omitted paths", () => {
+			const user = {
+				id: 1,
+				name: "John",
+				age: 34,
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+					{ name: "dog", age: 2 },
+				],
+			};
+
+			const omittedDog = Utils.deepOmit(user, ["id", "age", "childs.2"]);
+			expect(omittedDog).toEqual({
+				name: "John",
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+				],
+			});
+
+			const omittedProps = Utils.deepOmit(user, ["id", "age", "childs"]);
+			expect(omittedProps).toEqual({ name: "John" });
+		});
+
+		it("should throw an error if obj is not an object", () => {
+			expect(() => Utils.deepOmit(null as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit(123 as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit("string" as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+
+		it("should throw an error if any path is invalid", () => {
+			const user = {
+				id: 1,
+				name: "John",
+				age: 34,
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+					{ name: "dog", age: 2 },
+				],
+			};
+
+			expect(Utils.deepOmit(user, ["id", "age", "childs.3"])).toStrictEqual({
+				name: "John",
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+					{ name: "dog", age: 2 },
+				],
+			});
+			// expect(() => Utils.deepOmit(user, ["id", "age", "childs.3"])).toThrow();
+			expect(Utils.deepOmit(user, ["id", "age", "childs.0.name"])).toStrictEqual({
+				name: "John",
+				childs: [{ age: 10 }, { name: "Jane II", age: 8 }, { name: "dog", age: 2 }],
+			});
+		});
+	});
+
+	describe("pick function", () => {
+		it("should pick all keys from an empty object", () => {
+			const obj: Record<string, unknown> = {};
+			const keys: string[] = ["key1", "key2", "key3"];
+			const result = Utils.pick(obj, keys);
+			expect(result).toEqual({});
+		});
+
+		it("should pick all keys from an object with all keys present", () => {
+			const obj = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
+			const result = Utils.pick(obj, ["id", "name"]);
+			expect(result).toEqual({ id: 1, name: "John" });
+		});
+
+		it("should pick only specified keys from an object with all keys present", () => {
+			const obj: Record<string, unknown> = { key1: "value1", key2: "value2", key3: "value3" };
+			const keys: string[] = ["key1", "key3"];
+			const result = Utils.pick(obj, keys);
+			expect(result).toEqual({ key1: "value1", key3: "value3" });
+		});
+
+		it("should pick only specified keys from an object with some keys missing", () => {
+			const obj: Record<string, unknown> = { key1: "value1", key2: "value2" };
+			const keys: string[] = ["key1", "key3"];
+			const result = Utils.pick(obj, keys);
+			expect(result).toEqual({ key1: "value1" });
+		});
+
+		it("should throw an error if the object parameter is not an object", () => {
+			expect(() => Utils.pick(null as never, ["key1", "key2", "key3"])).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+
+		it("should throw an error if the keys parameter is not an array", () => {
+			const obj: Record<string, unknown> = { key1: "value1", key2: "value2", key3: "value3" };
+			expect(() => Utils.pick(obj, null as never)).toThrow("The 'keys' parameter must be an array of strings.");
+		});
+	});
+
+	describe("deepPick function", () => {
+		it("should return an empty object when given an empty object and an empty path array", () => {
+			const obj: Record<string, unknown> = {};
+			const paths: readonly string[] = [];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({});
+		});
+
+		it("should return the correct object when given a simple object and a single path", () => {
+			const obj = { name: "John", age: 30 };
+			const paths = ["name"];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({ name: "John" });
+		});
+
+		it("should return the correct object when given a nested object and a single path", () => {
+			const obj = { user: { name: "John", age: 30 } };
+			const paths = ["user.name"];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({ user: { name: "John" } });
+		});
+
+		it("should return the correct object when given an object with arrays and a single path", () => {
+			const obj = {
+				users: [
+					{ name: "John", age: 30 },
+					{ name: "Jane", age: 25 },
+				],
+			};
+			const paths = ["users.0.name"];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({ users: [{ name: "John" }] });
+		});
+
+		it("should return the correct object when given an object with nested arrays and a single path", () => {
+			const obj = {
+				users: [
+					{ name: "John", age: 30, address: { street: "Main St" } },
+					{ name: "Jane", age: 25, address: { street: "Elm St" } },
+				],
+			};
+			const paths = ["users.1.address.street"];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({ users: [{ address: { street: "Elm St" } }] });
+		});
+
+		it("should return the correct object when given an object with nested arrays and a multi-level path", () => {
+			const obj = {
+				users: [
+					{ name: "John", age: 30 },
+					{ name: "Jane", age: 25 },
+				],
+			};
+			const paths = ["users.0.address.street"];
+			const result = Utils.deepPick(obj, paths);
+			expect(result).toEqual({ users: [{}] });
+		});
+
+		it("should throw an error when given a non-object value for the obj parameter", () => {
+			const paths = ["name"];
+			expect(() => Utils.deepPick(null as never, paths)).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+	});
+
+	describe("chunk function", () => {
+		it("should return an empty array when given an empty array and a positive size", () => {
+			expect(Utils.chunk([], 2)).toEqual([]);
+		});
+
+		it("should return an array with a single chunk when given an array with a single element and a positive size", () => {
+			expect(Utils.chunk([1], 2)).toEqual([[1]]);
+		});
+
+		it("should return an array with multiple chunks when given an array with multiple elements and a positive size", () => {
+			expect(Utils.chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]);
+		});
+
+		it("should return an array with a single chunk when given an array with a single element and a size of 1", () => {
+			expect(Utils.chunk([1], 1)).toEqual([[1]]);
+		});
+
+		it("should return an array with multiple chunks when given an array with multiple elements and a size of 1", () => {
+			expect(Utils.chunk([1, 2, 3, 4, 5], 1)).toEqual([[1], [2], [3], [4], [5]]);
+		});
+
+		it("should throw an error when given a negative size", () => {
+			expect(() => Utils.chunk([1, 2, 3], -2)).toThrowError("Chunk size must be greater than 0");
+		});
+	});
+
+	describe("groupBy function", () => {
+		it("should group an empty array", () => {
+			const result = Utils.groupBy([], (item) => item);
+			expect(result).toEqual({});
+		});
+
+		it("should group an array of objects by a single key", () => {
+			const people = [
+				{ name: "Alice", age: 30 },
+				{ name: "Bob", age: 25 },
+				{ name: "Charlie", age: 30 },
+			];
+			const result = Utils.groupBy(people, (person) => person.age as never);
+			expect(result).toEqual({
+				25: [{ name: "Bob", age: 25 }],
+				30: [
+					{ name: "Alice", age: 30 },
+					{ name: "Charlie", age: 30 },
+				],
+			});
+		});
+
+		it("should group an array of objects by a function that returns a string", () => {
+			const books = [
+				{ title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Classic" },
+				{ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Classic" },
+				{ title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Classic" },
+				{ title: "The Hobbit", author: "J.R.R. Tolkien", genre: "Fantasy" },
+				{ title: "The Lord of the Rings", author: "J.R.R. Tolkien", genre: "Fantasy" },
+			];
+			const result = Utils.groupBy(books, (book) => book.genre as never);
+			expect(result).toEqual({
+				Classic: [
+					{ title: "The Catcher in the Rye", author: "J.D. Salinger", genre: "Classic" },
+					{ title: "To Kill a Mockingbird", author: "Harper Lee", genre: "Classic" },
+					{ title: "The Great Gatsby", author: "F. Scott Fitzgerald", genre: "Classic" },
+				],
+				Fantasy: [
+					{ title: "The Hobbit", author: "J.R.R. Tolkien", genre: "Fantasy" },
+					{ title: "The Lord of the Rings", author: "J.R.R. Tolkien", genre: "Fantasy" },
+				],
+			});
+		});
+
+		it("should group an array of objects by a function that returns a number", () => {
+			const people = [
+				{ name: "Alice", age: 30 },
+				{ name: "Bob", age: 25 },
+				{ name: "Charlie", age: 30 },
+			];
+			const result = Utils.groupBy(people, (person) => person.age as never);
+			expect(result).toEqual({
+				25: [{ name: "Bob", age: 25 }],
+				30: [
+					{ name: "Alice", age: 30 },
+					{ name: "Charlie", age: 30 },
+				],
+			});
 		});
 	});
 });

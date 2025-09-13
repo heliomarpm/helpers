@@ -569,4 +569,23 @@ export const Is = {
 			return false;
 		}
 	},
+
+	/**
+	 * Checks if a date is between two other dates.
+	 * @param date The date to be checked.
+	 * @param start The start date of the range.
+	 * @param end The end date of the range.
+	 * @returns {boolean} `true` if the date is between the start and end dates, `false` otherwise.
+	 *
+	 * @example
+	 * ```ts
+	 * Is.dateBetween(new Date('2022-01-15'), new Date('2022-01-01'), new Date('2022-01-31')); //output: true
+	 * Is.dateBetween(new Date('2022-02-01'), new Date('2022-01-01'), new Date('2022-01-31')); //output: false
+	 * ```
+	 *
+	 * @category Is.dateBetween
+	 */
+	dateBetween(date: Date, start: Date, end: Date): boolean {
+		return date >= start && date <= end;
+	},
 };

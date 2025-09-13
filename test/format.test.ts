@@ -345,6 +345,28 @@ describe("Format Class", () => {
 		});
 	});
 
+	describe("slugify function", () => {
+		it("should slugify a string with no special characters", () => {
+			expect(Format.slugify("hello world")).toBe("hello-world");
+		});
+
+		it("should slugify a string with special characters", () => {
+			expect(Format.slugify("Hello, world!")).toBe("hello-world");
+		});
+
+		it("should slugify a string with multiple spaces", () => {
+			expect(Format.slugify("Hello   world")).toBe("hello-world");
+		});
+
+		it("should slugify a string with leading and trailing spaces", () => {
+			expect(Format.slugify("   Hello world   ")).toBe("hello-world");
+		});
+
+		it("should slugify a string with leading and trailing special characters", () => {
+			expect(Format.slugify("!@#$Hello world$%^^")).toBe("hello-world");
+		});
+	});
+
 	describe("maskIt function", () => {
 		it("masks a substring with default mask character", () => {
 			expect(Format.maskIt("1234567890", "*", 2, 5)).toBe("12***67890");
