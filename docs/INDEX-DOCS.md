@@ -85,7 +85,9 @@ import { Format, Is, To, Utils } from '@heliomarpm/helpers';
 
 ## 📚 API Reference
 
-### Format Helpers
+
+<details>
+  <summary>Format Helpers</summary
 
 #### Brazilian Formats (ptBr)
 
@@ -162,12 +164,26 @@ Format.padZerosByRef(5, 100); // '005'
 Format.titleCase('john doe'); // 'John Doe'
 Format.titleCase('MARIA DA SILVA'); // 'Maria da Silva'
 
+// Slugify a string
+Format.slugify('Hello, World!'); // 'hello-world'
+
 // Mask a part of a string with a single character
 Format.maskIt('1234567890', 3, 6, '*'); // '123****890'
 Format.maskItParts('Heliomar P. Marques', '*', 1); // 'H******* P. M******'
-```
 
-### Is Helpers (Validation)
+// Truncates a given text to a maximum length and appends an ellipsis
+Format.truncate('Hello, world!', 9, 'ooo!'); // 'Helloooo!'
+Format.truncate('Short text', 10, "..."); // 'Short text'
+
+// Interpolates a string with values
+Format.interpolate('Hello, {name}!', { name: 'John' }); // 'Hello, John!'
+Format.interpolate('The division of {0} by {1} is {1}.', 4, 2); // 'The division of 4 by 2 is 2.'
+
+```
+</details>
+
+<details>
+  <summary>Is Helpers (Type Checking)</summary>
 
 ```typescript
 Is.cpf('123.456.789-01'); // Validates CPF
@@ -176,6 +192,7 @@ Is.cnpj('12.ABC.345/01DE-35'); //after 2026, the CNPJ will transition to a new f
 Is.numeric('123'); // true
 Is.equals(obj1, obj2); // Deep comparison
 Is.date('2023-12-31'); // Validates date
+Is.dateBetween(new Date('2022-01-15'), new Date('2022-01-01'), new Date('2022-01-31')); // Checks if a date is between min and max
 Is.nullOrEmpty(value); // Checks for null/empty
 Is.object({}); // Validates object type
 Is.email('user@example.com'); // Validates email
@@ -197,29 +214,40 @@ Is.plataform.arch_Arm
 Is.plataform.arch_Arm64
 ```
 
-### To Helpers (Conversion)
+</details>
+
+<details>
+  <summary>To Helpers (Conversion)</summary>
 
 ```typescript
 To.dictionary(jsonObject); // Converts to Record<string, T>
 To.boolean('true'); // Converts to boolean
 To.dateParts(new Date()); // Extracts date components
+To.date(1793456000000); // Converts to Date
 To.number('123'); // Converts to number
 ```
+</details>
 
-### Utils Helpers
+<details>
+  <summary>Utils Helpers</summary>
 
 ```typescript
 Utils.gerarCPF(); // Generates valid CPF
 Utils.gerarCNPJ(); // Generates valid CNPJ
-Utils.sortByProps(['name', '-age']); // Sort function for arrays
+Utils.sortBy(['name', '-age']); // Sort function for arrays
 Utils.orderBy(array, 'key', 'asc'); // Sort array by key
+Utils.groupby([{ name: 'Alice', age: 30 }, { name: 'Bob', age: 25 }], (person) => person.age); // Group array by key (e.g. { 25: [{ name: 'Bob', age: 25 }], 30: [{ name: 'Alice', age: 30 }] }); 
+Utils.chunk([1, 2, 3, 4, 5], 2); // Chunk array into smaller arrays (e.g. [[1, 2], [3, 4], [5]])
 Utils.getNestedValue(obj, 'user.name'); // Get nested object value
 Utils.setNestedValue(obj, 'user.name', value); // Set nested object value
 Utils.ifNull(value, defaultValue); // Null coalescing
 Utils.ifNullOrEmpty(value, value2, defaultValue); // Returns the first non-null, non-undefined, and non-empty value from the given arguments.
-Utils.generateGuid(); // Generate GUID (e.g. '00000000-0000-0000-0000-000000000000') 
+Utils.generateUUIDv4(); // Generates UUID v4 (e.g '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d')
 Utils.months({locale: 'pt-BR', month: 'long'}); // Get month names array (e.g. ['Janeiro', 'Fevereiro', ...])
 Utils.weekdays({locale: 'pt-BR', weekday: 'long'}); // Get weekday names array (e.g. ['Domingo', 'Segunda-feira', ...])
+Utils.dayOfYear("2025-02-15") // Get day of year (e.g. 46) 
+Utils.weekOfYear("2022-01-01") // Get week of year (e.g. 52)); 
+
 Utils.sleep(1000); // Sleep for 1 second
 Utils.retry(fn, {retries: 5, delay: 500, onRetry: (error, attempt) => console.log(`Attempt ${attempt} failed with error ${error.message}`)}); // Retry function
 Utils.memoize(fn); // Memoize function
@@ -228,12 +256,19 @@ Utils.throttle(fn, 100); // Throttle function
 Utils.once(fn); // Once function
 Utils.pipe(fn1, fn2, fn3); // Pipe function
 Utils.compose(fn1, fn2, fn3); // Compose function
+Utils.randomNum(1, 10); // Random number between 1 and 10
+Utils.clamp(5, 1, 10); // Clamp number between 1 and 10 (e.g. 5)
+Utils.omit({ id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' }, ['name', 'age']); // Omit object properties (e.g. { id: 1, email: 'dL5mW@example.com' })
+Utils.deepOmit({ id: 1, items: [{  name: 'item 1' }, {  name: 'item 2' }] }, ['items.0']);  // Deep omit object properties (e.g. { id: 1, items: [{  name: 'item 2' }] })
+Utils.pick({ id: 1, name: 'John', age: 30, email: 'dL5mW@example.com' }, ['name', 'age']); // Pick object properties (e.g. { name: 'John', age: 30 })
+Utils.deepPick({ id: 1, items: [{  name: 'item 1' }, {  name: 'item 2' }] }, ['items.0']);  // Deep pick object properties (e.g. { id: 1, items: [{  name: 'item 1' }] })
 
 // Crypto utilities
 Utils.crypto.generateKey(); // Generate encryption key
 Utils.crypto.encrypt(text, key); // Encrypt text
 Utils.crypto.decrypt(encryptedText, key); // Decrypt text
 ```
+</details>
 
 ## 📦 Project Scripts
 
