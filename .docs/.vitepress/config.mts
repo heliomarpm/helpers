@@ -5,7 +5,7 @@ import { defineConfig } from "vitepress";
 export default defineConfig({
 	title: "Helpers",
 	base: "/helpers/",
-	description: "A utility for NodeJS App with many useful features",
+	description: "✨ A utility for NodeJS App with many useful features",
 	cleanUrls: true,
 	lastUpdated: true,
 	ignoreDeadLinks: true,

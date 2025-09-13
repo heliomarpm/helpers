@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { To } from "../src";
 
 describe("To", () => {
-	describe("dictionary", () => {
+	describe("dictionary function", () => {
 		it("deve converter um objeto JSON para um Record<string, T>", () => {
 			const jsonObject = { key1: "value1", key2: "value2" };
 			const result = To.dictionary<string>(jsonObject);
@@ -10,7 +10,7 @@ describe("To", () => {
 		});
 	});
 
-	describe("boolean", () => {
+	describe("boolean function", () => {
 		it("deve converter números para booleanos corretos", () => {
 			expect(To.boolean(1)).toBe(true);
 			expect(To.boolean(0)).toBe(false);
@@ -89,7 +89,56 @@ describe("To", () => {
 		});
 	});
 
-	describe("To.number", () => {
+	describe("date function", () => {
+		it("should convert a Date object to a Date object", () => {
+			const date = new Date();
+			const result = To.date(date);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.getTime()).toBe(date.getTime());
+		});
+
+		it("should convert a number to a Date object", () => {
+			const timestamp = 1693456000000;
+			const result = To.date(timestamp);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.getTime()).toBe(timestamp);
+		});
+
+		it("should convert a string in ISO format to a Date object", () => {
+			const dateString = "2023-08-01";
+			const result = To.date(dateString);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.toISOString()).toBe(`${dateString}T00:00:00.000Z`);
+		});
+
+		it("should convert a string in local time format to a Date object", () => {
+			const dateString = "2023-08-01T00:00:00";
+			const result = To.date(dateString);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.getMonth()).toBe(7);
+		});
+
+		it("should convert a string in local time format with milliseconds to a Date object", () => {
+			const dateString = "2023-08-01 00:00:00.000";
+			const result = To.date(dateString);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.toDateString()).toBe(new Date(dateString).toDateString());
+		});
+
+		it("should convert a string in UTC time format to a Date object", () => {
+			const dateString = "2023-08-01 00:00:00.000Z";
+			const result = To.date(dateString);
+			expect(result).toBeInstanceOf(Date);
+			expect(result.toISOString()).toBe("2023-08-01T00:00:00.000Z");
+		});
+
+		it("should return NaN for an invalid input", () => {
+			const input = "invalid-date";
+			expect(() => To.date(input)).toThrow("Invalid date");
+		});
+	});
+
+	describe("number function", () => {
 		it("should convert numeric values as-is", () => {
 			expect(To.number(42)).toBe(42);
 			expect(To.number(-42)).toBe(-42);
