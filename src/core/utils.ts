@@ -1180,6 +1180,25 @@ export const Utils = {
 	},
 
 	/**
+	 * Returns the number of days in a given month.
+	 *
+	 * @param {number} [year=new Date().getFullYear()] - The year to get the number of days for.
+	 * @param {number} [month=new Date().getMonth() + 1] - The month to get the number of days for (1-12).
+	 * @returns {number} The number of days in the given month.
+	 *
+	 * @example
+	 * ```ts
+	 * const daysInMonth = Utils.daysInMonth(2025, 1);
+	 * console.log(daysInMonth); // 30-31
+	 * ```
+	 *
+	 * @category Utils.daysInMonth
+	 */
+	daysInMonth: (year: number = new Date().getFullYear(), month: number = new Date().getMonth() + 1): number => {
+		return new Date(year, month, 0).getDate();
+	},
+
+	/**
 	 * Returns the week of the year (ISO 8601)
 	 *
 	 * @param {Date|string|number} [input=new Date()] - The date to get the week of the year for.
