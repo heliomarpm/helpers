@@ -911,4 +911,22 @@ describe("Is", () => {
 			expect(Is.dateBetween(date, start, end)).toBe(true);
 		});
 	});
+
+	describe("leapYear", () => {
+		it("should return true for leap years", () => {
+			expect(Is.leapYear(2000)).toBe(true);
+			expect(Is.leapYear(2020)).toBe(true);
+			expect(Is.leapYear(1996)).toBe(true);
+		});
+
+		it("should return false for non-leap years", () => {
+			expect(Is.leapYear(1900)).toBe(false);
+			expect(Is.leapYear(2100)).toBe(false);
+			expect(Is.leapYear(2019)).toBe(false);
+		});
+
+		it("should default to the current year if no year is provided", () => {
+			expect(() => Is.leapYear()).not.throws();
+		});
+	});
 });
