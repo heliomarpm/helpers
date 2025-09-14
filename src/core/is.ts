@@ -588,4 +588,25 @@ export const Is = {
 	dateBetween(date: Date, start: Date, end: Date): boolean {
 		return date >= start && date <= end;
 	},
+
+	/**
+	 * Checks if a given year is a leap year.
+	 *
+	 * A year is a leap year if it is divisible by 4, except for end-of-century years which must be divisible by 400.
+	 * This means that the year 2000 was a leap year, although 1900 was not.
+	 *
+	 * @param {number} [year=new Date().getFullYear()] - The year to check.
+	 * @returns {boolean} True if the year is a leap year, false otherwise.
+	 *
+	 * @example
+	 * ```ts
+	 * const isLeapYear = Is.leapYear(2000);
+	 * console.log(isLeapYear); // true
+	 * ```
+	 *
+	 * @category Is.leapYear
+	 */
+	leapYear: (year: number = new Date().getFullYear()): boolean => {
+		return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+	},
 };

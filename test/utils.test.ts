@@ -2,7 +2,7 @@
 // biome-ignore-all lint/style/noNonNullAssertion: false positive
 import { afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from "vitest";
 
-import { Utils } from "../src";
+import { Is, Utils } from "../src";
 
 describe("Utils", () => {
 	beforeEach(() => {
@@ -1032,10 +1032,10 @@ describe("Utils", () => {
 			expect(result).toBeLessThanOrEqual(max);
 		});
 
-		it("throws an error when min is greater than or equal to max", () => {
+		it("throws an Number.NaN when min is greater than or equal to max", () => {
 			const min = 10;
 			const max = 1;
-			expect(() => Utils.randomNum(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
+			expect(Utils.randomNum(min, max)).toBeNaN();
 		});
 
 		it("returns a random integer that is inclusive of min and max", () => {
@@ -1063,6 +1063,32 @@ describe("Utils", () => {
 			expect(result1).toBeLessThanOrEqual(max);
 			expect(result2).toBeGreaterThanOrEqual(min);
 			expect(result2).toBeLessThanOrEqual(max);
+		});
+	});
+
+	describe("randomValue function", () => {
+		it("should return a random value from the array", () => {
+			const values = ["apple", "banana", "cherry"];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return a random value from an array of numbers", () => {
+			const values = [1, 2, 3];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return the first value if the array has only one element", () => {
+			const values = ["apple"];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBe("apple");
+		});
+
+		it("should return the last value if the array is empty", () => {
+			const values: string[] = [];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBeUndefined();
 		});
 	});
 
@@ -1402,6 +1428,42 @@ describe("Utils", () => {
 			const date = new Date(2020, 1, 1); // February 1st
 			const actualDayOfYear = Utils.dayOfYear(date);
 			expect(actualDayOfYear).toBe(32);
+		});
+	});
+
+	describe("daysInMonth", () => {
+		it("should return the correct number of days in a given month (current year, current month)", () => {
+			const daysInCurrentMonth = Utils.daysInMonth();
+			expect(daysInCurrentMonth).toBeGreaterThanOrEqual(1);
+			expect(daysInCurrentMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (specific year, specific month)", () => {
+			const daysInMonth = Utils.daysInMonth(2025, 2);
+			const expectedDaysInMonth = Is.leapYear(2025) ? 29 : 28;
+			expect(daysInMonth).toBe(expectedDaysInMonth);
+		});
+
+		it("should return the correct number of days in a given month (current year, specific month)", () => {
+			const daysInMonth = Utils.daysInMonth(new Date().getFullYear(), 1);
+			expect(daysInMonth).toBeGreaterThanOrEqual(28);
+			expect(daysInMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (specific year, current month)", () => {
+			const daysInMonth = Utils.daysInMonth(new Date().getFullYear(), new Date().getMonth() + 1);
+			expect(daysInMonth).toBeGreaterThanOrEqual(28);
+			expect(daysInMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (February in a leap year)", () => {
+			const daysInMonth = Utils.daysInMonth(2020, 2);
+			expect(daysInMonth).toBe(29);
+		});
+
+		it("should return the correct number of days in a given month (February in a non-leap year)", () => {
+			const daysInMonth = Utils.daysInMonth(2021, 2);
+			expect(daysInMonth).toBe(28);
 		});
 	});
 

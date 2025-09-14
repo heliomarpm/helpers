@@ -938,11 +938,29 @@ export const Utils = {
 	 * @category Utils.randomNum
 	 */
 	randomNum: (min: number, max: number): number => {
-		if (min >= max) {
-			throw new Error("The 'min' parameter must be less than 'max'.");
-		}
+		// throw new Error("The 'min' parameter must be less than 'max'.");
+		if (min > max) return Number.NaN;
+		if (min === max) return min;
 
 		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+
+	/**
+	 * Returns a random value from the given array.
+	 * @param values - The array of values to choose from.
+	 * @returns A random value from the given array.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const randomValue = Utils.randomValue(["apple", "banana", "cherry"]);
+	 * console.log(randomValue); // Outputs a random value from the array
+	 * ```
+	 *
+	 * @category Utils.randomValue
+	 */
+	randomValue: <T>(values: T[]): T => {
+		return values[Utils.randomNum(0, values.length - 1)];
 	},
 
 	/**
@@ -1177,6 +1195,25 @@ export const Utils = {
 		const oneDay = 1000 * 60 * 60 * 24;
 
 		return Math.floor((current - start.getTime()) / oneDay);
+	},
+
+	/**
+	 * Returns the number of days in a given month.
+	 *
+	 * @param {number} [year=new Date().getFullYear()] - The year to get the number of days for.
+	 * @param {number} [month=new Date().getMonth() + 1] - The month to get the number of days for (1-12).
+	 * @returns {number} The number of days in the given month.
+	 *
+	 * @example
+	 * ```ts
+	 * const daysInMonth = Utils.daysInMonth(2025, 1);
+	 * console.log(daysInMonth); // 30-31
+	 * ```
+	 *
+	 * @category Utils.daysInMonth
+	 */
+	daysInMonth: (year: number = new Date().getFullYear(), month: number = new Date().getMonth() + 1): number => {
+		return new Date(year, month, 0).getDate();
 	},
 
 	/**
