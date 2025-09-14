@@ -938,9 +938,9 @@ export const Utils = {
 	 * @category Utils.randomNum
 	 */
 	randomNum: (min: number, max: number): number => {
-		if (min >= max) {
-			throw new Error("The 'min' parameter must be less than 'max'.");
-		}
+		// throw new Error("The 'min' parameter must be less than 'max'.");
+		if (min > max) return Number.NaN;
+		if (min === max) return min;
 
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	},
