@@ -1032,10 +1032,10 @@ describe("Utils", () => {
 			expect(result).toBeLessThanOrEqual(max);
 		});
 
-		it("throws an error when min is greater than or equal to max", () => {
+		it("throws an Number.NaN when min is greater than or equal to max", () => {
 			const min = 10;
 			const max = 1;
-			expect(() => Utils.randomNum(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
+			expect(Utils.randomNum(min, max)).toBeNaN();
 		});
 
 		it("returns a random integer that is inclusive of min and max", () => {
@@ -1063,6 +1063,32 @@ describe("Utils", () => {
 			expect(result1).toBeLessThanOrEqual(max);
 			expect(result2).toBeGreaterThanOrEqual(min);
 			expect(result2).toBeLessThanOrEqual(max);
+		});
+	});
+
+	describe("randomValue function", () => {
+		it("should return a random value from the array", () => {
+			const values = ["apple", "banana", "cherry"];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return a random value from an array of numbers", () => {
+			const values = [1, 2, 3];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return the first value if the array has only one element", () => {
+			const values = ["apple"];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBe("apple");
+		});
+
+		it("should return the last value if the array is empty", () => {
+			const values: string[] = [];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBeUndefined();
 		});
 	});
 

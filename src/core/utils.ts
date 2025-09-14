@@ -946,6 +946,24 @@ export const Utils = {
 	},
 
 	/**
+	 * Returns a random value from the given array.
+	 * @param values - The array of values to choose from.
+	 * @returns A random value from the given array.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const randomValue = Utils.randomValue(["apple", "banana", "cherry"]);
+	 * console.log(randomValue); // Outputs a random value from the array
+	 * ```
+	 *
+	 * @category Utils.randomValue
+	 */
+	randomValue: <T>(values: T[]): T => {
+		return values[Utils.randomNum(0, values.length - 1)];
+	},
+
+	/**
 	 * Clamps a number between a minimum and maximum value.
 	 * @param num - The number to clamp.
 	 * @param min - The minimum value.
