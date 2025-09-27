@@ -27,7 +27,7 @@
 </div>
 
 >[!NOTE]
-> Cryptor utility has been removed from this package and made available separately at [@heliomarpm/cryptor](https://www.npmjs.com/package/@heliomarpm/cryptor)
+> Cryptor utility has been removed from this package and made available separately at [@heliomarpm/cryptoh](https://www.npmjs.com/package/@heliomarpm/cryptoh)
 
 ## 📚 Summary
 

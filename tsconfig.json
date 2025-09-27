@@ -1,25 +1,36 @@
 {
+  /* Visit https://aka.ms/tsconfig to read more about this file */
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig to read more about this file */
+    /* Segurança e padronização */
     "strict": true,
-    "target": "ES2022",
-    "module": "ESNext",
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+
+    /* Compatibilidade ampla */
+    "target": "ES2023",
+    "module": "ESNext", // deixa o bundler escolher a melhor estratégia
+    "lib": ["ES2023", "DOM"],
     "moduleResolution": "Node",
-    "lib": ["ES2022", "DOM"],
-    "declaration": true,
-    "declarationDir": "./dist/types",
+
+    /* Tipos */
+    "declaration": true, // gera .d.ts
+    "declarationMap": true, // gera mapas dos tipos (útil em IDEs)
+    // "declarationDir": "./dist/types", // separa tipos do código JS
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    /* Recursos extras */
+    "resolveJsonModule": true, // permite importar JSON direto
+    "useDefineForClassFields": true, // padrão moderno de fields em classes
+    // "removeComments": true, // tira comentários no .js final
+    "noEmitOnError": true, // não gera saída se houver erro
+    "sourceMap": true, // desligado em produção
+
+    /* Organização do projeto */
     "outDir": "./dist",
     "rootDir": "./src",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "useDefineForClassFields": true,
-    "forceConsistentCasingInFileNames": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@test/*": ["./test/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*"],

@@ -2,8 +2,10 @@
   "name": "@heliomarpm/helpers",
   "version": "0.4.0",
   "description": "A utility for NodeJS App with many useful features",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "type": "module",
   "author": "Heliomar P. Marques",
   "license": "MIT",
   "bugs": {
@@ -13,6 +15,13 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/heliomarpm/helpers.git"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist/**/*"
