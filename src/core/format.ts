@@ -37,14 +37,15 @@ export const Format = {
 		 * const cnpj = Format.ptBr.cnpj('12345678000195'); // Output: '12.345.678/0001-95'
 		 * ```
 		 */
-		cnpj: (value: string, fallback = "CNPJ está incorreto!"): string => {
+		cnpj: (value: string, fallback = "CNPJ com formato incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
-			if (number.length !== 14) {
+			if (number?.length !== 14) {
 				return fallback;
 			}
 			return number.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
 		},
+
 		/**
 		 * Formata um CPF.
 		 *
@@ -57,14 +58,15 @@ export const Format = {
 		 * const cpf = Format.ptBr.cpf('12345678909'); // Output: '123.456.789-09'
 		 * ```
 		 */
-		cpf: (value: string, fallback = "CPF está incorreto!"): string => {
+		cpf: (value: string, fallback = "CPF com formato incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
-			if (number.length !== 11) {
+			if (number?.length !== 11) {
 				return fallback;
 			}
 			return number.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 		},
+
 		/**
 		 * Formata um CEP.
 		 *
@@ -77,7 +79,7 @@ export const Format = {
 		 * const cep = Format.ptBr.cep('12345678'); // Output: '12345-678'
 		 * ```
 		 */
-		cep: (value: string, fallback = "CEP está incorreto!"): string => {
+		cep: (value: string, fallback = "CEP com formato incorreto!"): string => {
 			const number = Format.onlyNumbers(value);
 
 			if (number.length !== 8) {
@@ -86,25 +88,31 @@ export const Format = {
 
 			return number.replace(/(\d{5})(\d{3})/, "$1-$2");
 		},
+
 		/**
-		 * Formata um número de telefone com DDD.
-		 * Se o valor informado tiver entre 8 e 11 dígitos, ele
-		 * será formatado com DDD.
-		 * Caso o valor tenha 8 ou 9 dígitos, ele usará o DDD
-		 * informado como parâmetro.
-		 * @param {string} value O valor a ser formatado.
-		 * @param {string} [defaultAreaCode=''] DDD padrão a ser usado.
-		 * @param {string} [fallback="Telefone está incorreto!"] O valor a ser retornado caso o valor informado esteja incorreto.
-		 * @returns {string} O valor formatado.
-		 * @throws {Error} Se o valor informado tiver menos de 8 ou mais de 11 dígitos.
+		 * Formata um número de telefone brasileiro.
+		 * Se o número tiver menos de 10 dígitos, o código de área padrão será adicionado.
+		 * Se o número tiver 8 ou 9 dígitos, será formatado como um número local.
+		 * Se o número tiver 10 ou 11 dígitos, será formatado com o código de área.
+		 *
+		 * @param value O valor a ser formatado. (ex. '33987654321')
+		 * @param defaultAreaCode O código de área padrão a ser usado se o número tiver menos de 10 dígitos. (ex. '33')
+		 * @param fallback O valor a ser retornado caso o valor informado esteja incorreto.
+		 * @returns O número de telefone formatado.
 		 *
 		 * @example
 		 * ```ts
-		 * const telefone1 = Format.ptBr.telefone('11987654321'); // Output: '(11) 98765-4321'
-		 * const telefone2 = Format.ptBr.telefone('987654321', '11'); // Output: '(11) 98765-4321'
+		 * const telefone1 = Format.ptBr.telefone('33987654321'); // Output: '33 98765-4321'
+		 * const telefone2 = Format.ptBr.telefone('987654321', '11'); // Output: '11 98765-4321'
+		 * const telefone3 = Format.ptBr.telefone('87654321', '11'); // Output: '11 8765-4321'
+		 * const telefone4 = Format.ptBr.telefone('87654321'); // Output: 'Telefone está incorreto!'
 		 * ```
+		 *
+		 * @see https://en.wikipedia.org/wiki/Telephone_numbers_in_Brazil
+		 * @see https://en.wikipedia.org/wiki/List_of_country_calling_codes
+		 * @see https://en.wikipedia.org/wiki/Area_codes_in_Brazil
 		 */
-		telefone: (value: string, defaultAreaCode = "", fallback = "Telefone está incorreto!"): string => {
+		telefone: (value: string, defaultAreaCode = "", fallback = "Telefone com formato incorreto!"): string => {
 			let number = Format.onlyNumbers(value);
 			const areaCode = Format.onlyNumbers(defaultAreaCode);
 
@@ -136,9 +144,9 @@ export const Format = {
 		 *  Format.valorPorExtenso(2_000_000_000_000_000); // Output: "dois quatrilhões"
 		 * ```
 		 */
-		valorPorExtenso: (value: number): string => {
+		valorPorExtenso: (value: number | bigint): string => {
 			if (value < 0 || value >= 1000 ** 6) {
-				throw new Error("O valor deve estar entre 0 e 999.999.999.999.999.999");
+				throw new Error("O valor deve estar entre 0 e 999_999_999_999_999_999");
 			}
 
 			const units = ["zero", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
@@ -178,23 +186,26 @@ export const Format = {
 			if (value === 0) return units[0];
 
 			let result = "";
-			const parts: number[] = [];
+			const bigValue = typeof value === "bigint" ? value : BigInt(value);
+			const parts: bigint[] = [];
 
 			for (let i = 0; i < scales.length; i++) {
-				parts[i] = Math.floor(value / 1000 ** i) % 1000;
+				const divisor = BigInt(1000) ** BigInt(i);
+				parts[i] = (bigValue / divisor) % BigInt(1000);
 			}
 
 			for (let i = scales.length - 1; i >= 0; i--) {
-				if (parts[i] > 0) {
-					if (result) result += parts[i] < 101 ? " e " : " ";
+				const part = Number(parts[i]); // seguro, pois part < 1000
+				if (part > 0) {
+					if (result) result += part < 101 ? " e " : " ";
 
-					if (i === 1 && parts[i] === 1) {
+					if (i === 1 && part === 1) {
 						result += "mil";
 					} else {
-						result += convertHundreds(parts[i]) + (i > 0 ? ` ${scales[i]}` : "");
+						result += convertHundreds(part) + (i > 0 ? ` ${scales[i]}` : "");
 					}
 
-					if (parts[i] > 1 && (i === 2 || i === 3 || i === 4 || i === 5)) {
+					if (part > 1 && (i === 2 || i === 3 || i === 4 || i === 5)) {
 						result = result.replace(/ão$/, "ões");
 					}
 				}
@@ -213,81 +224,126 @@ export const Format = {
 	 * - 'h': hours in 12h format (1-12)
 	 * - 'HH': two-digit hours in 24h format (00-23)
 	 * - 'H': hours in 24h format (0-23)
-	 * - 'MM': two-digit minutes (00-59)
+	 * - 'mm': two-digit minutes (00-59)
 	 * - 'ss': two-digit seconds (00-59)
 	 * - 'SSS': three-digit milliseconds (000-999)
 	 * - 'yyyy': four-digit year (2024)
 	 * - 'yy': two-digit year (24)
-	 * - 'mmmm': full month name (January, February, ...)
-	 * - 'mmm': full month name abbreviated month (Jan, Feb, ...)
-	 * - 'mm': two-digit month (01-12)
+	 * - 'MMMM': full month name (January, February, ...)
+	 * - 'MMM': full month name abbreviated month (Jan, Feb, ...)
+	 * - 'MM': two-digit month (01-12)
+	 * - 'M': month (1-12)
 	 * - 'dddd': full weekday name (Sun, Mon, ...)
 	 * - 'ddd': abbreviated weekday name (Sun, Mon, ...)
 	 * - 'dd': two-digit day (01-31)
+	 * - 'd': day (1-31)
 	 *
 	 * @param {Date|string|number} date - The date to format.
 	 * @param {string} format - The desired format for the output string.
-	 * @param {string} locale - The locale to use.
+	 * @param {string} options - Options for formatting. These include:
+	 * - `locale`: The locale to use for formatting. Defaults to "default".
+	 * - `timeZoneUTC`: Whether to use UTC time zone. Defaults to false.
 	 * @returns {string} The date formatted as a string.
 	 *
 	 * @example
 	 * ```ts
-	 * Format.date('2025-03-02', 'dddd, dd mmmm yyyy', 'en-US'); // Output: 'Sunday, 02 March 2025'
+	 * Format.date('2025-03-02', 'dddd, dd MMMM yyyy', 'en-US'); // Output: 'Sunday, 02 March 2025'
 	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 * @category Format.date
 	 */
-	date: (date: Date | string | number, format: string, locale: Intl.LocalesArgument = "default"): string => {
-		let dateValue = date;
+	date: (date: Date | string | number, format: string, options: { locale?: Intl.LocalesArgument; timeZoneUTC?: boolean } = {}): string => {
+		const { locale = "default", timeZoneUTC = false } = options;
+
+		let dateValue: Date;
+		let useUTC = timeZoneUTC;
 
 		try {
-			if (!(dateValue instanceof Date)) {
-				if (typeof dateValue === "string") {
-					dateValue = dateValue.trim().replace(/-/g, "/").replace(/T/g, " ");
-					if (!dateValue.endsWith("Z")) dateValue += "Z"; // Adiciona o fuso horário UTC se não estiver presente
+			if (date instanceof Date) {
+				// construtor Date => local time
+				if (useUTC) dateValue = new Date(date.getTime());
+				else dateValue = new Date(date);
+			} else if (typeof date === "number") {
+				// timestamp => UTC
+				dateValue = new Date(date);
+				useUTC = true;
+			} else if (typeof date === "string") {
+				const raw = date.trim();
+
+				// se contém Z ou offset explícito => UTC
+				if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw)) {
+					dateValue = new Date(raw);
+					useUTC = true;
+				} else {
+					// senão => local
+					const normalized = raw.replace(/-/g, "/").replace(/T/g, " ");
+					dateValue = new Date(normalized);
 				}
-				dateValue = new Date(new Date(dateValue).toISOString());
+			} else {
+				throw new Error();
 			}
 
-			const monthName = new Intl.DateTimeFormat(locale, { month: "long" }).formatToParts(dateValue).map((part) => part.value)[0];
-			const dayName = new Intl.DateTimeFormat(locale, { weekday: "long" }).formatToParts(dateValue).map((part) => part.value)[0];
-
-			const hr24 = dateValue.getHours();
-			const hr12 = hr24 % 12 || 12;
-			const ampm = hr24 < 12 ? "am" : "pm";
-
-			const map: { [key: string]: string } = {
-				a: ampm,
-				A: ampm.toUpperCase(),
-				hh: hr12.toString().padStart(2, "0"),
-				h: hr12.toString(),
-				HH: hr24.toString().padStart(2, "0"),
-				H: hr24.toString(),
-				MM: String(dateValue.getMinutes()).padStart(2, "0"),
-				ss: String(dateValue.getSeconds()).padStart(2, "0"),
-				SSS: String(dateValue.getMilliseconds()).padStart(3, "0"),
-				yyyy: dateValue.getFullYear().toString(),
-				yy: dateValue.getFullYear().toString().slice(-2),
-				mmmm: monthName,
-				mmm: monthName.slice(0, 3),
-				mm: String(dateValue.getMonth() + 1).padStart(2, "0"),
-				dddd: dayName,
-				ddd: dayName.slice(0, 3),
-				dd: String(dateValue.getDate()).padStart(2, "0"),
-			};
-
-			return format.replace(/a|A|hh|h|HH|H|MM|ss|SSS|yyyy|yy|mmmm|mmm|mm|dddd|ddd|dd/g, (matched: string) => map[matched]);
-		} catch (error) {
-			throw new Error(`Error in Format.date\n${error}`);
+			if (Number.isNaN(dateValue.getTime())) throw new Error();
+		} catch {
+			throw new Error("Invalid date provided");
 		}
+
+		// Funções para extrair valores coerentes
+		const get = (utc: boolean) => ({
+			month: utc ? dateValue.getUTCMonth() : dateValue.getMonth(),
+			day: utc ? dateValue.getUTCDate() : dateValue.getDate(),
+			year: utc ? dateValue.getUTCFullYear() : dateValue.getFullYear(),
+			hour: utc ? dateValue.getUTCHours() : dateValue.getHours(),
+			min: utc ? dateValue.getUTCMinutes() : dateValue.getMinutes(),
+			sec: utc ? dateValue.getUTCSeconds() : dateValue.getSeconds(),
+			ms: utc ? dateValue.getUTCMilliseconds() : dateValue.getMilliseconds(),
+		});
+
+		const { month, day, year, hour, min, sec, ms } = get(useUTC);
+		const hr12 = hour % 12 || 12;
+		const ampm = hour < 12 ? "am" : "pm";
+
+		// nomes localizados
+		const opts = { timeZone: useUTC ? "UTC" : undefined } as const;
+		const monthName = new Intl.DateTimeFormat(locale, { month: "long", ...opts }).format(dateValue);
+		const shortMonthName = new Intl.DateTimeFormat(locale, { month: "short", ...opts }).format(dateValue);
+		const dayName = new Intl.DateTimeFormat(locale, { weekday: "long", ...opts }).format(dateValue);
+		const shortDayName = new Intl.DateTimeFormat(locale, { weekday: "short", ...opts }).format(dateValue);
+
+		const map: { [key: string]: string } = {
+			a: ampm,
+			A: ampm.toUpperCase(),
+			hh: hr12.toString().padStart(2, "0"),
+			h: hr12.toString(),
+			HH: hour.toString().padStart(2, "0"),
+			H: hour.toString(),
+			mm: String(min).padStart(2, "0"),
+			ss: String(sec).padStart(2, "0"),
+			SSS: String(ms).padStart(3, "0"),
+			yyyy: year.toString(),
+			yy: year.toString().slice(-2),
+			MMMM: monthName,
+			MMM: shortMonthName.slice(0, 3),
+			MM: String(month + 1).padStart(2, "0"),
+			M: String(month + 1),
+			dddd: dayName,
+			ddd: shortDayName.slice(0, 3),
+			dd: String(day).padStart(2, "0"),
+			d: String(day),
+		};
+
+		return format.replace(/a|A|hh|h|HH|H|mm|ss|SSS|yyyy|yy|MMMM|MMM|MM|M|dddd|ddd|dd|d/g, (matched) => map[matched]);
 	},
 
 	/**
-	 * Formats a number as currency.
-	 * @param value The number to format.
-	 * @param options Options for formatting. These include the locale and currency.
-	 * @returns The formatted string.
+	 * Formats a number as a currency string.
+	 * Defaults to Brazilian Real (BRL) and Portuguese (Brazil) locale (pt-BR). eg: R$ 1.234,56
+	 *
+	 * @param value - The number to format.
+	 * @param options - Options for formatting. These include the locale and currency.
+	 * @returns A string representing the formatted currency.
+	 * @throws {Error} If the value is not a number.
 	 *
 	 * @example
 	 * ```js
@@ -299,34 +355,49 @@ export const Format = {
 	 * @category Format.currency
 	 */
 	currency: (value: number, options: { locale: Intl.LocalesArgument; currency: string } = { locale: "pt-BR", currency: "BRL" }): string => {
+		if (typeof value !== "number" && typeof value !== "bigint") throw new Error("Value must be a number or bigint");
+
 		const result = value.toLocaleString(options.locale, { style: "currency", currency: options.currency });
 		return result.replace(/\u00A0/gu, " "); // Substitui o espaço não quebrável (\u00A0) por um espaço comum
 	},
 
 	/**
-	 * Formats a number according to the given locale.
-	 * @param value The number to format.
-	 * @param locale The locale to use.
-	 * @returns The formatted string.
+	 * Formats a number with at least two decimal places, using the specified locale.
+	 *
+	 * @param value - The number to format.
+	 * @param locale - The locale to use for formatting. Defaults to "default".
+	 * @returns A string representing the formatted number.
 	 *
 	 * @example
-	 * ```js
-	 * Format.number(123456.78); // '123.456,78'Format.number(1234.56);
-	 * // Output: 1.234,56
+	 * ```ts
+	 * Format.number(123.456, "pt-BR"); // Output: "123,46"
+	 * Format.number(123.45); // Output: "123.45"
+	 * Format.number(123); // Output: "123"
 	 * ```
 	 *
 	 * @see https://www.w3schools.com/jsref/jsref_tolocalestring.asp
 	 * @category Format.number
 	 */
-	number: (value: number, locale: Intl.LocalesArgument = "default"): string => {
+	number: (value: number | bigint, locale: Intl.LocalesArgument = "default"): string => {
+		if (typeof value !== "number" && typeof value !== "bigint") throw new Error("Value must be a number or bigint");
+
 		return value.toLocaleString(locale, { minimumFractionDigits: 2 });
 	},
 
 	/**
 	 * Abbreviates a number by adding a suffix based on its magnitude.
-	 *
-	 * This function takes a number and returns a string with the number abbreviated
-	 * using metric suffixes (e.g., K for thousand, M for million).
+	 * The function supports numbers up to 1 decillion (1e33) and uses the following suffixes:
+	 * - K for thousand (1e3)
+	 * - M for million (1e6)
+	 * - B for billion (1e9)
+	 * - T for trillion (1e12)
+	 * - Q for quadrillion (1e15)
+	 * - Qi for quintillion (1e18)
+	 * - S for sextillion (1e21)
+	 * - Se for septillion (1e24)
+	 * - O for octillion (1e27)
+	 * - N for nonillion (1e30)
+	 * - D for decillion (1e33)	 *
 	 *
 	 * @param value - The number to abbreviate.
 	 * @param options - Options for abbreviation, including:
@@ -336,22 +407,25 @@ export const Format = {
 	 *
 	 * @example
 	 * ```ts
-	 * abbreviateNumber(1500); // '1.50K'
-	 * abbreviateNumber(2000000); // '2.00M'
-	 * abbreviateNumber(123_456_789); // '123.46M'
-	 * abbreviateNumber(1e33); // '1.00D'
+	 * abbreviateNumber(1_500); // '1.50K'
+	 * abbreviateNumber(2_000_000); // '2.00M'
+	 * abbreviateNumber(123_456_789, {fractionDigits: 1}); // '123.5M'
+	 * abbreviateNumber(1e33, {removeEndZero: false}); // '1.00D'
 	 * ```
+	 *
+	 * @see https://en.wikipedia.org/wiki/Metric_prefix
+	 * @see https://en.wikipedia.org/wiki/Names_of_large_numbers
 	 *
 	 * @category Format.abbreviateNumber
 	 */
-	abbreviateNumber: (value: number, { fractionDigits = 2, removeEndZero = true } = {}): string => {
+	abbreviateNumber: (value: number | bigint, { fractionDigits = 2, removeEndZero = true } = {}): string => {
 		const abbreviations = [
 			{ threshold: 1e33, suffix: "D" }, // 1 decillion
 			{ threshold: 1e30, suffix: "N" }, // 1 nonillion
 			{ threshold: 1e27, suffix: "O" }, // 1 octillion
 			{ threshold: 1e24, suffix: "Se" }, // 1 septillion
 			{ threshold: 1e21, suffix: "S" }, // 1 sextillion
-			{ threshold: 1e18, suffix: "Qu" }, // 1 quintillion
+			{ threshold: 1e18, suffix: "Qi" }, // 1 quintillion
 			{ threshold: 1e15, suffix: "Q" }, // 1 quadrillion
 			{ threshold: 1e12, suffix: "T" }, // 1 trillion
 			{ threshold: 1e9, suffix: "B" }, // 1 billion
@@ -359,10 +433,12 @@ export const Format = {
 			{ threshold: 1e3, suffix: "K" }, // 1 thousand
 		];
 
+		if (typeof value !== "number" && typeof value !== "bigint") throw new Error("Value must be a number or bigint");
+
 		const abbreviation = abbreviations.find(({ threshold }) => value >= threshold);
 
 		if (abbreviation) {
-			let abbreviatedValue = (value / abbreviation.threshold).toFixed(fractionDigits);
+			let abbreviatedValue = (Number(value) / abbreviation.threshold).toFixed(fractionDigits);
 
 			// Optionally remove trailing zeros
 			if (removeEndZero) {
@@ -389,13 +465,13 @@ export const Format = {
 	 * ```
 	 * @category Format.onlyNumbers
 	 */
-	onlyNumbers: (value: string): string => value.replace(/\D/g, ""),
+	onlyNumbers: (value: string): string => value?.replace(/\D/g, ""),
 
 	/**
 	 * Pads a number with leading zeros to match the number of digits in a given maximum value.
 	 *
 	 * @param {number} value The number to be padded with leading zeros.
-	 * @param {number} refValue The reference value for determining the maximum length for adding leading zeros.
+	 * @param {number} refValue The reference value for determining the maximum length for adding leading zeros. eg: 90, 110, 999, 1000, etc.
 	 *
 	 *  @returns {string} the input number padded with leading zeros to match the number of digits in the maximum value.
 	 *
