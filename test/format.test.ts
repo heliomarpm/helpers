@@ -294,7 +294,7 @@ describe("Format Class", () => {
 
 	describe("number", () => {
 		it("formats a number with default locale", () => {
-			expect(Format.number(123456.78)).toBe("123.456,78");
+			expect(Format.number(123456.78, "pt-BR")).toBe("123.456,78");
 		});
 
 		it("formats a number with a specific locale", () => {
@@ -302,8 +302,8 @@ describe("Format Class", () => {
 		});
 
 		it("should handle large numbers", () => {
-			expect(Format.number(1234567890.123)).toBe("1.234.567.890,123");
-			expect(Format.number(1234567890123.456)).toBe("1.234.567.890.123,456");
+			expect(Format.number(1234567890.123, "pt-BR")).toBe("1.234.567.890,123");
+			expect(Format.number(1234567890123.456, "pt-BR")).toBe("1.234.567.890.123,456");
 		});
 
 		it("returns an empty string if the value is not a number", () => {
