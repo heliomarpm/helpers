@@ -268,7 +268,7 @@ export const Format = {
 				// timestamp => UTC
 				dateValue = new Date(date);
 				useUTC = true;
-			} else if (typeof date === "string") {
+			} else {
 				const raw = date.trim();
 
 				// se contém Z ou offset explícito => UTC
@@ -280,8 +280,6 @@ export const Format = {
 					const normalized = raw.replace(/-/g, "/").replace(/T/g, " ");
 					dateValue = new Date(normalized);
 				}
-			} else {
-				throw new Error();
 			}
 
 			if (Number.isNaN(dateValue.getTime())) throw new Error();

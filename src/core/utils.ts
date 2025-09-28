@@ -1249,22 +1249,18 @@ export const Utils = {
 	/**
 	 * Returns the easter date
 	 *
-	 * @param {Date|string|number} [input=new Date()] - The date to get the easter date for.
+	 * @param year - The year to get the easter date for. Defaults to the current year.
 	 * @returns {Date} The easter date.
 	 *
 	 * @example
 	 * ```ts
-	 * const today = new Date();
-	 * const easterDate = Utils.easterDate(today);
-	 * console.log(easterDate); // <Date>
+	 * const easterDate = Utils.easterDate(2022);
+	 * console.log(easterDate); // Date(2022, 3, 17) -> April 17, 2022
 	 * ```
 	 *
 	 * @category Utils.easterDate
 	 */
-	easterDate: (input: Date | string | number = new Date()): Date => {
-		const date = To.date(input);
-		const year = date.getFullYear();
-
+	easterDate: (year: number = new Date().getUTCFullYear()): Date => {
 		// Cálculos baseados no algoritmo de computus (Método de Meeus)
 		const goldenNumber = year % 19; // Número áureo
 		const century = Math.floor(year / 100);
@@ -1279,6 +1275,6 @@ export const Utils = {
 		const month = Math.floor((epact + weekdayCorrection - 7 * marchOffset + 114) / 31) - 1; // 0 = jan
 		const day = ((epact + weekdayCorrection - 7 * marchOffset + 114) % 31) + 1;
 
-		return new Date(year, month - 1, day);
+		return new Date(year, month, day);
 	},
 };

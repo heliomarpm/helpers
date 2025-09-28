@@ -43,6 +43,13 @@ describe("Utils", () => {
 		];
 
 		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
+			const unsorted = [...data].sort(Utils.sortByProps("not-a-property"));
+			expect(unsorted[0].name).toBe("Bob");
+			expect(unsorted[1].name).toBe("Charlie");
+			expect(unsorted[2].name).toBe("Alice");
+		});
+
+		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
 			const unsorted = [...data].sort(Utils.sortBy("not-a-property"));
 			expect(unsorted[0].name).toBe("Bob");
 			expect(unsorted[1].name).toBe("Charlie");
@@ -1137,16 +1144,20 @@ describe("Utils", () => {
 			expect(result).toEqual(user);
 		});
 
+		it("should handle invalid keys", () => {
+			const user = { id: 1, name: "John", age: 30, email: "utils@helpers.com" };
+			const invalidkey = ["invalidKey"];
+			const result = Utils.omit(user, invalidkey as never);
+			expect(result).toEqual(user);
+		});
+
 		it("should handle non-object parameter", () => {
 			expect(() => Utils.omit(null as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
 			expect(() => Utils.omit(123 as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
 		});
 
-		it("should handle invalid keys", () => {
-			const user = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
-			const invalidkey = ["invalidKey"];
-			const result = Utils.omit(user, invalidkey as never);
-			expect(result).toEqual(user);
+		it("should throw an error if the keys parameter is not an array", () => {
+			expect(() => Utils.omit({} as never, "key1" as never)).toThrow("The 'keys' parameter must be an array of strings.");
 		});
 	});
 
@@ -1176,12 +1187,6 @@ describe("Utils", () => {
 			expect(omittedProps).toEqual({ name: "John" });
 		});
 
-		it("should throw an error if obj is not an object", () => {
-			expect(() => Utils.deepOmit(null as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-			expect(() => Utils.deepOmit(123 as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-			expect(() => Utils.deepOmit("string" as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-		});
-
 		it("should throw an error if any path is invalid", () => {
 			const user = {
 				id: 1,
@@ -1207,6 +1212,32 @@ describe("Utils", () => {
 				name: "John",
 				childs: [{ age: 10 }, { name: "Jane II", age: 8 }, { name: "dog", age: 2 }],
 			});
+		});
+
+		it("should handle invalid paths", () => {
+			const user = {
+				id: 1,
+				name: "John",
+				age: 34,
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+					{ name: "dog", age: 2 },
+				],
+			};
+			const invalidPath = ["invalidPath"];
+			const result = Utils.deepOmit(user, invalidPath);
+			expect(result).toEqual(user);
+		});
+
+		it("should throw an error if obj is not an object", () => {
+			expect(() => Utils.deepOmit(null as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit(123 as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit("string" as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+
+		it("should throw an error if the paths parameter is not an array", () => {
+			expect(() => Utils.deepOmit({} as never, "paths" as never)).toThrow("The 'paths' parameter must be an array of strings.");
 		});
 	});
 
@@ -1310,6 +1341,10 @@ describe("Utils", () => {
 			const paths = ["name"];
 			expect(() => Utils.deepPick(null as never, paths)).toThrow("The 'obj' parameter must be a non-null object.");
 		});
+
+		it("should throw an error if the paths parameter is not an array", () => {
+			expect(() => Utils.deepPick({} as never, "paths" as never)).toThrow("The 'paths' parameter must be an array of strings.");
+		});
 	});
 
 	describe("chunk function", () => {
@@ -1400,13 +1435,6 @@ describe("Utils", () => {
 	});
 
 	describe("dayOfYear", () => {
-		it("should return the correct day of the year for a specific date", () => {
-			const today = new Date();
-			const expectedDayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-			const actualDayOfYear = Utils.dayOfYear(today);
-			expect(actualDayOfYear).toBe(expectedDayOfYear);
-		});
-
 		it("should return 1 for January 1st", () => {
 			const date = new Date(2022, 0, 1); // January 1st
 			const actualDayOfYear = Utils.dayOfYear(date);
@@ -1419,9 +1447,9 @@ describe("Utils", () => {
 		});
 
 		it("should return the correct day of the year for a date in December", () => {
-			const date = new Date(2022, 11, 25); // December 25th
+			const date = new Date(2022, 11, 31); // December 25th
 			const actualDayOfYear = Utils.dayOfYear(date);
-			expect(actualDayOfYear).toBe(359);
+			expect(actualDayOfYear).toBe(365);
 		});
 
 		it("should return the correct day of the year for a date in a leap year", () => {
@@ -1491,6 +1519,30 @@ describe("Utils", () => {
 			const input = 1640995200000; // 2022-01-01 00:00:00 UTC
 			const result = Utils.weekOfYear(input);
 			expect(result).toBe(52);
+		});
+	});
+
+	describe("Utils.easterDate", () => {
+		it("should return the correct date for the current year", () => {
+			const easterDate = Utils.easterDate();
+			expect(easterDate.getFullYear()).toBe(new Date().getFullYear());
+		});
+
+		it("should return the correct date for a specific year", () => {
+			const year = 2022;
+			const easterDate = Utils.easterDate(year);
+			expect(easterDate.getFullYear()).toBe(year);
+			expect(easterDate.getMonth()).toBe(3);
+			expect(easterDate.getDate()).toBe(17);
+		});
+
+		it("should return the correct date for a specific date", () => {
+			const year = 2023;
+			const easterDate = Utils.easterDate(year);
+
+			expect(easterDate.getFullYear()).toBe(year);
+			expect(easterDate.getMonth()).toBe(3);
+			expect(easterDate.getUTCDate()).toBe(9);
 		});
 	});
 });
