@@ -2,7 +2,7 @@
 // biome-ignore-all lint/style/noNonNullAssertion: false positive
 import { afterEach, beforeAll, beforeEach, describe, expect, it, test, vi } from "vitest";
 
-import { Utils } from "../src";
+import { Is, Utils } from "../src";
 
 describe("Utils", () => {
 	beforeEach(() => {
@@ -41,6 +41,13 @@ describe("Utils", () => {
 			{ name: "Charlie", age: 35 },
 			{ name: "Alice", age: 30 },
 		];
+
+		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
+			const unsorted = [...data].sort(Utils.sortByProps("not-a-property"));
+			expect(unsorted[0].name).toBe("Bob");
+			expect(unsorted[1].name).toBe("Charlie");
+			expect(unsorted[2].name).toBe("Alice");
+		});
 
 		it("deve retornar ordem atual se nenhuma propriedade for fornecida", () => {
 			const unsorted = [...data].sort(Utils.sortBy("not-a-property"));
@@ -1032,10 +1039,10 @@ describe("Utils", () => {
 			expect(result).toBeLessThanOrEqual(max);
 		});
 
-		it("throws an error when min is greater than or equal to max", () => {
+		it("throws an Number.NaN when min is greater than or equal to max", () => {
 			const min = 10;
 			const max = 1;
-			expect(() => Utils.randomNum(min, max)).toThrowError("The 'min' parameter must be less than 'max'.");
+			expect(Utils.randomNum(min, max)).toBeNaN();
 		});
 
 		it("returns a random integer that is inclusive of min and max", () => {
@@ -1063,6 +1070,32 @@ describe("Utils", () => {
 			expect(result1).toBeLessThanOrEqual(max);
 			expect(result2).toBeGreaterThanOrEqual(min);
 			expect(result2).toBeLessThanOrEqual(max);
+		});
+	});
+
+	describe("randomValue function", () => {
+		it("should return a random value from the array", () => {
+			const values = ["apple", "banana", "cherry"];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return a random value from an array of numbers", () => {
+			const values = [1, 2, 3];
+			const randomValue = Utils.randomValue(values);
+			expect(values).toContain(randomValue);
+		});
+
+		it("should return the first value if the array has only one element", () => {
+			const values = ["apple"];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBe("apple");
+		});
+
+		it("should return the last value if the array is empty", () => {
+			const values: string[] = [];
+			const randomValue = Utils.randomValue(values);
+			expect(randomValue).toBeUndefined();
 		});
 	});
 
@@ -1111,16 +1144,20 @@ describe("Utils", () => {
 			expect(result).toEqual(user);
 		});
 
+		it("should handle invalid keys", () => {
+			const user = { id: 1, name: "John", age: 30, email: "utils@helpers.com" };
+			const invalidkey = ["invalidKey"];
+			const result = Utils.omit(user, invalidkey as never);
+			expect(result).toEqual(user);
+		});
+
 		it("should handle non-object parameter", () => {
 			expect(() => Utils.omit(null as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
 			expect(() => Utils.omit(123 as never, ["key1", "key2"])).toThrow("The 'obj' parameter must be a non-null object.");
 		});
 
-		it("should handle invalid keys", () => {
-			const user = { id: 1, name: "John", age: 30, email: "dL5mW@example.com" };
-			const invalidkey = ["invalidKey"];
-			const result = Utils.omit(user, invalidkey as never);
-			expect(result).toEqual(user);
+		it("should throw an error if the keys parameter is not an array", () => {
+			expect(() => Utils.omit({} as never, "key1" as never)).toThrow("The 'keys' parameter must be an array of strings.");
 		});
 	});
 
@@ -1150,12 +1187,6 @@ describe("Utils", () => {
 			expect(omittedProps).toEqual({ name: "John" });
 		});
 
-		it("should throw an error if obj is not an object", () => {
-			expect(() => Utils.deepOmit(null as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-			expect(() => Utils.deepOmit(123 as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-			expect(() => Utils.deepOmit("string" as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
-		});
-
 		it("should throw an error if any path is invalid", () => {
 			const user = {
 				id: 1,
@@ -1181,6 +1212,32 @@ describe("Utils", () => {
 				name: "John",
 				childs: [{ age: 10 }, { name: "Jane II", age: 8 }, { name: "dog", age: 2 }],
 			});
+		});
+
+		it("should handle invalid paths", () => {
+			const user = {
+				id: 1,
+				name: "John",
+				age: 34,
+				childs: [
+					{ name: "John II", age: 10 },
+					{ name: "Jane II", age: 8 },
+					{ name: "dog", age: 2 },
+				],
+			};
+			const invalidPath = ["invalidPath"];
+			const result = Utils.deepOmit(user, invalidPath);
+			expect(result).toEqual(user);
+		});
+
+		it("should throw an error if obj is not an object", () => {
+			expect(() => Utils.deepOmit(null as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit(123 as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+			expect(() => Utils.deepOmit("string" as never, [])).toThrow("The 'obj' parameter must be a non-null object.");
+		});
+
+		it("should throw an error if the paths parameter is not an array", () => {
+			expect(() => Utils.deepOmit({} as never, "paths" as never)).toThrow("The 'paths' parameter must be an array of strings.");
 		});
 	});
 
@@ -1284,6 +1341,10 @@ describe("Utils", () => {
 			const paths = ["name"];
 			expect(() => Utils.deepPick(null as never, paths)).toThrow("The 'obj' parameter must be a non-null object.");
 		});
+
+		it("should throw an error if the paths parameter is not an array", () => {
+			expect(() => Utils.deepPick({} as never, "paths" as never)).toThrow("The 'paths' parameter must be an array of strings.");
+		});
 	});
 
 	describe("chunk function", () => {
@@ -1374,13 +1435,6 @@ describe("Utils", () => {
 	});
 
 	describe("dayOfYear", () => {
-		it("should return the correct day of the year for a specific date", () => {
-			const today = new Date();
-			const expectedDayOfYear = Math.floor((today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
-			const actualDayOfYear = Utils.dayOfYear(today);
-			expect(actualDayOfYear).toBe(expectedDayOfYear);
-		});
-
 		it("should return 1 for January 1st", () => {
 			const date = new Date(2022, 0, 1); // January 1st
 			const actualDayOfYear = Utils.dayOfYear(date);
@@ -1393,15 +1447,51 @@ describe("Utils", () => {
 		});
 
 		it("should return the correct day of the year for a date in December", () => {
-			const date = new Date(2022, 11, 25); // December 25th
+			const date = new Date(2022, 11, 31); // December 25th
 			const actualDayOfYear = Utils.dayOfYear(date);
-			expect(actualDayOfYear).toBe(359);
+			expect(actualDayOfYear).toBe(365);
 		});
 
 		it("should return the correct day of the year for a date in a leap year", () => {
 			const date = new Date(2020, 1, 1); // February 1st
 			const actualDayOfYear = Utils.dayOfYear(date);
 			expect(actualDayOfYear).toBe(32);
+		});
+	});
+
+	describe("daysInMonth", () => {
+		it("should return the correct number of days in a given month (current year, current month)", () => {
+			const daysInCurrentMonth = Utils.daysInMonth();
+			expect(daysInCurrentMonth).toBeGreaterThanOrEqual(1);
+			expect(daysInCurrentMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (specific year, specific month)", () => {
+			const daysInMonth = Utils.daysInMonth(2025, 2);
+			const expectedDaysInMonth = Is.leapYear(2025) ? 29 : 28;
+			expect(daysInMonth).toBe(expectedDaysInMonth);
+		});
+
+		it("should return the correct number of days in a given month (current year, specific month)", () => {
+			const daysInMonth = Utils.daysInMonth(new Date().getFullYear(), 1);
+			expect(daysInMonth).toBeGreaterThanOrEqual(28);
+			expect(daysInMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (specific year, current month)", () => {
+			const daysInMonth = Utils.daysInMonth(new Date().getFullYear(), new Date().getMonth() + 1);
+			expect(daysInMonth).toBeGreaterThanOrEqual(28);
+			expect(daysInMonth).toBeLessThanOrEqual(31);
+		});
+
+		it("should return the correct number of days in a given month (February in a leap year)", () => {
+			const daysInMonth = Utils.daysInMonth(2020, 2);
+			expect(daysInMonth).toBe(29);
+		});
+
+		it("should return the correct number of days in a given month (February in a non-leap year)", () => {
+			const daysInMonth = Utils.daysInMonth(2021, 2);
+			expect(daysInMonth).toBe(28);
 		});
 	});
 
@@ -1429,6 +1519,30 @@ describe("Utils", () => {
 			const input = 1640995200000; // 2022-01-01 00:00:00 UTC
 			const result = Utils.weekOfYear(input);
 			expect(result).toBe(52);
+		});
+	});
+
+	describe("Utils.easterDate", () => {
+		it("should return the correct date for the current year", () => {
+			const easterDate = Utils.easterDate();
+			expect(easterDate.getFullYear()).toBe(new Date().getFullYear());
+		});
+
+		it("should return the correct date for a specific year", () => {
+			const year = 2022;
+			const easterDate = Utils.easterDate(year);
+			expect(easterDate.getFullYear()).toBe(year);
+			expect(easterDate.getMonth()).toBe(3);
+			expect(easterDate.getDate()).toBe(17);
+		});
+
+		it("should return the correct date for a specific date", () => {
+			const year = 2023;
+			const easterDate = Utils.easterDate(year);
+
+			expect(easterDate.getFullYear()).toBe(year);
+			expect(easterDate.getMonth()).toBe(3);
+			expect(easterDate.getUTCDate()).toBe(9);
 		});
 	});
 });

@@ -938,11 +938,29 @@ export const Utils = {
 	 * @category Utils.randomNum
 	 */
 	randomNum: (min: number, max: number): number => {
-		if (min >= max) {
-			throw new Error("The 'min' parameter must be less than 'max'.");
-		}
+		// throw new Error("The 'min' parameter must be less than 'max'.");
+		if (min > max) return Number.NaN;
+		if (min === max) return min;
 
 		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+
+	/**
+	 * Returns a random value from the given array.
+	 * @param values - The array of values to choose from.
+	 * @returns A random value from the given array.
+	 *
+	 * @example
+	 *
+	 * ```ts
+	 * const randomValue = Utils.randomValue(["apple", "banana", "cherry"]);
+	 * console.log(randomValue); // Outputs a random value from the array
+	 * ```
+	 *
+	 * @category Utils.randomValue
+	 */
+	randomValue: <T>(values: T[]): T => {
+		return values[Utils.randomNum(0, values.length - 1)];
 	},
 
 	/**
@@ -1180,6 +1198,25 @@ export const Utils = {
 	},
 
 	/**
+	 * Returns the number of days in a given month.
+	 *
+	 * @param {number} [year=new Date().getFullYear()] - The year to get the number of days for.
+	 * @param {number} [month=new Date().getMonth() + 1] - The month to get the number of days for (1-12).
+	 * @returns {number} The number of days in the given month.
+	 *
+	 * @example
+	 * ```ts
+	 * const daysInMonth = Utils.daysInMonth(2025, 1);
+	 * console.log(daysInMonth); // 30-31
+	 * ```
+	 *
+	 * @category Utils.daysInMonth
+	 */
+	daysInMonth: (year: number = new Date().getFullYear(), month: number = new Date().getMonth() + 1): number => {
+		return new Date(year, month, 0).getDate();
+	},
+
+	/**
 	 * Returns the week of the year (ISO 8601)
 	 *
 	 * @param {Date|string|number} [input=new Date()] - The date to get the week of the year for.
@@ -1212,22 +1249,18 @@ export const Utils = {
 	/**
 	 * Returns the easter date
 	 *
-	 * @param {Date|string|number} [input=new Date()] - The date to get the easter date for.
+	 * @param year - The year to get the easter date for. Defaults to the current year.
 	 * @returns {Date} The easter date.
 	 *
 	 * @example
 	 * ```ts
-	 * const today = new Date();
-	 * const easterDate = Utils.easterDate(today);
-	 * console.log(easterDate); // <Date>
+	 * const easterDate = Utils.easterDate(2022);
+	 * console.log(easterDate); // Date(2022, 3, 17) -> April 17, 2022
 	 * ```
 	 *
 	 * @category Utils.easterDate
 	 */
-	easterDate: (input: Date | string | number = new Date()): Date => {
-		const date = To.date(input);
-		const year = date.getFullYear();
-
+	easterDate: (year: number = new Date().getUTCFullYear()): Date => {
 		// Cálculos baseados no algoritmo de computus (Método de Meeus)
 		const goldenNumber = year % 19; // Número áureo
 		const century = Math.floor(year / 100);
@@ -1242,6 +1275,6 @@ export const Utils = {
 		const month = Math.floor((epact + weekdayCorrection - 7 * marchOffset + 114) / 31) - 1; // 0 = jan
 		const day = ((epact + weekdayCorrection - 7 * marchOffset + 114) % 31) + 1;
 
-		return new Date(year, month - 1, day);
+		return new Date(year, month, day);
 	},
 };
