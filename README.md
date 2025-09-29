@@ -29,7 +29,7 @@
 >[!NOTE]
 > Cryptor utility has been removed from this package and made available separately at [@heliomarpm/cryptoh](https://www.npmjs.com/package/@heliomarpm/cryptoh)
 
-## 📚 Summary
+## 📚 About
 
 `@heliomarpm/helpers` is a comprehensive collection of TypeScript utility functions for formatting, type checking, conversion, and general utilities. This library provides a set of helper functions to make common programming tasks easier and more maintainable.
 
