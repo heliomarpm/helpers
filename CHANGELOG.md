@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/heliomarpm/helpers/compare/v0.5.0...v0.5.1) (2025-09-29)
+
+
+### Bug Fixes
+
+* simplifies package exports and updates metadata ([43d6af0](https://github.com/heliomarpm/helpers/commit/43d6af0ef6627c8d71f217ad7c0d60503f6a9d52))
+
 # [0.5.0](https://github.com/heliomarpm/helpers/compare/v0.4.0...v0.5.0) (2025-09-28)
 
 
