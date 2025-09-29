@@ -7,7 +7,7 @@
     "skipLibCheck": true,
 
     /* Compatibilidade ampla */
-    "target": "ES2023",
+    "target": "es2023",
     "module": "ESNext", // deixa o bundler escolher a melhor estratégia
     "lib": ["ES2023", "DOM"],
     "moduleResolution": "Node",
